@@ -155,6 +155,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .pop-bottom-bar::after{content:"";width:32px;height:4.5px;border-radius:3px;background:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.6)}
 .edit #pop .pop-bottom-bar{display:flex}
 
+/* ───── Zone Launcher overflow scroll chevron ───── */
+.pop-scroll-arrow{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:36px;height:24px;display:none;align-items:center;justify-content:center;color:#fff;font-size:16px;z-index:45;pointer-events:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.85));transition:transform .12s,color .15s}
+.pop-scroll-arrow.visible{display:flex}
+.pop-scroll-arrow.active{color:var(--acc);transform:translateX(-50%) translateY(2px) scale(1.25)}
+
 /* ───── simulated app window ───── */
 #sim{position:absolute;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #sim.on{transform:none;opacity:1;pointer-events:auto}
@@ -313,6 +318,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
               <div class="pbody" id="pbody">
                 <div id="grid"></div>
               </div>
+              <div class="pop-scroll-arrow" id="popScrollArrow"><i class="fa-solid fa-chevron-down"></i></div>
               <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
             </div>
         <div class="rz" id="rz" title="Drag to resize"></div>
@@ -529,8 +535,14 @@ function placePop(){if(userMoved){placeRz();return;}
   pop.style.top=t+'px';
   positionFabButtons();
   placeRz()}
-function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz()}
-function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';if(document.activeElement)document.activeElement.blur()}
+function updateScrollArrow(){
+  const arr=$('#popScrollArrow');
+  if(!arr)return;
+  const canScrollDown=pbody.scrollHeight - (pbody.scrollTop + pbody.clientHeight) > 8;
+  arr.classList.toggle('visible', canScrollDown && !editMode);
+}
+function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz();updateScrollArrow()}
+function closePop(){stopAutoScroll();pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
@@ -547,6 +559,25 @@ dtRing.className = 'dt-ring';
 phone.appendChild(dtRing);
 
 let fbDrag=false, fbEdgeDrag=false, fbStart={x:0,y:0}, fbWasOpen=false;
+let scrollDownInterval=null;
+function startAutoScroll(){
+  if(scrollDownInterval)return;
+  $('#popScrollArrow')?.classList.add('active');
+  scrollDownInterval=setInterval(()=>{
+    if(pbody.scrollHeight - (pbody.scrollTop + pbody.clientHeight) <= 2){
+      stopAutoScroll();
+      updateScrollArrow();
+      return;
+    }
+    pbody.scrollTop+=8;
+    updateScrollArrow();
+  },20);
+}
+function stopAutoScroll(){
+  if(scrollDownInterval){clearInterval(scrollDownInterval);scrollDownInterval=null}
+  $('#popScrollArrow')?.classList.remove('active');
+}
+pbody.addEventListener('scroll',updateScrollArrow);
 fab.addEventListener('pointerdown',e=>{
   if(editMode){
     fbEdgeDrag=true;
@@ -579,17 +610,30 @@ fab.addEventListener('pointermove',e=>{
   const el=document.elementFromPoint(e.clientX,e.clientY);
   document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
   document.querySelectorAll('.fbtn').forEach(b=>{if(!b.classList.contains('drag-over'))return;b.classList.remove('drag-over');b.style.transform=''});
-  if(el){
-    const it=el.closest('.it');
-    if(it)it.classList.add('drag-over');
-    const fb=el.closest('.fbtn');
-    if(fb){
-      fb.classList.add('drag-over');
-      fb.style.transform='scale(1.35)';
-      fb.style.zIndex='55';
+  const arr=$('#popScrollArrow');
+    let hoveringArrow=false;
+    if(arr && arr.classList.contains('visible')){
+      const ar=arr.getBoundingClientRect();
+      if(Math.hypot(e.clientX-(ar.left+ar.width/2), e.clientY-(ar.top+ar.height/2)) <= 28){
+        hoveringArrow=true;
+      }
     }
-  }
-});
+    if(hoveringArrow){
+      startAutoScroll();
+    }else{
+      stopAutoScroll();
+    }
+    if(el){
+      const it=el.closest('.it');
+      if(it)it.classList.add('drag-over');
+      const fb=el.closest('.fbtn');
+      if(fb){
+        fb.classList.add('drag-over');
+        fb.style.transform='scale(1.35)';
+        fb.style.zIndex='55';
+      }
+    }
+  });
 fab.addEventListener('pointerup',e=>{
   if(fbEdgeDrag){
     fbEdgeDrag=false;
@@ -597,11 +641,12 @@ fab.addEventListener('pointerup',e=>{
     return;
   }
   if(!fbDrag)return;
-  fbDrag=false;
-  dtRing.style.display='none';
-  document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
-  document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('drag-over');b.style.transform=''});
-  const el=document.elementFromPoint(e.clientX,e.clientY);
+    stopAutoScroll();
+    fbDrag=false;
+    dtRing.style.display='none';
+    document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
+    document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('drag-over');b.style.transform=''});
+    const el=document.elementFromPoint(e.clientX,e.clientY);
   let handled=false;
   if(el){
     const targetSet=el.closest('#fabSet');
@@ -632,6 +677,7 @@ fab.addEventListener('pointerup',e=>{
   }
 });
 fab.addEventListener('pointercancel',()=>{
+  stopAutoScroll();
   fbEdgeDrag=false;
   fbDrag=false; dtRing.style.display='none';
   document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
@@ -753,8 +799,8 @@ function render(){
     }
   }
   grid.innerHTML=html;
-  if(stOn())studioRefresh();
-  requestAnimationFrame(placePop)}
+    if(stOn())studioRefresh();
+    requestAnimationFrame(()=>{placePop();updateScrollArrow();})}
 /* ───────── settings panel ───────── */
 let sTab='grid';
 function stOn(){return $('#studio').classList.contains('on')}

@@ -254,10 +254,10 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp{position:relative;flex-shrink:0;height:245px;margin:8px 14px 4px;border-radius:20px;overflow:hidden;background:#090611;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;gap:16px;padding:0 12px;transition:all .2s ease}
 .stp-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(124,92,255,.18),transparent 70%),#0c0817}
 .stp .tag{position:absolute;top:8px;left:12px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);background:rgba(0,0,0,.4);padding:2px 8px;border-radius:6px;pointer-events:none}
-.stp.ring-mode{justify-content:flex-start}
-.stp.ring-mode .stp-phone{flex-shrink:0;margin-left:8px}
+.stp.ring-mode{justify-content:center}
+.stp.ring-mode .stp-phone{display:none}
 .stp-phone{position:relative;height:92%;border-radius:24px;border:2.5px solid rgba(255,255,255,.18);background:#000;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.8);isolation:isolate;transition:margin .2s ease}
-.ring-preview-area{position:relative;flex:1;height:100%;display:none;align-items:center;justify-content:center;z-index:8}
+.ring-preview-area{position:relative;width:100%;height:100%;display:none;align-items:center;justify-content:center;z-index:8}
 .stp.ring-mode .ring-preview-area{display:flex}
 .ring-preview-grid{display:grid;grid-template-columns:repeat(2,auto);gap:16px;align-items:center;justify-content:center}
 .ring-preview-item{position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;user-select:none}

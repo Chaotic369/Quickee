@@ -76,9 +76,10 @@ input,select{font:inherit;color:var(--ink);outline:none}
 #pop{
   --icon:50px;--rad:30;--cols:4;--cgap:10px;--rgap:14px;--pad:14px;--lbl:10.5px;--glass:.88;--pop-rad:26px;--pop-blur:32px;
   position:absolute;z-index:40;display:flex;flex-direction:column;overflow:hidden;
-  border-radius:var(--pop-rad);background:rgba(0,0,0,var(--glass));backdrop-filter:blur(var(--pop-blur));-webkit-backdrop-filter:blur(var(--pop-blur));
+  border-radius:var(--pop-rad);background:var(--pop-bg,rgba(0,0,0,var(--glass)));backdrop-filter:blur(var(--pop-blur));-webkit-backdrop-filter:blur(var(--pop-blur));
   box-shadow:0 26px 70px rgba(0,0,0,.92),0 0 0 1px rgba(255,255,255,.08),inset 0 1px 1px rgba(255,255,255,.05);
   opacity:0;transform:scale(.92) translateX(12px);pointer-events:none;transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1)}
+#pop.solid-black{background:#000 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important;box-shadow:0 26px 70px rgba(0,0,0,1),0 0 0 1px rgba(255,255,255,.06) !important}
 #pop.open{opacity:1;transform:none;pointer-events:auto}
 .top-bar{display:flex;align-items:center;gap:8px;padding:10px var(--pad) 0;flex-shrink:0}
 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
@@ -268,7 +269,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp-phone{position:relative;height:92%;border-radius:24px;border:2.5px solid rgba(255,255,255,.18);background:#000;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.8);isolation:isolate;transition:margin .2s ease}
 .ring-preview-area{position:relative;width:100%;height:100%;display:none;align-items:center;justify-content:center;z-index:8}
 .stp.ring-mode .ring-preview-area{display:flex}
-.ring-preview-card{position:relative;display:flex;flex-direction:column;border-radius:var(--pop-rad,26px);background:rgba(0,0,0,var(--glass));backdrop-filter:blur(var(--pop-blur,32px));-webkit-backdrop-filter:blur(var(--pop-blur,32px));box-shadow:0 16px 40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);padding:var(--pad);touch-action:none}
+.ring-preview-card{position:relative;display:flex;flex-direction:column;border-radius:var(--pop-rad,26px);background:rgba(10,10,10,var(--glass));backdrop-filter:blur(var(--pop-blur,32px));-webkit-backdrop-filter:blur(var(--pop-blur,32px));box-shadow:0 16px 40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);padding:var(--pad);touch-action:none}
 .ring-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);align-items:center;justify-content:center;width:100%}
 .ring-preview-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;width:100%}
 .ring-preview-item .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s;overflow:hidden}
@@ -282,7 +283,8 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 70%,rgba(35,35,35,.8) 0 8%,rgba(18,18,18,.9) 24%,transparent 55%),linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%)}
 .stp-wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%)}
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
-.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--pop-rad,26px);background:rgba(0,0,0,var(--glass));backdrop-filter:blur(var(--pop-blur,30px));-webkit-backdrop-filter:blur(var(--pop-blur,30px));box-shadow:0 16px 40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);pointer-events:none;transform-origin:top right}
+.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--pop-rad,26px);background:var(--pop-bg,rgba(0,0,0,var(--glass)));backdrop-filter:blur(var(--pop-blur,30px));-webkit-backdrop-filter:blur(var(--pop-blur,30px));box-shadow:0 16px 40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);pointer-events:none;transform-origin:top right}
+.pvpop.solid-black{background:#000 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
 .pv-fab{position:absolute;right:0;z-index:5;background:rgba(255,255,255,.6);border-radius:4px 0 0 4px;pointer-events:none}
 .stabs{display:grid;grid-template-columns:repeat(4,1fr);gap:6px 6px;padding:10px 14px;flex-shrink:0;background:rgba(0,0,0,.35);border-bottom:1px solid rgba(255,255,255,.07)}
@@ -517,7 +519,8 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rg
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true,customWall:null};
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
 const DEF=[
@@ -617,9 +620,12 @@ function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].fo
 /* ───────── popup: apply layout ───────── */
 function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   const v=(k,x)=>pop.style.setProperty(k,x);
+  const isFullBlack=s.glass>=100;
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
-  v('--pop-blur',(s.blur!=null?s.blur:32)+'px');
+  v('--pop-blur',(isFullBlack?0:(s.blur!=null?s.blur:32))+'px');
+  v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
+  pop.classList.toggle('solid-black',isFullBlack);
   if(s.customWall){
     phone.classList.add('has-custom-wall');
     phone.style.setProperty('--user-wall',`url("${s.customWall}")`);
@@ -1014,11 +1020,14 @@ let stOpenedFromPop=false;
 function stOn(){const s=$('#studio');return Boolean(s&&(s.classList.contains('on')||s.style.display==='flex'))}
 function setVars(el,s){
   const v=(k,x)=>el.style.setProperty(k,x);
+  const isFullBlack=s.glass>=100;
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);
   v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');
   v('--glass',s.glass/100);
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
-  v('--pop-blur',(s.blur!=null?s.blur:32)+'px');
+  v('--pop-blur',(isFullBlack?0:(s.blur!=null?s.blur:32))+'px');
+  v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
+  el.classList.toggle('solid-black',isFullBlack);
 }
 function pvUpdate(){
   const stage=$('#stPrev'),phoneBox=$('#stPhone'),screen=$('#stScreen'),p=$('#pvpop'),pvF=$('#pvFab');

@@ -103,7 +103,6 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .it{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;width:100%;cursor:pointer}
 .it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s}
 .it .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
-.it:hover .ic{transform:scale(1.3);z-index:10}
 .it:active .ic{transform:scale(.95)}
 .it .lb{max-width:100%;font-size:var(--lbl);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-weight:500;color:rgba(246,239,228,.9)}
 .nolbl .it .lb{display:none}
@@ -111,9 +110,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .it.lift{opacity:.25}
 .it .x{display:none;position:absolute;top:-6px;right:calc(50% - var(--icon)/2 - 6px);width:20px;height:20px;border-radius:50%;background:#e5534b;color:#fff;font-size:11px;place-items:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.5);border:1.5px solid #1b1629;cursor:pointer}
 .edit .it .x{display:grid}
-.edit .it .ic{animation:wig .26s infinite alternate ease-in-out}
-.edit .it:nth-child(2n) .ic{animation-delay:-.13s}
-@keyframes wig{from{transform:rotate(-2.4deg)}to{transform:rotate(2.4deg)}}
+.edit .it .ic{animation:none}
 @media (prefers-reduced-motion:reduce){.edit .it .ic{animation:none}#pop,#fab i{transition:none}}
 .ghost{position:fixed;z-index:200;pointer-events:none;transform:scale(1.15);filter:drop-shadow(0 16px 24px rgba(0,0,0,.6))}
 .empty{grid-column:1/-1;text-align:center;color:var(--dim);font-size:13px;padding:26px 8px;line-height:1.5}
@@ -245,8 +242,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 
 .hi[data-app]{cursor:pointer}
 #studio{position:absolute;inset:0;z-index:62;background:var(--bg);display:none;flex-direction:column}
-#studio.on{display:flex;animation:stIn .24s cubic-bezier(.2,.8,.2,1)}
-@keyframes stIn{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+#studio.on{display:flex}
 .stp{position:relative;flex-shrink:0;height:260px;margin:10px 14px 0;border-radius:22px;overflow:hidden;background:#0d0918;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
 .stp-bg{position:absolute;inset:0;background:linear-gradient(180deg,#120e29 0%,#241a4a 45%,#3a1a3a 100%);opacity:.85}
 .stp .tag{position:absolute;top:9px;left:14px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.75);pointer-events:none}
@@ -391,7 +387,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',search:'Intent ACTION_WEB_SEARCH with query',deep:'Intent ACTION_VIEW Uri.parse(customUri)',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:58,radius:30,cols:4,rows:5,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50,ringSize:52,ringThick:3,ringOpacity:20};
+const S_DEF={icon:58,radius:30,cols:4,rows:5,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50,ringSize:52,ringThick:3,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 
 const DEF=[
@@ -431,8 +427,23 @@ function tick(){const d=new Date();const h=d.getHours()%12||12,m=String(d.getMin
   const ds=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});$('#date').textContent=ds;$('#lkD').textContent=ds}
 tick();setInterval(tick,15000);
 function icHTML(a){return`<div class="ic" style="background:${a.c}"><i class="${a.i}"></i></div>`}
-$('#homeGrid').innerHTML=[{n:'Launcher',i:'fa-solid fa-sliders',c:'#7c5cff',app:1}].concat(['Camera','Gallery','Maps','Music','YouTube','Notes','Clock'].map(n=>INSTALLED.find(x=>x.n===n))).map(a=>`<div class="hi"${a.app?' data-app="studio"':''}>${icHTML(a)}<span>${a.n}</span></div>`).join('');
-$('#homeGrid').addEventListener('click',e=>{if(e.target.closest('[data-app="studio"]'))openStudio()});
+const HOME_ITEMS=[
+ {n:'Launcher',i:'fa-solid fa-sliders',c:'#7c5cff',app:'studio'},
+ INSTALLED.find(x=>x.n==='Camera'),
+ INSTALLED.find(x=>x.n==='Gallery'),
+ INSTALLED.find(x=>x.n==='Maps'),
+ INSTALLED.find(x=>x.n==='Music'),
+ {n:'Quick Access',i:'fa-solid fa-shield-halved',c:'#388bfd',app:'mgr'},
+ INSTALLED.find(x=>x.n==='YouTube'),
+ INSTALLED.find(x=>x.n==='Notes')
+];
+$('#homeGrid').innerHTML=HOME_ITEMS.map(a=>`<div class="hi"${a.app?` data-app="${a.app}"`:''}>${icHTML(a)}<span>${a.n}</span></div>`).join('');
+$('#homeGrid').addEventListener('click',e=>{
+  const it=e.target.closest('[data-app]');
+  if(!it)return;
+  if(it.dataset.app==='studio')openStudio();
+  else if(it.dataset.app==='mgr')openMgr();
+});
 $('#dock').innerHTML=['Messages','Chrome','Files','Settings'].map(n=>icHTML(INSTALLED.find(x=>x.n===n))).join('');
 function statusIcons(){const t=st.tog;$('#stIcons').innerHTML=(t.flash?'<i class="fa-solid fa-lightbulb" style="color:var(--acc)"></i>':'')+(t.dnd?'<i class="fa-solid fa-bell-slash"></i>':'')+(t.air?'<i class="fa-solid fa-plane"></i>':(t.bt?'<i class="fa-brands fa-bluetooth-b"></i>':'')+(t.wifi?'<i class="fa-solid fa-wifi"></i>':''))+'<i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-three-quarters"></i>'}
 function applyBright(){$('#dim').style.opacity=((100-st.lv.br)/100*.7).toFixed(2)}
@@ -445,6 +456,7 @@ function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].fo
 function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   const v=(k,x)=>pop.style.setProperty(k,x);
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
+  fab.style.display=s.triggerEnabled===false?'none':'block';
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
@@ -790,6 +802,106 @@ function buildStBody(){
   }
   b.scrollTop=y}
 function studioRefresh(){pvUpdate();if(sTab==='items')buildStBody()}
+function openMgr(){
+  closePop();
+  openSim({
+    n:'Quick Access Manager',
+    i:'fa-solid fa-shield-halved',
+    c:'#388bfd',
+    sub:'Service & Permissions',
+    hint:'System Overlay & Accessibility Services Management'
+  },`
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Master Control</div>
+      <div class="sw" style="margin:0;padding:0;border:0">
+        <div>
+          <b style="display:block;font-size:13px">Trigger Handle</b>
+          <small style="color:var(--dim)">Show side trigger on screen</small>
+        </div>
+        <button class="tg${st.set.triggerEnabled!==false?' on':''}" id="mgTrig"></button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">App Permissions</div>
+      
+      <div class="sw" style="margin:8px 0;padding-top:6px">
+        <div>
+          <b style="display:block;font-size:13px">Display over other apps</b>
+          <small style="color:var(--dim)">Required for floating trigger & pop-up</small>
+        </div>
+        <button class="tg${st.set.permOverlay?' on':''}" id="mgPermOverlay"></button>
+      </div>
+
+      <div class="sw" style="margin:8px 0;padding-top:6px">
+        <div>
+          <b style="display:block;font-size:13px">Accessibility Service</b>
+          <small style="color:var(--dim)">Lock screen, recents & quick actions</small>
+        </div>
+        <button class="tg${st.set.permAcc?' on':''}" id="mgPermAcc"></button>
+      </div>
+
+      <div class="sw" style="margin:8px 0;padding-top:6px">
+        <div>
+          <b style="display:block;font-size:13px">All Files Access</b>
+          <small style="color:var(--dim)">Browse folders and open files</small>
+        </div>
+        <button class="tg${st.set.permStorage?' on':''}" id="mgPermStorage"></button>
+      </div>
+
+      <div class="sw" style="margin:8px 0;padding-top:6px">
+        <div>
+          <b style="display:block;font-size:13px">Usage Data Access</b>
+          <small style="color:var(--dim)">Detect running apps and sort recent</small>
+        </div>
+        <button class="tg${st.set.permUsage?' on':''}" id="mgPermUsage"></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-size:11px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Launcher Preferences</div>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:12px">Configure layout grid, icon sizes, popup dimensions and shortcuts.</p>
+      <button class="bigbtn" id="mgOpenStudio" style="margin-top:0;width:100%;text-align:center">Open Launcher Settings</button>
+    </div>
+  `,b=>{
+    const bindTg=(id,prop,lbl)=>{
+      const btn=b.querySelector(id);
+      if(!btn)return;
+      btn.onclick=()=>{
+        st.set[prop]=!st.set[prop];
+        btn.classList.toggle('on',!!st.set[prop]);
+        applySet();
+        save();
+        toast(`${lbl} ${st.set[prop]?'granted':'revoked'}`);
+      };
+    };
+
+    const trigBtn=b.querySelector('#mgTrig');
+    if(trigBtn){
+      trigBtn.onclick=()=>{
+        st.set.triggerEnabled=st.set.triggerEnabled===false?true:false;
+        trigBtn.classList.toggle('on',st.set.triggerEnabled);
+        applySet();
+        save();
+        toast(`Trigger ${st.set.triggerEnabled?'enabled':'disabled'}`);
+      };
+    }
+
+    bindTg('#mgPermOverlay','permOverlay','Display overlay permission');
+    bindTg('#mgPermAcc','permAcc','Accessibility service');
+    bindTg('#mgPermStorage','permStorage','Files access permission');
+    bindTg('#mgPermUsage','permUsage','Usage access permission');
+
+    const openStudioBtn=b.querySelector('#mgOpenStudio');
+    if(openStudioBtn){
+      openStudioBtn.onclick=()=>{
+        closeSim();
+        openStudio();
+      };
+    }
+  });
+}
+
 function openStudio(){
   closePop();sTab='grid';
   const s=$('#studio');

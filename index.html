@@ -92,7 +92,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .chip.on{background:var(--acc);color:#1c1304;border-color:transparent}
 .pbody{flex:1;min-height:0;overflow-y:auto;padding:var(--pad);scrollbar-width:none}
 .pbody::-webkit-scrollbar{display:none}
-#grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
+#grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
 .grid-cell{position:relative;width:100%;min-height:calc(var(--icon) + 18px);display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
 .edit .grid-cell{border:1.5px dashed rgba(255,255,255,.16);border-radius:calc(var(--icon)*var(--rad)/100 + 4px);min-height:calc(var(--icon) + 24px);background:rgba(255,255,255,.02);transition:border-color .15s,background .15s}
 .edit .grid-cell.cell-over{border-color:var(--acc);background:rgba(255,196,107,.12)}
@@ -248,7 +248,8 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp{position:relative;flex-shrink:0;height:min(300px,34dvh);margin:12px 14px 0;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#120e29 0%,#241a4a 35%,#662d5d 62%,#d45952 85%,#f59e56 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
 .stp .tag{position:absolute;top:9px;left:14px;z-index:2;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.65);pointer-events:none}
 .pvpop{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);pointer-events:none}
-#pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
+#pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
+.pv-fab{position:absolute;right:0;z-index:5;background:var(--acc);border-radius:4px 0 0 4px;box-shadow:-2px 0 10px rgba(255,196,107,.5);pointer-events:none}
 .stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .stabs::-webkit-scrollbar{display:none}
 .stabs button{flex:0 0 auto;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
@@ -384,8 +385,8 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',search:'Intent ACTION_WEB_SEARCH with query',deep:'Intent ACTION_VIEW Uri.parse(customUri)',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:58,radius:30,cols:4,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50,ringSize:52,ringThick:3,ringOpacity:20};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
+const S_DEF={icon:58,radius:30,cols:4,rows:5,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50,ringSize:52,ringThick:3,ringOpacity:20};
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 
 const DEF=[
  ['app','Camera'],['app','Gallery'],['app','Maps'],['app','Music'],['app','Settings'],['app','Chrome'],['app','YouTube'],['app','Calculator'],
@@ -437,7 +438,7 @@ function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].fo
 /* ───────── popup: apply layout ───────── */
 function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   const v=(k,x)=>pop.style.setProperty(k,x);
-  v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
+  v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
@@ -672,11 +673,12 @@ const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
 function render(){
   const cols=Math.max(1,parseInt(st.set.cols)||4);
+  const rows=Math.max(1,parseInt(st.set.rows)||5);
   const bySlot=new Map();
   st.items.forEach(it=>{if(typeof it.slot==='number')bySlot.set(it.slot,it)});
   let maxSlot=-1;
   st.items.forEach(it=>{if(typeof it.slot==='number'&&it.slot>maxSlot)maxSlot=it.slot});
-  const totalCount=Math.max(cols*4,Math.ceil((maxSlot+2)/cols)*cols);
+  const totalCount=Math.max(cols*rows,Math.ceil((maxSlot+2)/cols)*cols);
   let html='';
   for(let s=0;s<totalCount;s++){
     const it=bySlot.get(s);
@@ -692,19 +694,20 @@ function render(){
 /* ───────── settings panel ───────── */
 let sTab='grid';
 function stOn(){return $('#studio').classList.contains('on')}
-function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
+function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
 function pvUpdate(){
-  const stage=$('#stPrev'),p=$('#pvpop');if(!stage||!p||!stage.clientWidth)return;
+  const stage=$('#stPrev'),p=$('#pvpop'),pvF=$('#pvFab');if(!stage||!p||!stage.clientWidth)return;
   const s=st.set,ph=phone.getBoundingClientRect();
   setVars(p,s);p.classList.toggle('nolbl',!s.showLbl);
   p.style.width=Math.min(s.w,ph.width-12)+'px';
   p.style.maxHeight=Math.min(s.h,ph.height-70)+'px';
   const cols=Math.max(1,parseInt(s.cols)||4);
+  const rows=Math.max(1,parseInt(s.rows)||5);
   const bySlot=new Map();
   st.items.forEach(it=>{if(typeof it.slot==='number')bySlot.set(it.slot,it)});
   let maxSlot=-1;
   st.items.forEach(it=>{if(typeof it.slot==='number'&&it.slot>maxSlot)maxSlot=it.slot});
-  const totalCount=Math.max(cols*3,Math.ceil((maxSlot+1)/cols)*cols);
+  const totalCount=Math.max(cols*rows,Math.ceil((maxSlot+1)/cols)*cols);
   let html='';
   for(let slot=0;slot<totalCount;slot++){
     const it=bySlot.get(slot);
@@ -715,10 +718,22 @@ function pvUpdate(){
   p.style.transform='scale('+k+')';
   p.style.left=((stage.clientWidth-w*k)/2)+'px';
   p.style.top=(28+(ah-h*k)/2)+'px';
+  if(pvF){
+    const previewScale=stage.clientHeight/ph.height;
+    const th=Math.max(8,(s.trigH||90)*previewScale);
+    const tw=Math.max(3,(s.trigW||6)*previewScale);
+    let topPx;
+    if(st.btn&&typeof st.btn.y==='number'){topPx=st.btn.y*previewScale}
+    else{const pct=(s.trigY!=null?s.trigY:50)/100;topPx=stage.clientHeight*pct-th/2}
+    topPx=clamp(topPx,4,stage.clientHeight-th-4);
+    pvF.style.width=tw+'px';
+    pvF.style.height=th+'px';
+    pvF.style.top=topPx+'px';
+  }
   $('#stTag').textContent='Live preview'+(k<0.995?' · '+Math.round(k*100)+'%':'')}
 function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
 const SET_GROUPS={
-  grid:{keys:['cols','cgap','rgap','pad'],title:'Grid Management'},
+  grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
   popup:{keys:['w','h','glass'],title:'Pop-up Size & Glass'},
   trigger:{keys:['trigH','trigW','trigY'],title:'Trigger Size & Placement',extra:'<div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>'},
@@ -744,7 +759,7 @@ function studioRefresh(){pvUpdate();if(sTab==='items')buildStBody()}
 function openStudio(){
   closePop();sTab='grid';
   const s=$('#studio');
-  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
   $('#stBack').onclick=closeStudio;
   $('#stTry').onclick=()=>{closeStudio();openPop()};
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();$('#stBody').scrollTop=0};

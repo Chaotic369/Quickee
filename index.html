@@ -339,8 +339,51 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 
   <div class="dlgw" id="dlg">
       <div class="dc">
-        <h3 id="dT">New shortcut</h3>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h3 id="dT" style="margin:0">New shortcut</h3>
+          <button id="dBatchBtn" type="button" class="sbtn" style="margin:0;padding:5px 12px;font-size:11.5px;color:var(--acc);border-color:rgba(255,196,107,.3)"><i class="fa-solid fa-layer-group"></i> Add Multiple</button>
+        </div>
         <label>Type</label><div class="seg" id="dType"></div>
+        <label>Name</label><input type="text" id="dName" placeholder="Shown under the icon">
+        <label id="dTL">Target</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
+          <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
+        </div>
+        <select id="dSys"></select>
+        <datalist id="dl"></datalist>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
+          <label style="margin:0">Icon</label>
+          <div style="display:flex;gap:6px">
+            <input type="file" id="dImgFileInput" accept="image/*" style="display:none">
+            <button id="dUploadIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-image"></i> Custom Image</button>
+            <button id="dChangeIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-pen"></i> Presets</button>
+          </div>
+        </div>
+        <div id="dIconPreview" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)">
+          <div id="dCurrentIcon" class="ic" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"></div>
+          <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
+        </div>
+        <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(255,255,255,.06)"></div>
+        <label>Color</label><div class="pick cols" id="dCols"></div>
+        <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
+      </div>
+    </div>
+
+    <div class="dlgw" id="batchDlg" style="z-index:82">
+      <div class="dc">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:var(--acc)"></i> Add Multiple Apps</h3>
+          <span id="batchCount" style="font-size:11.5px;color:var(--acc);font-weight:700">0 selected</span>
+        </div>
+        <div id="batchAppList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+        <div class="acts" style="margin-top:16px">
+          <button id="batchCancel">Cancel</button>
+          <span class="sp"></span>
+          <button class="pri" id="batchAddBtn">Add Selected</button>
+        </div>
+      </div>
+    </div>
         <label>Name</label><input type="text" id="dName" placeholder="Shown under the icon">
         <label id="dTL">Target</label>
         <div style="display:flex;gap:8px;align-items:center">
@@ -1383,6 +1426,7 @@ function openDlg(item,targetSlot){
   const destSlot=(item&&typeof item.slot==='number')?item.slot:(typeof targetSlot==='number'?targetSlot:firstFreeSlot());
   dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,customImg:item.customImg||null,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,customImg:null,touched:false};
   $('#dT').textContent=item?'Edit shortcut':'New shortcut';
+  $('#dBatchBtn').style.display=item?'none':'inline-flex';
   $('#dName').value=item?item.n:'';
   $('#dDel').style.display=item?'block':'none';
   $('#dIcons').style.display='none';
@@ -1392,6 +1436,77 @@ function openDlg(item,targetSlot){
   setDType(dS.t,true);
   if(item){if(item.t==='system')$('#dSys').value=item.v;else $('#dTarget').value=item.v}
   buildPickers();$('#dlg').style.display='flex'}
+
+let batchSelected=new Set();
+function openBatchDlg(){
+  batchSelected.clear();
+  const list=$('#batchAppList');
+  list.innerHTML=INSTALLED.map(app=>{
+    const already=st.items.some(x=>x.t==='app'&&x.v===app.v);
+    return`<div class="res batch-row" data-pkg="${esc(app.v)}" style="user-select:none;display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:14px;background:rgba(255,255,255,.04);cursor:pointer">
+      <div class="ic" style="background:${app.c};width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"><i class="${esc(app.i)}"></i></div>
+      <div class="tx" style="flex:1"><b>${esc(app.n)}</b><small style="color:var(--dim)">${already?'Already added':'Tap to select'}</small></div>
+      <input type="checkbox" class="batch-chk" style="width:18px;height:18px;accent-color:var(--acc);pointer-events:none">
+    </div>`;
+  }).join('');
+  updateBatchUI();
+  $('#dlg').style.display='none';
+  $('#batchDlg').style.display='flex';
+}
+
+function updateBatchUI(){
+  $('#batchCount').textContent=`${batchSelected.size} selected`;
+  document.querySelectorAll('.batch-row').forEach(row=>{
+    const pkg=row.dataset.pkg;
+    const chk=row.querySelector('.batch-chk');
+    const on=batchSelected.has(pkg);
+    if(chk)chk.checked=on;
+    row.style.background=on?'rgba(255,196,107,.15)':'rgba(255,255,255,.04)';
+    row.style.border=on?'1px solid var(--acc)':'1px solid transparent';
+  });
+}
+
+$('#batchAppList').onclick=e=>{
+  const row=e.target.closest('.batch-row');
+  if(!row)return;
+  const pkg=row.dataset.pkg;
+  if(batchSelected.has(pkg))batchSelected.delete(pkg); else batchSelected.add(pkg);
+  updateBatchUI();
+};
+
+$('#dBatchBtn').onclick=openBatchDlg;
+$('#batchCancel').onclick=()=>{
+  $('#batchDlg').style.display='none';
+  $('#dlg').style.display='flex';
+};
+
+$('#batchAddBtn').onclick=()=>{
+  if(!batchSelected.size){
+    toast('Select at least one app');
+    return;
+  }
+  const taken=new Set(st.items.map(x=>x.slot));
+  let curSlot=0;
+  batchSelected.forEach(pkg=>{
+    const app=INSTALLED.find(x=>x.v===pkg);
+    if(!app)return;
+    while(taken.has(curSlot))curSlot++;
+    st.items.push({
+      id:uid(),
+      t:'app',
+      n:app.n,
+      v:app.v,
+      i:app.i,
+      c:app.c,
+      slot:curSlot
+    });
+    taken.add(curSlot);
+  });
+  save();
+  $('#batchDlg').style.display='none';
+  render();
+  toast(`${batchSelected.size} shortcuts added`);
+};
 function setDType(t,keep){dS.t=t;
   document.querySelectorAll('#dType button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   const sys=t==='system';
@@ -1654,7 +1769,7 @@ $('#dSave').onclick=()=>{
 
 
 /* ───────── keyboard + resize + init ───────── */
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';
 statusIcons();applyBright();applySet();placeFab();

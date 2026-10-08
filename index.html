@@ -156,8 +156,12 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .sbtn{padding:10px 16px;border-radius:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08);font-size:12.5px;font-weight:600;margin-right:8px;transition:all .15s}
 .sbtn:hover{background:rgba(255,255,255,.15);color:#fff}
 .sbtn:active{transform:scale(.96)}
-.rz{position:absolute;width:18px;height:18px;border-radius:50%;background:#000;border:2px solid #888;box-shadow:0 2px 8px rgba(0,0,0,.7);touch-action:none;cursor:nesw-resize;z-index:90;display:none;align-items:center;justify-content:center;transition:transform .15s,border-color .15s}
-.rz:hover,.rz:active{transform:scale(1.25);border-color:#bbb}
+.rz{position:absolute;width:calc(var(--pop-rad, 26px) + 6px);height:calc(var(--pop-rad, 26px) + 6px);touch-action:none;cursor:nesw-resize;z-index:90;display:none;align-items:center;justify-content:center;transition:transform .15s,opacity .15s;background:transparent;border:none;box-shadow:none;border-radius:0}
+.rz::after{content:"";position:absolute;inset:0;pointer-events:none;border-bottom:3px solid var(--acc);border-bottom-left-radius:var(--pop-rad, 26px);filter:drop-shadow(0 2px 5px rgba(0,0,0,.9));transition:border-color .15s,border-width .15s}
+#phone.edge-left .rz::after{border-bottom-left-radius:0;border-bottom-right-radius:var(--pop-rad, 26px);border-left:none;border-right:3px solid var(--acc)}
+#phone:not(.edge-left) .rz::after{border-left:3px solid var(--acc);border-right:none}
+.rz:hover,.rz:active{transform:scale(1.12)}
+.rz:hover::after,.rz:active::after{border-color:#fff}
 .trig-handle{display:none;position:absolute;right:100%;z-index:48;touch-action:none;user-select:none;align-items:center;justify-content:center;color:#fff}
 .trig-handle.end-cap{width:22px;height:24px;background:#3a3842;border:1px solid rgba(255,255,255,.2);clip-path:polygon(0% 25%, 65% 25%, 100% 50%, 65% 75%, 0% 75%);cursor:ns-resize}
 .trig-handle.top-cap{top:-12px}
@@ -656,8 +660,9 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
     phone.style.removeProperty('--user-wall');
   }
   fab.style.display=s.triggerEnabled===false?'none':'block';
-  phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
-  phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
+    phone.classList.toggle('edge-left', s.trigEdge==='left');
+    phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
+    phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
   phone.style.setProperty('--ring-th',(s.ringThick||2.5)+'px');
   const ro=(s.ringOpacity!=null?s.ringOpacity:40)/100;
@@ -703,8 +708,12 @@ function placeRz(){
   if(isOpen()&&editMode){
     rzEl.style.display='flex';
     const isLeft=st.set&&st.set.trigEdge==='left';
-    rzEl.style.left=isLeft?(pop.offsetLeft+pop.offsetWidth-9)+'px':(pop.offsetLeft-9)+'px';
-    rzEl.style.top=(pop.offsetTop+pop.offsetHeight-9)+'px';
+    const rad=st.set.popRad!=null?st.set.popRad:26;
+    const sz=rad+6;
+    rzEl.style.width=sz+'px';
+    rzEl.style.height=sz+'px';
+    rzEl.style.left=isLeft?(pop.offsetLeft+pop.offsetWidth-sz)+'px':pop.offsetLeft+'px';
+    rzEl.style.top=(pop.offsetTop+pop.offsetHeight-sz)+'px';
   }else{
     rzEl.style.display='none';
   }

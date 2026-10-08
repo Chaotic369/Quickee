@@ -144,8 +144,13 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .sbtn{padding:10px 16px;border-radius:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08);font-size:12.5px;font-weight:600;margin-right:8px;transition:all .15s}
 .sbtn:hover{background:rgba(255,255,255,.15);color:#fff}
 .sbtn:active{transform:scale(.96)}
-.rz{position:absolute;right:0;bottom:0;width:30px;height:30px;touch-action:none;cursor:nwse-resize;z-index:3}
-.rz::after{content:"";position:absolute;right:7px;bottom:7px;width:12px;height:12px;border-right:2px solid rgba(255,255,255,.4);border-bottom:2px solid rgba(255,255,255,.4);border-bottom-right-radius:8px}
+.rz{position:absolute;right:0;bottom:0;width:34px;height:34px;touch-action:none;cursor:nwse-resize;z-index:50;display:flex;align-items:flex-end;justify-content:flex-end;padding:4px}
+.rz::after{content:"";display:block;width:14px;height:14px;border-right:3px solid var(--acc);border-bottom:3px solid var(--acc);border-bottom-right-radius:8px;box-shadow:2px 2px 6px rgba(0,0,0,.6)}
+.trig-rz{display:none;position:absolute;left:-14px;width:30px;height:24px;border-radius:12px;background:var(--acc);color:#1b152d;box-shadow:0 4px 12px rgba(0,0,0,.6);cursor:ns-resize;touch-action:none;align-items:center;justify-content:center;font-size:10px;z-index:46;user-select:none}
+.trig-rz.top{top:-12px}
+.trig-rz.bottom{bottom:-12px}
+.trig-rz-w{display:none;position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:20px;height:28px;border-radius:8px;background:var(--acc);color:#1b152d;box-shadow:0 4px 12px rgba(0,0,0,.6);cursor:ew-resize;touch-action:none;align-items:center;justify-content:center;font-size:10px;z-index:46;user-select:none}
+.edit #fab .trig-rz, .edit #fab .trig-rz-w{display:flex}
 
 /* ───── simulated app window ───── */
 #sim{position:absolute;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .2s}
@@ -266,7 +271,12 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
     <button id="fabAdd" class="fbtn" aria-label="Add shortcut" title="Add shortcut"><i class="fa-solid fa-plus"></i></button>
     <button id="fabEdit" class="fbtn" aria-label="Edit launcher" title="Edit launcher"><i class="fa-solid fa-pen"></i></button>
     <button id="fabSet" class="fbtn" aria-label="Launcher settings" title="Launcher settings"><i class="fa-solid fa-gear"></i></button>
-    <button id="fab" aria-label="Open launcher"><i class="fa-solid fa-plus"></i></button>
+    <div id="fab" aria-label="Open launcher">
+          <i class="fa-solid fa-plus"></i>
+          <div class="trig-rz top" id="trigRzTop" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
+          <div class="trig-rz-w" id="trigRzW" title="Drag to adjust width"><i class="fa-solid fa-arrows-left-right"></i></div>
+          <div class="trig-rz bottom" id="trigRzBottom" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
+        </div>
 
     <div id="pop" role="dialog" aria-label="Quick launcher">
       <div class="grab" id="topBar"></div>
@@ -564,15 +574,60 @@ $('#pop').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const
 $('#pop').addEventListener('pointerup',()=>{pdg=null});
 $('#pop').addEventListener('pointercancel',()=>{pdg=null});
 
-/* ───────── popup: resize corner ───────── */
+/* ───────── popup: dynamic drag resize (width & height) ───────── */
 let rz=null;
-$('#rz').addEventListener('pointerdown',e=>{e.stopPropagation();rz={x:e.clientX,y:e.clientY,w:pop.offsetWidth,h:pop.offsetHeight};$('#rz').setPointerCapture(e.pointerId)});
-$('#rz').addEventListener('pointermove',e=>{if(!rz)return;const ph=phone.getBoundingClientRect();
-  st.set.w=Math.round(clamp(rz.w+e.clientX-rz.x,240,Math.min(420,ph.width-12)));
-  st.set.h=Math.round(clamp(rz.h+e.clientY-rz.y,260,Math.min(780,ph.height-70)));
-  applySet()});
-$('#rz').addEventListener('pointerup',()=>{if(rz){rz=null;save()}});
-$('#rz').addEventListener('pointercancel',()=>{rz=null});
+$('#rz').addEventListener('pointerdown',e=>{
+  e.stopPropagation();
+  rz={x:e.clientX,y:e.clientY,w:pop.offsetWidth,h:pop.offsetHeight};
+  $('#rz').setPointerCapture(e.pointerId);
+});
+$('#rz').addEventListener('pointermove',e=>{
+  if(!rz)return;
+  const ph=phone.getBoundingClientRect();
+  const nw=Math.round(clamp(rz.w+(e.clientX-rz.x),200,ph.width-16));
+  const nh=Math.round(clamp(rz.h+(e.clientY-rz.y),220,ph.height-90));
+  st.set.w=nw;
+  st.set.h=nh;
+  applySet();
+  positionFabButtons();
+  if(stOn())pvUpdate();
+});
+$('#rz').addEventListener('pointerup',()=>{if(rz){rz=null;save();toast('Popup size saved')}});
+$('#rz').addEventListener('pointercancel',()=>{if(rz){rz=null;save()}});
+
+/* ───────── trigger: interactive drag resize handles (width & height) ───────── */
+let trgDrag=null;
+function bindTrigResize(el, mode){
+  el.addEventListener('pointerdown',e=>{
+    e.stopPropagation();
+    trgDrag={mode,y:e.clientY,x:e.clientX,h:st.set.trigH||90,w:st.set.trigW||6};
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!trgDrag||trgDrag.mode!==mode)return;
+    if(mode==='width'){
+      const diffX=trgDrag.x-e.clientX;
+      st.set.trigW=Math.round(clamp(trgDrag.w+diffX,3,32));
+    }else{
+      const diffY=(mode==='top'?(trgDrag.y-e.clientY):(e.clientY-trgDrag.y))*2;
+      st.set.trigH=Math.round(clamp(trgDrag.h+diffY,36,280));
+    }
+    applySet();
+    placeFab();
+    if(stOn()){syncSl();pvUpdate();}
+  });
+  el.addEventListener('pointerup',e=>{
+    if(trgDrag&&trgDrag.mode===mode){
+      trgDrag=null;
+      save();
+      toast(mode==='width'?'Trigger width updated':'Trigger height updated');
+    }
+  });
+  el.addEventListener('pointercancel',()=>{trgDrag=null});
+}
+bindTrigResize($('#trigRzTop'),'top');
+bindTrigResize($('#trigRzBottom'),'bottom');
+bindTrigResize($('#trigRzW'),'width');
 
 /* ───────── views: grid / results / settings ───────── */
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}

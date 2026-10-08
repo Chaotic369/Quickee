@@ -838,7 +838,13 @@ popBottomBar.addEventListener('pointercancel',()=>{popMoveDrag=null});
 
 /* ───────── views: grid / results / settings ───────── */
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}
-function iconInner(it){return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`}
+function iconInner(it){
+  if(it.t==='web'&&it.v){
+    const domain=(it.v.replace(/^[a-z]+:\/\//i,'').split('/')[0]||'').toLowerCase();
+    if(domain)return`<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit" onerror="this.replaceWith(document.createElement('i'));this.className='fa-solid fa-globe'">`;
+  }
+  return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`;
+}
 function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
@@ -1462,11 +1468,21 @@ function updateIconPreview(){
   const curIcon=$('#dCurrentIcon');
   if(curIcon){
     curIcon.style.background=dS.c;
-    curIcon.innerHTML=dS.i==='letter'?'<b>Aa</b>':`<i class="${esc(dS.i)}"></i>`;
+    if(dS.t==='web'&&$('#dTarget').value.trim()){
+      const targetVal=$('#dTarget').value.trim();
+      const domain=(targetVal.replace(/^[a-z]+:\/\//i,'').split('/')[0]||'').toLowerCase();
+      curIcon.innerHTML=`<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit" onerror="this.outerHTML='<i class=\\'fa-solid fa-globe\\'></i>'">`;
+    }else{
+      curIcon.innerHTML=dS.i==='letter'?'<b>Aa</b>':`<i class="${esc(dS.i)}"></i>`;
+    }
   }
   const lbl=$('#dIconLabel');
   if(lbl){
-    lbl.textContent=dS.i==='letter'?'Monogram (Aa)':dS.i.replace('fa-solid fa-','').replace('fa-brands fa-','');
+    if(dS.t==='web'&&$('#dTarget').value.trim()){
+      lbl.textContent='Website Favicon (Auto)';
+    }else{
+      lbl.textContent=dS.i==='letter'?'Monogram (Aa)':dS.i.replace('fa-solid fa-','').replace('fa-brands fa-','');
+    }
   }
 }
 
@@ -1493,7 +1509,22 @@ $('#dIcons').onclick=e=>{
 };
 $('#dCols').onclick=e=>{const b=e.target.closest('button');if(b){dS.c=b.dataset.c;dS.touched=true;buildPickers()}};
 $('#dSys').onchange=()=>{const s=SYS[$('#dSys').value];if(!$('#dName').value||Object.values(SYS).some(x=>x.n===$('#dName').value))$('#dName').value=s.n;if(!dS.touched){dS.i=s.i;dS.c=s.c;buildPickers()}};
-$('#dTarget').addEventListener('change',()=>{if(dS.t!=='app')return;const a=INSTALLED.find(x=>x.n.toLowerCase()===$('#dTarget').value.trim().toLowerCase());if(a){$('#dTarget').value=a.v;if(!$('#dName').value)$('#dName').value=a.n;if(!dS.touched){dS.i=a.i;dS.c=a.c;buildPickers()}}});
+$('#dTarget').addEventListener('input',()=>{
+  if(dS.t==='web'){
+    const v=$('#dTarget').value.trim();
+    if(v&&!$('#dName').value){
+      const host=v.replace(/^[a-z]+:\/\//i,'').split('/')[0].replace(/^www\./,'');
+      if(host)$('#dName').value=host.split('.')[0].charAt(0).toUpperCase()+host.split('.')[0].slice(1);
+    }
+    updateIconPreview();
+  }
+});
+$('#dTarget').addEventListener('change',()=>{
+  if(dS.t==='web'){updateIconPreview();return;}
+  if(dS.t!=='app')return;
+  const a=INSTALLED.find(x=>x.n.toLowerCase()===$('#dTarget').value.trim().toLowerCase());
+  if(a){$('#dTarget').value=a.v;if(!$('#dName').value)$('#dName').value=a.n;if(!dS.touched){dS.i=a.i;dS.c=a.c;buildPickers()}}
+});
 $('#dCancel').onclick=()=>{$('#dlg').style.display='none'};
 $('#dDel').onclick=()=>{st.items=st.items.filter(x=>x.id!==dS.id);save();$('#dlg').style.display='none';render()};
 $('#dSave').onclick=()=>{

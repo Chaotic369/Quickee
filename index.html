@@ -47,11 +47,11 @@ input,select{font:inherit;color:var(--ink);outline:none}
 #navpill{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:120px;height:4.5px;border-radius:4px;background:rgba(255,255,255,.75);box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:6}
 
 /* ───── floating plus ───── */
-#fab{position:absolute;z-index:45;width:40px;height:40px;border-radius:15px;display:grid;place-items:center;font-size:15px;touch-action:none;user-select:none;
-  background:linear-gradient(135deg,rgba(36,26,60,.85),rgba(18,13,32,.85));backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 10px 28px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.25),0 0 0 1px rgba(255,255,255,.1);transition:transform .18s,box-shadow .18s,color .2s;color:var(--ink)}
+#fab{position:absolute;z-index:45;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-size:13px;touch-action:none;user-select:none;
+  background:linear-gradient(135deg,rgba(36,26,60,.85),rgba(18,13,32,.85));backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.25),0 0 0 1px rgba(255,255,255,.1);transition:transform .18s,box-shadow .18s,color .2s;color:var(--ink)}
 #fab:active{transform:scale(.92)}
 #fab i{transition:transform .26s cubic-bezier(.34,1.56,.64,1)}
-#fab.open{color:var(--acc);box-shadow:0 10px 28px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.3),0 0 0 1.5px var(--acc)}
+#fab.open{color:var(--acc);box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.3),0 0 0 1.5px var(--acc)}
 #fab.open i{transform:rotate(135deg)}
 #scrim{position:absolute;inset:0;z-index:38;display:none}
 #scrim.on{display:block}
@@ -216,7 +216,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .acts .pri{background:var(--acc);color:#2a1b05;border-color:transparent}
 .acts .del{color:#ff7b72;background:rgba(229,83,75,.14);border-color:rgba(229,83,75,.2)}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
-.grab{display:flex;align-items:center;justify-content:center;width:100%;height:24px;flex-shrink:0;cursor:grab;touch-action:none}
+.grab{display:none}
 
 .hi[data-app]{cursor:pointer}
 #studio{position:absolute;inset:0;z-index:62;background:var(--bg);display:none;flex-direction:column}
@@ -405,23 +405,23 @@ $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── floating plus: drag + tap ───────── */
 function placeFab(){const ph=phone.getBoundingClientRect();let x,y;
-  if(st.btn){x=st.btn.x;y=st.btn.y}else{x=ph.width-46-16;y=ph.height-46-118}
-  fab.style.left=clamp(x,6,ph.width-52)+'px';fab.style.top=clamp(y,34,ph.height-52)+'px'}
+  if(st.btn){x=st.btn.x;y=st.btn.y}else{x=ph.width-34-16;y=ph.height-34-118}
+  fab.style.left=clamp(x,6,ph.width-40)+'px';fab.style.top=clamp(y,34,ph.height-40)+'px'}
 let bd=null;
 fab.addEventListener('pointerdown',e=>{bd={x:e.clientX,y:e.clientY,l:fab.offsetLeft,t:fab.offsetTop,m:false};fab.setPointerCapture(e.pointerId)});
 fab.addEventListener('pointermove',e=>{if(!bd)return;const dx=e.clientX-bd.x,dy=e.clientY-bd.y;
   if(!bd.m&&Math.hypot(dx,dy)<6)return;bd.m=true;const ph=phone.getBoundingClientRect();
-  fab.style.left=clamp(bd.l+dx,6,ph.width-52)+'px';fab.style.top=clamp(bd.t+dy,34,ph.height-52)+'px';placePop()});
+  fab.style.left=clamp(bd.l+dx,6,ph.width-40)+'px';fab.style.top=clamp(bd.t+dy,34,ph.height-40)+'px';placePop()});
 fab.addEventListener('pointerup',()=>{if(!bd)return;if(bd.m){st.btn={x:fab.offsetLeft,y:fab.offsetTop};save()}else{isOpen()?closePop():openPop()}bd=null});
 fab.addEventListener('pointercancel',()=>{bd=null});
 
 /* ───────── popup: drag ───────── */
 let pdg=null;
-$('#topBar').addEventListener('pointerdown',e=>{if(e.target.closest('.mbtn'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};$('#topBar').setPointerCapture(e.pointerId)});
-$('#topBar').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
+$('#pop').addEventListener('pointerdown',e=>{if(e.target.closest('.it,button,input,select,.rz'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};pop.setPointerCapture(e.pointerId)});
+$('#pop').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
   pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,24,ph.height-60)+'px'});
-$('#topBar').addEventListener('pointerup',()=>{pdg=null});
-$('#topBar').addEventListener('pointercancel',()=>{pdg=null});
+$('#pop').addEventListener('pointerup',()=>{pdg=null});
+$('#pop').addEventListener('pointercancel',()=>{pdg=null});
 
 /* ───────── popup: resize corner ───────── */
 let rz=null;

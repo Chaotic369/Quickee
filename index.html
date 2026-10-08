@@ -67,7 +67,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .fbtn.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc)}
 #fabAdd{display:none}
 #fabAdd.show{display:grid}
-.dt-ring{position:absolute;z-index:999;width:var(--ring-sz,52px);height:var(--ring-sz,52px);border-width:var(--ring-th,2.5px);border-style:solid;border-color:var(--ring-col,rgba(255,255,255,.75));border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:var(--ring-bg,rgba(255,255,255,.14));box-shadow:none}
+.dt-ring{position:absolute;z-index:999;width:var(--ring-sz,52px);height:var(--ring-sz,52px);border-width:var(--ring-th,2.5px);border-style:solid;border-color:var(--ring-col,rgba(255,255,255,.38));border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:transparent !important;box-shadow:none}
 .grid-cell:has(.drag-over),.grid-cell:has(:hover){z-index:25}
 .it:hover,.it.drag-over{z-index:30}
 .it:hover .ic,.it.drag-over .ic{transform:scale(1.35);box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.4);transition:transform 0s,box-shadow 0s !important;z-index:30}
@@ -281,7 +281,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .ring-preview-item .lb{max-width:100%;font-size:var(--lbl);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-weight:500;color:rgba(246,239,228,.9)}
 .ring-preview-card.nolbl .ring-preview-item .lb{display:none}
 .ring-preview-item.hovered .ic{transform:scale(1.35);z-index:12;box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.4);transition:none !important}
-.ring-sim-pointer{position:absolute;pointer-events:none;z-index:20;transform:translate(-50%,-50%);border-radius:50%;display:block;box-shadow:0 0 12px rgba(255,196,107,.25)}
+.ring-sim-pointer{position:absolute;pointer-events:none;z-index:20;transform:translate(-50%,-50%);border-radius:50%;display:block;background:transparent !important;box-shadow:none}
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 70%,rgba(35,35,35,.8) 0 8%,rgba(18,18,18,.9) 24%,transparent 55%),linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%)}
 .stp-wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%)}
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
@@ -521,8 +521,8 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true,customWall:null};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true,customWall:null};
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
 const DEF=[
@@ -640,8 +640,9 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
   phone.style.setProperty('--ring-th',(s.ringThick||2.5)+'px');
-  phone.style.setProperty('--ring-col',`rgba(255,255,255,.75)`);
-  phone.style.setProperty('--ring-bg',`rgba(255,255,255,${(s.ringOpacity!=null?s.ringOpacity:14)/100})`);
+  const ro=(s.ringOpacity!=null?s.ringOpacity:40)/100;
+    phone.style.setProperty('--ring-col',`rgba(255,255,255,${ro})`);
+    phone.style.setProperty('--ring-bg',`transparent`);
   pop.classList.toggle('nolbl',!s.showLbl);
   pop.style.width=Math.min(s.w,ph.width-12)+'px';
   pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
@@ -1122,15 +1123,15 @@ function pvUpdate(){
           ringCard.style.width=(singleColW*2+gapWidth+cardPad)+'px';
 
           const rSz=s.ringSize||42;
-          const rTh=s.ringThick||2.5;
-          const rOp=(s.ringOpacity!=null?s.ringOpacity:14)/100;
-          ringSim.style.width=rSz+'px';
-          ringSim.style.height=rSz+'px';
-          ringSim.style.borderWidth=rTh+'px';
-          ringSim.style.borderStyle='solid';
-          ringSim.style.borderColor='rgba(255,255,255,0.75)';
-          ringSim.style.backgroundColor=`rgba(255,255,255,${rOp})`;
-          ringSim.style.display='block';
+                const rTh=s.ringThick||2.5;
+                const rOp=(s.ringOpacity!=null?s.ringOpacity:40)/100;
+                ringSim.style.width=rSz+'px';
+                ringSim.style.height=rSz+'px';
+                ringSim.style.borderWidth=rTh+'px';
+                ringSim.style.borderStyle='solid';
+                ringSim.style.borderColor=`rgba(255,255,255,${rOp})`;
+                ringSim.style.backgroundColor='transparent';
+                ringSim.style.display='block';
 
           const ringGrid=$('#ringGrid');
           if(ringGrid){

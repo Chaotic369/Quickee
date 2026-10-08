@@ -248,8 +248,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp .tag{position:absolute;top:8px;left:12px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);background:rgba(0,0,0,.4);padding:2px 8px;border-radius:6px;pointer-events:none}
 .stp-phone{position:relative;height:92%;border-radius:24px;border:2.5px solid rgba(255,255,255,.18);background:#000;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.8);isolation:isolate}
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 72%,rgba(255,217,160,.92) 0 6%,rgba(255,160,95,.8) 12%,rgba(255,120,90,0) 38%),linear-gradient(180deg,#120e29 0%,#241a4a 30%,#662d5d 58%,#d45952 82%,#f59e56 100%)}
+.stp-wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;background:linear-gradient(180deg,rgba(40,20,50,.92),#0e0817);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%)}
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
-.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14);pointer-events:none;transform-origin:top left}
+.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14);pointer-events:none;transform-origin:top right}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
 .pv-fab{position:absolute;right:0;z-index:5;background:rgba(255,255,255,.6);border-radius:4px 0 0 4px;pointer-events:none}
 .stabs{display:flex;gap:4px;padding:8px 14px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.05)}
@@ -762,15 +763,13 @@ function pvUpdate(){
   else{const pct=(s.trigY!=null?s.trigY:50)/100;trigTop=ph.height*pct-th/2}
   trigTop=clamp(trigTop,36,ph.height-th-18);
 
-  const pw=Math.min(s.w,ph.width-12);
   const popH=p.offsetHeight||Math.min(s.h,ph.height-70);
-  let popLeft=ph.width-pw-12;
   let popTop=trigTop+(th/2)-(popH/2);
-  popLeft=clamp(popLeft,6,ph.width-pw-6);
   popTop=clamp(popTop,36,ph.height-popH-12);
 
   p.style.transform=`scale(${scale})`;
-  p.style.left=(popLeft*scale)+'px';
+  p.style.left='auto';
+  p.style.right=(12*scale)+'px';
   p.style.top=(popTop*scale)+'px';
 
   if(pvF){

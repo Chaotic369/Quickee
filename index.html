@@ -46,19 +46,17 @@ input,select{font:inherit;color:var(--ink);outline:none}
 #dock .ic:active{transform:scale(.9)}
 #navpill{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:120px;height:4.5px;border-radius:4px;background:rgba(255,255,255,.75);box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:6}
 
-/* ───── floating plus + edit button ───── */
-#fab{position:absolute;z-index:45;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-size:13px;touch-action:none;user-select:none;
-  background:linear-gradient(135deg,rgba(36,26,60,.85),rgba(18,13,32,.85));backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.25),0 0 0 1px rgba(255,255,255,.1);transition:transform .18s,box-shadow .18s,color .2s;color:var(--ink)}
-#fab:active{transform:scale(.92)}
-#fab i{transition:transform .26s cubic-bezier(.34,1.56,.64,1)}
-#fab.open{color:var(--acc);box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.3),0 0 0 1.5px var(--acc)}
-#fab.open i{transform:rotate(135deg)}
-#fabEdit{position:absolute;z-index:45;width:34px;height:34px;border-radius:12px;display:grid;place-items:center;font-size:13px;color:var(--ink);
-  background:linear-gradient(135deg,rgba(36,26,60,.85),rgba(18,13,32,.85));backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);box-shadow:0 8px 20px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.25),0 0 0 1px rgba(255,255,255,.1);
+/* ───── Zone Launcher side line trigger ───── */
+#fab{position:absolute;z-index:45;width:6px;height:90px;border-radius:4px 0 0 4px;touch-action:none;user-select:none;
+  background:rgba(255,255,255,.32);box-shadow:-2px 0 10px rgba(0,0,0,.45);transition:width .18s,background .2s,box-shadow .2s;color:transparent}
+#fab i{display:none}
+#fab:hover,#fab:active,#fab.open{width:10px;background:var(--acc);box-shadow:-3px 0 14px rgba(255,196,107,.55)}
+#fabEdit{position:absolute;z-index:45;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:12px;color:var(--ink);
+  background:rgba(27,22,41,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 6px 18px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.14);
   opacity:0;pointer-events:none;transform:scale(.7);transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.34,1.56,.64,1),color .15s,box-shadow .15s}
-#fabEdit:active{transform:scale(.92)}
+#fabEdit:active{transform:scale(.9)}
 #fabEdit.open{opacity:1;pointer-events:auto;transform:scale(1)}
-#fabEdit.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc),0 8px 20px rgba(0,0,0,.5)}
+#fabEdit.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc),0 6px 18px rgba(0,0,0,.5)}
 .dt-ring{position:absolute;z-index:999;width:50px;height:50px;border:2.5px solid var(--acc);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:rgba(255,196,107,.18);box-shadow:0 0 16px rgba(255,196,107,.4),0 8px 20px rgba(0,0,0,.4)}
 .it.drag-over .ic{transform:scale(.92);box-shadow:0 0 0 3px var(--acc),0 0 20px rgba(255,196,107,.6),inset 0 1px 1px rgba(255,255,255,.4)}
 #scrim{position:absolute;inset:0;z-index:38;display:none}
@@ -70,7 +68,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
   position:absolute;z-index:40;display:flex;flex-direction:column;overflow:hidden;
   border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);
   box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);
-  opacity:0;transform:scale(.94) translateY(6px);pointer-events:none;transition:opacity .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1)}
+  opacity:0;transform:scale(.92) translateX(12px);pointer-events:none;transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1)}
 #pop.open{opacity:1;transform:none;pointer-events:auto}
 .top-bar{display:flex;align-items:center;gap:8px;padding:10px var(--pad) 0;flex-shrink:0}
 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
@@ -414,18 +412,15 @@ function openPop(){userMoved=false;applySet();render();pop.classList.add('open')
 function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
-/* ───────── floating plus: slide to launch ───────── */
+/* ───────── Zone Launcher side trigger: slide to launch ───────── */
 function positionFabEdit(){
-  const ph=phone.getBoundingClientRect(),fx=fab.offsetLeft,fy=fab.offsetTop;
-  const leftSpace=fx-6,rightSpace=ph.width-40-fx;
-  let ex=leftSpace>=40?fx-40:(rightSpace>=40?fx+40:fx);
-  let ey=fy;
-  if(ex===fx)ey=fy>=40?fy-40:fy+40;
-  fabEdit.style.left=clamp(ex,6,ph.width-40)+'px';
-  fabEdit.style.top=clamp(ey,34,ph.height-40)+'px'}
-function placeFab(){const ph=phone.getBoundingClientRect();let x,y;
-  if(st.btn){x=st.btn.x;y=st.btn.y}else{x=ph.width-40-16;y=ph.height-40-118}
-  fab.style.left=clamp(x,6,ph.width-46)+'px';fab.style.top=clamp(y,34,ph.height-46)+'px';
+  const ph=phone.getBoundingClientRect(),fy=fab.offsetTop;
+  fabEdit.style.left=(ph.width-44)+'px';
+  fabEdit.style.top=clamp(fy-40,36,ph.height-48)+'px'}
+function placeFab(){const ph=phone.getBoundingClientRect();let y;
+  if(st.btn&&typeof st.btn.y==='number'){y=st.btn.y}else{y=ph.height/2-45}
+  fab.style.left=(ph.width-fab.offsetWidth)+'px';
+  fab.style.top=clamp(y,36,ph.height-fab.offsetHeight-18)+'px';
   positionFabEdit()}
 const dtRing = document.createElement('div');
 dtRing.className = 'dt-ring';

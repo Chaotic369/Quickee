@@ -143,9 +143,10 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .sbtn{padding:10px 16px;border-radius:14px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08);font-size:12.5px;font-weight:600;margin-right:8px;transition:all .15s}
 .sbtn:hover{background:rgba(255,255,255,.15);color:#fff}
 .sbtn:active{transform:scale(.96)}
-.rz{position:absolute;right:2px;bottom:2px;width:24px;height:24px;touch-action:none;cursor:nwse-resize;z-index:50;display:flex;align-items:flex-end;justify-content:flex-end;padding:3px;opacity:.7;transition:opacity .15s}
-.rz:hover{opacity:1}
-.rz::after{content:"";display:block;width:9px;height:9px;border-right:2px solid rgba(255,255,255,.6);border-bottom:2px solid rgba(255,255,255,.6);border-bottom-right-radius:5px}
+.rz{position:absolute;width:22px;height:22px;border-radius:50%;background:#140f23;border:2px solid rgba(255,255,255,.85);box-shadow:0 3px 10px rgba(0,0,0,.85);touch-action:none;cursor:nesw-resize;z-index:90;display:none;align-items:center;justify-content:center;transition:transform .15s,border-color .15s}
+.rz::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff;display:block}
+.rz:hover,.rz:active{transform:scale(1.25);border-color:var(--acc)}
+.rz:hover::after,.rz:active::after{background:var(--acc)}
 .trig-handle{display:none;position:absolute;right:100%;z-index:48;touch-action:none;user-select:none;align-items:center;justify-content:center;color:#fff}
 .trig-handle.end-cap{width:22px;height:24px;background:#3a3842;border:1px solid rgba(255,255,255,.2);clip-path:polygon(0% 25%, 65% 25%, 100% 50%, 65% 75%, 0% 75%);cursor:ns-resize}
 .trig-handle.top-cap{top:-12px}
@@ -310,13 +311,13 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
         </div>
 
     <div id="pop" role="dialog" aria-label="Quick launcher">
-          <div class="grab" id="topBar"></div>
-          <div class="pbody" id="pbody">
-            <div id="grid"></div>
-          </div>
-          <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
-          <div class="rz" id="rz" title="Drag to resize"></div>
-        </div>
+              <div class="grab" id="topBar"></div>
+              <div class="pbody" id="pbody">
+                <div id="grid"></div>
+              </div>
+              <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
+            </div>
+        <div class="rz" id="rz" title="Drag to resize"></div>
 
   <div id="sim"></div>
     <div id="studio"></div>
@@ -509,7 +510,18 @@ function positionFabButtons(){
   fabEdit.style.top=topTarget+'px';
   fabAdd.style.left=(rightX-60)+'px';
   fabAdd.style.top=topTarget+'px'}
-function placePop(){if(userMoved)return;
+function placeRz(){
+  const rzEl=$('#rz');
+  if(!rzEl)return;
+  if(isOpen()){
+    rzEl.style.display='flex';
+    rzEl.style.left=(pop.offsetLeft-11)+'px';
+    rzEl.style.top=(pop.offsetTop+pop.offsetHeight-11)+'px';
+  }else{
+    rzEl.style.display='none';
+  }
+}
+function placePop(){if(userMoved){placeRz();return;}
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
   let l=ph.width-w-12;
   let t=b.top-ph.top+(b.height/2)-(h/2);
@@ -517,9 +529,10 @@ function placePop(){if(userMoved)return;
   t=clamp(t,82,ph.height-h-12);
   pop.style.left=l+'px';
   pop.style.top=t+'px';
-  positionFabButtons()}
-function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop()}
-function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';if(document.activeElement)document.activeElement.blur()}
+  positionFabButtons();
+  placeRz()}
+function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz()}
+function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
@@ -630,11 +643,11 @@ fab.addEventListener('pointercancel',()=>{
 let pdg=null;
 $('#pop').addEventListener('pointerdown',e=>{if(e.target.closest('.it,button,input,select,.rz'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};pop.setPointerCapture(e.pointerId)});
 $('#pop').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
-  pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,82,ph.height-60)+'px';positionFabButtons()});
+  pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,82,ph.height-60)+'px';positionFabButtons();placeRz()});
 $('#pop').addEventListener('pointerup',()=>{pdg=null});
 $('#pop').addEventListener('pointercancel',()=>{pdg=null});
 
-/* ───────── popup: dynamic drag resize (width & height) ───────── */
+/* ───────── popup: dynamic drag resize (width & height) from bottom-left circle ───────── */
 let rz=null;
 $('#rz').addEventListener('pointerdown',e=>{
   e.stopPropagation();
@@ -644,12 +657,13 @@ $('#rz').addEventListener('pointerdown',e=>{
 $('#rz').addEventListener('pointermove',e=>{
   if(!rz)return;
   const ph=phone.getBoundingClientRect();
-  const nw=Math.round(clamp(rz.w+(e.clientX-rz.x),200,ph.width-16));
+  const nw=Math.round(clamp(rz.w-(e.clientX-rz.x),200,ph.width-16));
   const nh=Math.round(clamp(rz.h+(e.clientY-rz.y),220,ph.height-90));
   st.set.w=nw;
   st.set.h=nh;
   applySet();
   positionFabButtons();
+  placeRz();
   if(stOn())pvUpdate();
 });
 $('#rz').addEventListener('pointerup',()=>{if(rz){rz=null;save();toast('Popup size saved')}});
@@ -707,6 +721,7 @@ popBottomBar.addEventListener('pointermove',e=>{
   const newTop=clamp(popMoveDrag.initTop+(e.clientY-popMoveDrag.startY),36,Math.max(36,maxTop));
   pop.style.top=newTop+'px';
   positionFabButtons();
+  placeRz();
 });
 popBottomBar.addEventListener('pointerup',()=>{
   if(popMoveDrag){

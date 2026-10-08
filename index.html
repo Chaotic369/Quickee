@@ -13,6 +13,10 @@
   --ink:#ececec; --dim:rgba(200,200,200,.55); --faint:rgba(255,255,255,.06);
   --acc:#ffc46b; --bg:#050505; --panel:#0d0d0d;
 }
+#navBar{position:absolute;bottom:0;left:0;right:0;height:48px;z-index:95;display:flex;align-items:center;justify-content:space-around;background:rgba(8,8,8,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.07)}
+.nav-btn{width:48px;height:48px;display:grid;place-items:center;color:var(--dim);font-size:15px;transition:all .15s}
+.nav-btn:hover{color:var(--ink)}
+.nav-btn:active{transform:scale(.85);color:var(--acc)}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:#08060c;color:var(--ink);font-family:'Bricolage Grotesque',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
 body{display:grid;place-items:center}
@@ -302,9 +306,14 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
   <div id="dock"></div>
   <div id="dim"></div>
   <div id="status"><span id="stTime">9:41</span><span class="r" id="stIcons"></span></div>
-  <div id="navpill"></div>
+    <div id="navpill"></div>
+    <div id="navBar">
+      <button class="nav-btn" id="nbBack" title="Back" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button>
+      <button class="nav-btn" id="nbHome" title="Home" aria-label="Home"><i class="fa-regular fa-circle"></i></button>
+      <button class="nav-btn" id="nbRecents" title="Recents" aria-label="Recents"><i class="fa-regular fa-square"></i></button>
+    </div>
 
-  <div id="scrim"></div>
+    <div id="scrim"></div>
     <button id="fabAdd" class="fbtn" aria-label="Add shortcut" title="Add shortcut"><i class="fa-solid fa-plus"></i></button>
     <button id="fabEdit" class="fbtn" aria-label="Edit launcher" title="Edit launcher"><i class="fa-solid fa-pen"></i></button>
     <button id="fabSet" class="fbtn" aria-label="Launcher settings" title="Launcher settings"><i class="fa-solid fa-gear"></i></button>
@@ -375,22 +384,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
       </div>
     </div>
 
-    <div class="dlgw" id="batchDlg" style="z-index:82">
-          <div class="dc">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-              <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:var(--acc)"></i> Add Multiple Apps</h3>
-              <span id="batchCount" style="font-size:11.5px;color:var(--acc);font-weight:700">0 selected</span>
-            </div>
-            <div id="batchAppList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
-            <div class="acts" style="margin-top:16px">
-              <button id="batchCancel">Cancel</button>
-              <span class="sp"></span>
-              <button class="pri" id="batchAddBtn">Add Selected</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="dlgw" id="pickerDlg" style="z-index:85">
+    <div class="dlgw" id="pickerDlg" style="z-index:85">
         <div class="dc">
           <h3 id="pickerTitle"><i class="fa-solid fa-folder-open" style="color:var(--acc)"></i> Browse Storage</h3>
           <div class="crumb" id="pickerCrumb" style="padding:4px 0 10px;word-break:break-all"></div>
@@ -809,9 +803,9 @@ fab.addEventListener('pointerup',e=>{
     const targetIt=el.closest('.it');
 
     if(targetSet){
-          openStudio();
-          handled=true;
-        }else if(targetEdit){
+              openStudio(true);
+              handled=true;
+            }else if(targetEdit){
           fabEdit.click();
           handled=true;
         }else if(targetAdd){
@@ -963,6 +957,7 @@ function render(){
     requestAnimationFrame(()=>{placePop();updateScrollArrow();})}
 /* ───────── settings panel ───────── */
 let sTab='grid';
+let stOpenedFromPop=false;
 function stOn(){return $('#studio').classList.contains('on')}
 function setVars(el,s){
   const v=(k,x)=>el.style.setProperty(k,x);
@@ -1372,10 +1367,18 @@ function openMgr(){
   });
 }
 
-function openStudio(){
+function openStudio(fromPop=false){
+  stOpenedFromPop=Boolean(fromPop);
   closePop();sTab='general';
   const s=$('#studio');
-  s.innerHTML=`<div class="stp" id="stPrev" style="margin-top:14px"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`${stOpenedFromPop?`<div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 14px 2px;flex-shrink:0"><button id="stDoneBtn" class="sbtn" style="margin:0;padding:6px 16px;background:var(--acc);color:#1c1304;border-color:transparent;font-weight:700"><i class="fa-solid fa-check"></i> Done</button></div>`:''}<div class="stp" id="stPrev" style="margin-top:${stOpenedFromPop?'4px':'14px'}"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
+  const doneBtn=$('#stDoneBtn');
+  if(doneBtn){
+    doneBtn.onclick=()=>{
+      closeStudio();
+      openPop();
+    };
+  }
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();pvUpdate();$('#stBody').scrollTop=0};
   $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL.find(x=>x[0]===k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;$('#v_'+k).textContent=st.set[k]+c[5];applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
@@ -1462,7 +1465,7 @@ function firstFreeSlot(){
 }
 
 fabAdd.onclick=()=>{openDlg(null,firstFreeSlot())};
-fabSet.onclick=()=>{openStudio()};
+fabSet.onclick=()=>{openStudio(true)};
 
 let suppress=false;
 grid.addEventListener('click',e=>{
@@ -2088,6 +2091,34 @@ $('#phone').addEventListener('click',e=>{
     closeStudio();
   }
 });
+
+$('#nbBack').onclick=()=>{
+  haptic('tick');
+  if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none';return}
+  if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none';return}
+  if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none';return}
+  if($('#dlg').style.display==='flex'){$('#dlg').style.display='none';return}
+  if(sim.classList.contains('on')){closeSim();return}
+  if(stOn()){
+    closeStudio();
+    if(stOpenedFromPop)openPop();
+    return;
+  }
+  if(isOpen()){closePop();return}
+  toast('Back');
+};
+
+$('#nbHome').onclick=()=>{
+  haptic('tick');
+  closeLayers();
+  toast('Home');
+};
+
+$('#nbRecents').onclick=()=>{
+  haptic('tick');
+  showRecents();
+};
+
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';

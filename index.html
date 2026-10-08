@@ -377,13 +377,10 @@ const KEY='quick_launcher_demo_v1';
 /* ───────── data ───────── */
 const TYPES={
   app:{label:'App',color:'#5b8def',icon:'fa-solid fa-cube',ph:'Package name or pick an installed app'},
-  chat:{label:'Chat',color:'#2fb872',icon:'fa-brands fa-whatsapp',ph:'Phone number or username'},
   call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number'},
   sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
   email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
   web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'example.com'},
-  search:{label:'Search',color:'#fbbc05',icon:'fa-solid fa-magnifying-glass',ph:'Search keywords'},
-  deep:{label:'Deep Link',color:'#9c27b0',icon:'fa-solid fa-link',ph:'spotify://, slack://, etc.'},
   folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder',ph:'/storage/emulated/0/…'},
   file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'/storage/emulated/0/…'},
   system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-gear',ph:''}
@@ -430,14 +427,14 @@ const SYS={
  hotspot:{n:'Hotspot',i:'fa-solid fa-tower-broadcast',c:'#e65100',tog:1,hint:'TetheringManager.startTethering()'},
  mute:{n:'Mute / Silent',i:'fa-solid fa-volume-xmark',c:'#c2185b',tog:1,hint:'AudioManager.RINGER_MODE_SILENT'}
 };
-const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',search:'Intent ACTION_WEB_SEARCH with query',deep:'Intent ACTION_VIEW Uri.parse(customUri)',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
+const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
 const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,trigH:72,trigW:5,trigY:50,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 
 const DEF=[
  ['app','Camera'],['app','Gallery'],['app','Maps'],['app','Music'],['app','Settings'],['app','Chrome'],['app','YouTube'],['app','Calculator'],
- ['chat','Sam','+15551230142','fa-brands fa-whatsapp'],['chat','Dev group','dev-team','fa-brands fa-telegram','#2f9bd9'],['call','Mom','+15550198877','fa-solid fa-phone'],['call','Office','+15550134400','fa-solid fa-phone','#4c5fd1'],
+ ['call','Mom','+15550198877','fa-solid fa-phone'],['call','Office','+15550134400','fa-solid fa-phone','#4c5fd1'],
  ['folder','Downloads',ROOT+'Download'],['folder','Camera roll',ROOT+'DCIM/Camera'],['folder','Documents',ROOT+'Documents'],['file','Resume',ROOT+'Documents/Resume.pdf','fa-solid fa-file-pdf','#e5534b'],
  ['web','GitHub','github.com','fa-brands fa-github','#2a2438'],['web','Gmail','mail.google.com','fa-solid fa-envelope','#e5534b'],['web','Maps web','maps.google.com','fa-solid fa-location-dot','#34b36b'],
  ['system','','screenoff'],['system','','power'],['system','','screenoff2'],
@@ -1271,13 +1268,10 @@ function launch(it){
     if(s.tog){st.tog[it.v]=st.tog[it.v]?0:1;save();statusIcons();render();toast(s.n+(st.tog[it.v]?' on':' off'),s.hint);return}
     toast(s.n,s.hint);setTimeout(s.run,s.run===SYS.screenoff.run?350:0);return}
   if(it.t==='app')return openApp(it);
-  if(it.t==='chat')return openChat(it);
-  if(it.t==='call')return openCall(it);
-  if(it.t==='sms')return openSim({n:'SMS: '+it.n,i:'fa-solid fa-comment-sms',c:it.c,sub:it.v,hint:HINTS.sms},`<div class="card"><p style="font-size:13px;color:var(--dim)">Preparing SMS message to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:70%"></div><div class="skel"></div></div>`);
-  if(it.t==='email')return openSim({n:'Email: '+it.n,i:'fa-solid fa-envelope',c:it.c,sub:it.v,hint:HINTS.email},`<div class="card"><p style="font-size:13px;color:var(--dim)">Drafting email to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:60%"></div><div class="skel"></div></div>`);
-  if(it.t==='search')return openWeb('https://www.google.com/search?q='+encodeURIComponent(it.v),'Search: '+it.n);
-  if(it.t==='deep')return openSim({n:it.n,i:it.i,c:it.c,sub:it.v,hint:HINTS.deep},`<div class="card"><p style="font-size:13px;color:var(--dim)">Invoking custom application URI:</p><p style="margin-top:10px;font-weight:700;color:var(--acc);word-break:break-all">${esc(it.v)}</p></div>`);
-  if(it.t==='folder')return openFolder(it.v);
+    if(it.t==='call')return openCall(it);
+    if(it.t==='sms')return openSim({n:'SMS: '+it.n,i:'fa-solid fa-comment-sms',c:it.c,sub:it.v,hint:HINTS.sms},`<div class="card"><p style="font-size:13px;color:var(--dim)">Preparing SMS message to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:70%"></div><div class="skel"></div></div>`);
+    if(it.t==='email')return openSim({n:'Email: '+it.n,i:'fa-solid fa-envelope',c:it.c,sub:it.v,hint:HINTS.email},`<div class="card"><p style="font-size:13px;color:var(--dim)">Drafting email to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:60%"></div><div class="skel"></div></div>`);
+    if(it.t==='folder')return openFolder(it.v);
   if(it.t==='file')return openFile(it.v);
   if(it.t==='web')return openWeb(normUrl(it.v),it.n)}
 
@@ -1289,9 +1283,7 @@ let callTimer;
 
 function openApp(it){openSim({n:it.n,i:it.i==='letter'?'fa-solid fa-cube':it.i,c:it.c,sub:it.v,hint:HINTS.app},
  `<div class="card"><div class="skel" style="width:60%;height:20px"></div><div class="skel"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:40%"></div></div><div class="card" style="margin-top:12px"><div class="skel" style="width:70%"></div><div class="skel"></div></div><p style="margin-top:18px;font-size:12.5px;color:var(--dim)">Simulated launch of <b style="color:var(--ink)">${esc(it.v)}</b>. The real app would take over the screen here.</p>`)}
-function openChat(it){openSim({n:it.n,i:it.i,c:it.c,sub:it.v,hint:HINTS.chat},
- `<div style="display:flex;flex-direction:column;height:100%"><div id="msgs" style="flex:1;overflow:auto;padding:6px 16px"><div class="bub th">Hey! Are you free later?</div><div class="bub me">Yep, after 6. Call you?</div></div><div class="cinput"><input id="cm" placeholder="Message ${esc(it.n)}"><button id="cs" aria-label="Send"><i class="fa-solid fa-paper-plane"></i></button></div></div>`,
- b=>{const send=()=>{const v=$('#cm').value.trim();if(!v)return;const m=$('#msgs');m.insertAdjacentHTML('beforeend',`<div class="bub me">${esc(v)}</div>`);$('#cm').value='';m.scrollTop=1e5;setTimeout(()=>{m.insertAdjacentHTML('beforeend','<div class="bub th">👍</div>');m.scrollTop=1e5},900)};$('#cs').onclick=send;$('#cm').onkeydown=e=>{if(e.key==='Enter')send()}},true)}
+
 function openCall(it){openSim({n:'Calling…',i:'fa-solid fa-phone',c:'#3cc47c',sub:it.v,hint:HINTS.call},
  `<div class="callw"><div class="av">${esc((it.n[0]||'?').toUpperCase())}</div><h2 style="font-weight:600">${esc(it.n)}</h2><div style="color:var(--dim)">${esc(it.v)}</div><div id="ct" style="color:var(--acc);font-variant-numeric:tabular-nums">Ringing…</div><button class="end" id="ce" aria-label="End call"><i class="fa-solid fa-phone-slash"></i></button></div>`,
  b=>{let s=-2;callTimer=setInterval(()=>{s++;if(s>=0){const e=$('#ct');if(e)e.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}},1000);$('#ce').onclick=closeSim})}

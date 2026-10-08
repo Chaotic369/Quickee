@@ -773,14 +773,34 @@ function pvUpdate(){
   p.style.top=(popTop*scale)+'px';
 
   if(pvF){
-    const pvTh=Math.max(6,th*scale);
-    const pvTw=Math.max(2,(s.trigW||6)*scale);
-    const pvTop=clamp(trigTop*scale,2,phoneBox.clientHeight-pvTh-2);
-    pvF.style.width=pvTw+'px';
-    pvF.style.height=pvTh+'px';
-    pvF.style.top=pvTop+'px';
-  }
-  $('#stTag').textContent='Live Preview · '+Math.round(scale*100)+'%'}
+      const pvTh=Math.max(6,th*scale);
+      const pvTw=Math.max(2,(s.trigW||6)*scale);
+      const pvTop=clamp(trigTop*scale,2,phoneBox.clientHeight-pvTh-2);
+      pvF.style.width=pvTw+'px';
+      pvF.style.height=pvTh+'px';
+      pvF.style.top=pvTop+'px';
+    }
+
+    const pvRing=$('#pvRing');
+    if(pvRing){
+      if(sTab==='ring'){
+        const rSz=(s.ringSize||52)*scale;
+        const rTh=Math.max(1,(s.ringThick||2.5)*scale);
+        const rOp=(s.ringOpacity!=null?s.ringOpacity:14)/100;
+        pvRing.style.display='block';
+        pvRing.style.width=rSz+'px';
+        pvRing.style.height=rSz+'px';
+        pvRing.style.borderWidth=rTh+'px';
+        pvRing.style.borderStyle='solid';
+        pvRing.style.borderColor='rgba(255,255,255,0.75)';
+        pvRing.style.backgroundColor=`rgba(255,255,255,${rOp})`;
+        pvRing.style.left=((phoneBox.clientWidth||120)/2)+'px';
+        pvRing.style.top=(trigTop*scale+pvTh/2)+'px';
+      }else{
+        pvRing.style.display='none';
+      }
+    }
+    $('#stTag').textContent='Live Preview · '+Math.round(scale*100)+'%'}
 function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
@@ -909,7 +929,7 @@ function openMgr(){
 function openStudio(){
   closePop();sTab='grid';
   const s=$('#studio');
-  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="dt-ring" id="pvRing" style="pointer-events:none"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
   $('#stBack').onclick=closeStudio;
   $('#stTry').onclick=()=>{closeStudio();openPop()};
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();$('#stBody').scrollTop=0};

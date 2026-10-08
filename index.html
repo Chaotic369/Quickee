@@ -59,6 +59,8 @@ input,select{font:inherit;color:var(--ink);outline:none}
 #fabEdit:active{transform:scale(.92)}
 #fabEdit.open{opacity:1;pointer-events:auto;transform:scale(1)}
 #fabEdit.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc),0 8px 20px rgba(0,0,0,.5)}
+.dt-ring{position:absolute;z-index:999;width:50px;height:50px;border:2.5px solid var(--acc);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:rgba(255,196,107,.18);box-shadow:0 0 16px rgba(255,196,107,.4),0 8px 20px rgba(0,0,0,.4)}
+.it.drag-over .ic{transform:scale(.92);box-shadow:0 0 0 3px var(--acc),0 0 20px rgba(255,196,107,.6),inset 0 1px 1px rgba(255,255,255,.4)}
 #scrim{position:absolute;inset:0;z-index:38;display:none}
 #scrim.on{display:block}
 
@@ -402,10 +404,12 @@ let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
 function placePop(){if(userMoved)return;
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
-  const right=b.left+b.width/2>ph.left+ph.width/2,bottom=b.top+b.height/2>ph.top+ph.height/2;
-  let l=right?b.right-w:b.left,t=bottom?b.top-h-10:b.bottom+10;
-  l=clamp(l,ph.left+6,ph.right-w-6);t=clamp(t,ph.top+32,ph.bottom-h-8);
-  pop.style.left=(l-ph.left)+'px';pop.style.top=(t-ph.top)+'px'}
+  let l=ph.width-w-10;
+  let t=b.top-ph.top+b.height/2-h/2;
+  l=clamp(l,6,ph.width-w-6);
+  t=clamp(t,36,ph.height-h-12);
+  pop.style.left=l+'px';
+  pop.style.top=t+'px'}
 function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');$('#scrim').classList.add('on');placePop()}
 function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
@@ -460,7 +464,7 @@ fab.addEventListener('pointerup',e=>{
     const it=el.closest('.it');
     if(it){
       const item=st.items.find(x=>x.id===it.dataset.id);
-      if(item){launch(item);launched=true}
+      if(item){launch(item);launched=true;closePop()}
     }
   }
   if(!launched && Math.hypot(e.clientX-fbStart.x, e.clientY-fbStart.y)<6){

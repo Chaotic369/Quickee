@@ -1375,9 +1375,7 @@ function openMgr(){
 function openStudio(){
   closePop();sTab='general';
   const s=$('#studio');
-  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Permissions, Trigger & Layout</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
-  $('#stBack').onclick=closeStudio;
-  $('#stTry').onclick=()=>{closeStudio();openPop()};
+  s.innerHTML=`<div class="stp" id="stPrev" style="margin-top:14px"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();pvUpdate();$('#stBody').scrollTop=0};
   $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL.find(x=>x[0]===k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;$('#v_'+k).textContent=st.set[k]+c[5];applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
@@ -2084,6 +2082,12 @@ $('#dSave').onclick=()=>{
 
 
 /* ───────── keyboard + resize + init ───────── */
+$('#phone').addEventListener('click',e=>{
+  if(!stOn())return;
+  if(e.target.id==='phone'||e.target.id==='wall'||e.target.id==='home'||e.target.closest('#dock,#homeGrid')){
+    closeStudio();
+  }
+});
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';

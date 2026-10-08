@@ -101,7 +101,9 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .cell-add:hover{color:var(--acc);background:rgba(255,196,107,.1)}
 .edit .grid-cell.empty-slot .cell-add{display:grid}
 .it{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;width:100%;cursor:pointer}
-.it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s}
+.it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s;overflow:hidden}
+.it .ic .fav-wrap{width:100%;height:100%;display:grid;place-items:center;border-radius:inherit}
+.it .ic .fav-wrap img{width:56%;height:56%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));border-radius:4px;pointer-events:none}
 .it .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
 .it:active .ic{transform:scale(.95)}
 .it .lb{max-width:100%;font-size:var(--lbl);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-weight:500;color:rgba(246,239,228,.9)}
@@ -262,7 +264,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .ring-preview-card{position:relative;display:flex;flex-direction:column;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14);padding:var(--pad);touch-action:none}
 .ring-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);align-items:center;justify-content:center;width:100%}
 .ring-preview-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;width:100%}
-.ring-preview-item .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1)}
+.ring-preview-item .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1);overflow:hidden}
+.ring-preview-item .ic .fav-wrap{width:100%;height:100%;display:grid;place-items:center;border-radius:inherit}
+.ring-preview-item .ic .fav-wrap img{width:56%;height:56%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));border-radius:4px;pointer-events:none}
 .ring-preview-item .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
 .ring-preview-item .lb{max-width:100%;font-size:var(--lbl);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-weight:500;color:rgba(246,239,228,.9)}
 .ring-preview-card.nolbl .ring-preview-item .lb{display:none}
@@ -839,9 +843,11 @@ popBottomBar.addEventListener('pointercancel',()=>{popMoveDrag=null});
 /* ───────── views: grid / results / settings ───────── */
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}
 function iconInner(it){
-  if(it.t==='web'&&it.v){
-    const domain=(it.v.replace(/^[a-z]+:\/\//i,'').split('/')[0]||'').toLowerCase();
-    if(domain)return`<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit" onerror="this.replaceWith(document.createElement('i'));this.className='fa-solid fa-globe'">`;
+  const imgUrl=it.iconUrl||(it.t==='web'&&it.v?`https://icon.horse/icon/${encodeURIComponent((it.v.replace(/^[a-z]+:\/\//i,'').split('/')[0]||'').toLowerCase())}`:null);
+  if(imgUrl){
+    const domain=(it.v?it.v.replace(/^[a-z]+:\/\//i,'').split('/')[0]:'')||'';
+    const fb=`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
+    return`<div class="fav-wrap"><img src="${esc(imgUrl)}" alt="" onerror="if(this.src!=='${fb}'){this.src='${fb}'}else{this.parentElement.innerHTML='<i class=\\'fa-solid fa-globe\\'></i>'}"></div>`;
   }
   return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`;
 }
@@ -1355,7 +1361,7 @@ $('#sheet').addEventListener('pointerdown',e=>{if(e.target.id==='sheet')closeShe
 let dS=null;
 function openDlg(item,targetSlot){
   const destSlot=(item&&typeof item.slot==='number')?item.slot:(typeof targetSlot==='number'?targetSlot:firstFreeSlot());
-  dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,touched:false};
+  dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,iconUrl:item.iconUrl||null,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,iconUrl:null,touched:false};
   $('#dT').textContent=item?'Edit shortcut':'New shortcut';
   $('#dName').value=item?item.n:'';
   $('#dDel').style.display=item?'block':'none';
@@ -1468,18 +1474,23 @@ function updateIconPreview(){
   const curIcon=$('#dCurrentIcon');
   if(curIcon){
     curIcon.style.background=dS.c;
-    if(dS.t==='web'&&$('#dTarget').value.trim()){
+    curIcon.style.overflow='hidden';
+    if(dS.iconUrl){
+      curIcon.innerHTML=`<div class="fav-wrap" style="width:100%;height:100%;display:grid;place-items:center"><img src="${esc(dS.iconUrl)}" alt="" style="width:62%;height:62%;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));border-radius:6px" onerror="this.parentElement.innerHTML='<i class=\\'fa-solid fa-globe\\'></i>'"></div>`;
+    }else if(dS.t==='web'&&$('#dTarget').value.trim()){
       const targetVal=$('#dTarget').value.trim();
       const domain=(targetVal.replace(/^[a-z]+:\/\//i,'').split('/')[0]||'').toLowerCase();
-      curIcon.innerHTML=`<img src="https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128" alt="" style="width:100%;height:100%;object-fit:contain;border-radius:inherit" onerror="this.outerHTML='<i class=\\'fa-solid fa-globe\\'></i>'">`;
+      const pwaIcon=`https://icon.horse/icon/${encodeURIComponent(domain)}`;
+      const fbIcon=`https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=128`;
+      curIcon.innerHTML=`<div class="fav-wrap" style="width:100%;height:100%;display:grid;place-items:center"><img src="${pwaIcon}" alt="" style="width:62%;height:62%;object-fit:contain;filter:drop-shadow(0 2px 4px rgba(0,0,0,.35));border-radius:6px" onerror="if(this.src!=='${fbIcon}'){this.src='${fbIcon}'}else{this.parentElement.innerHTML='<i class=\\'fa-solid fa-globe\\'></i>'}"></div>`;
     }else{
       curIcon.innerHTML=dS.i==='letter'?'<b>Aa</b>':`<i class="${esc(dS.i)}"></i>`;
     }
   }
   const lbl=$('#dIconLabel');
   if(lbl){
-    if(dS.t==='web'&&$('#dTarget').value.trim()){
-      lbl.textContent='Website Favicon (Auto)';
+    if(dS.iconUrl||(dS.t==='web'&&$('#dTarget').value.trim())){
+      lbl.textContent='PWA / Web App Icon (Auto)';
     }else{
       lbl.textContent=dS.i==='letter'?'Monogram (Aa)':dS.i.replace('fa-solid fa-','').replace('fa-brands fa-','');
     }
@@ -1501,6 +1512,7 @@ $('#dIcons').onclick=e=>{
   const b=e.target.closest('button');
   if(b){
     dS.i=b.dataset.i;
+    dS.iconUrl=null;
     dS.touched=true;
     buildPickers();
     $('#dIcons').style.display='none';
@@ -1533,6 +1545,12 @@ $('#dSave').onclick=()=>{
   if(!v){toast('Add a target first');return}
   if(!name){toast('Add a name first');return}
   const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c,slot:dS.slot};
+  if(dS.iconUrl){
+    rec.iconUrl=dS.iconUrl;
+  }else if(dS.t==='web'&&!dS.touched){
+    const domain=(v.replace(/^[a-z]+:\/\//i,'').split('/')[0]||'').toLowerCase();
+    if(domain)rec.iconUrl=`https://icon.horse/icon/${encodeURIComponent(domain)}`;
+  }
   if(dS.id){
     const x=st.items.find(i=>i.id===dS.id);
     Object.assign(x,rec);

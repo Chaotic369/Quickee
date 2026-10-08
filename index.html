@@ -66,9 +66,9 @@ input,select{font:inherit;color:var(--ink);outline:none}
 
 /* ───── popup ───── */
 #pop{
-  --icon:50px;--rad:30;--cols:4;--cgap:10px;--rgap:14px;--pad:14px;--lbl:10.5px;--glass:.88;
+  --icon:50px;--rad:30;--cols:4;--cgap:10px;--rgap:14px;--pad:14px;--lbl:10.5px;--glass:.88;--pop-rad:26px;--pop-blur:32px;
   position:absolute;z-index:40;display:flex;flex-direction:column;overflow:hidden;
-  border-radius:26px;background:rgba(10,10,10,var(--glass));backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
+  border-radius:var(--pop-rad);background:rgba(10,10,10,var(--glass));backdrop-filter:blur(var(--pop-blur));-webkit-backdrop-filter:blur(var(--pop-blur));
   box-shadow:0 26px 70px rgba(0,0,0,.92),0 0 0 1px rgba(255,255,255,.08),inset 0 1px 1px rgba(255,255,255,.05);
   opacity:0;transform:scale(.92) translateX(12px);pointer-events:none;transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1)}
 #pop.open{opacity:1;transform:none;pointer-events:auto}
@@ -274,7 +274,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 70%,rgba(35,35,35,.8) 0 8%,rgba(18,18,18,.9) 24%,transparent 55%),linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%)}
 .stp-wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%)}
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
-.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(10,10,10,var(--glass));backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);box-shadow:0 16px 40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);pointer-events:none;transform-origin:top right}
+.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:var(--pop-rad,26px);background:rgba(10,10,10,var(--glass));backdrop-filter:blur(var(--pop-blur,30px));-webkit-backdrop-filter:blur(var(--pop-blur,30px));box-shadow:0 16px 40px rgba(0,0,0,.85),0 0 0 1px rgba(255,255,255,.08);pointer-events:none;transform-origin:top right}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
 .pv-fab{position:absolute;right:0;z-index:5;background:rgba(255,255,255,.6);border-radius:4px 0 0 4px;pointer-events:none}
 .stabs{display:flex;gap:4px;padding:8px 14px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.05)}
@@ -376,46 +376,21 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
     </div>
 
     <div class="dlgw" id="batchDlg" style="z-index:82">
-      <div class="dc">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:var(--acc)"></i> Add Multiple Apps</h3>
-          <span id="batchCount" style="font-size:11.5px;color:var(--acc);font-weight:700">0 selected</span>
+          <div class="dc">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:var(--acc)"></i> Add Multiple Apps</h3>
+              <span id="batchCount" style="font-size:11.5px;color:var(--acc);font-weight:700">0 selected</span>
+            </div>
+            <div id="batchAppList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+            <div class="acts" style="margin-top:16px">
+              <button id="batchCancel">Cancel</button>
+              <span class="sp"></span>
+              <button class="pri" id="batchAddBtn">Add Selected</button>
+            </div>
+          </div>
         </div>
-        <div id="batchAppList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
-        <div class="acts" style="margin-top:16px">
-          <button id="batchCancel">Cancel</button>
-          <span class="sp"></span>
-          <button class="pri" id="batchAddBtn">Add Selected</button>
-        </div>
-      </div>
-    </div>
-        <label>Name</label><input type="text" id="dName" placeholder="Shown under the icon">
-        <label id="dTL">Target</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
-          <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
-        </div>
-        <select id="dSys"></select>
-        <datalist id="dl"></datalist>
-              <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
-                      <label style="margin:0">Icon</label>
-                      <div style="display:flex;gap:6px">
-                        <input type="file" id="dImgFileInput" accept="image/*" style="display:none">
-                        <button id="dUploadIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-image"></i> Custom Image</button>
-                        <button id="dChangeIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-pen"></i> Presets</button>
-                      </div>
-                    </div>
-                    <div id="dIconPreview" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)">
-                      <div id="dCurrentIcon" class="ic" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"></div>
-                      <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
-                    </div>
-                    <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(255,255,255,.06)"></div>
-                    <label>Color</label><div class="pick cols" id="dCols"></div>
-        <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
-      </div>
-    </div>
 
-    <div class="dlgw" id="pickerDlg" style="z-index:85">
+        <div class="dlgw" id="pickerDlg" style="z-index:85">
         <div class="dc">
           <h3 id="pickerTitle"><i class="fa-solid fa-folder-open" style="color:var(--acc)"></i> Browse Storage</h3>
           <div class="crumb" id="pickerCrumb" style="padding:4px 0 10px;word-break:break-all"></div>
@@ -460,10 +435,12 @@ const KEY='quick_launcher_demo_v1';
 /* ───────── data ───────── */
 const TYPES={
   app:{label:'App',color:'#5b8def',icon:'fa-solid fa-cube',ph:'Package name or pick an installed app'},
-  call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number'},
+  call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number (Prompts dialer)'},
+  directDial:{label:'Direct Dial',color:'#2fb872',icon:'fa-solid fa-phone-flip',ph:'Directly calls number'},
   sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
   email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
-  web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'example.com'},
+  web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'https://example.com'},
+  intent:{label:'Custom Intent',color:'#9c27b0',icon:'fa-solid fa-terminal',ph:'intent:#Intent;action=...;end or URI'},
   folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder-open',ph:'/storage/emulated/0/…'},
   file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'/storage/emulated/0/…'},
   system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-sliders',ph:''}
@@ -521,8 +498,8 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,trigH:72,trigW:5,trigY:50,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 
 const DEF=[
  ['app','Camera'],['app','Gallery'],['app','Maps'],['app','Music'],['app','Settings'],['app','Chrome'],['app','YouTube'],['app','Calculator'],
@@ -582,21 +559,34 @@ $('#dock').innerHTML=['Messages','Chrome','Files','Settings'].map(n=>icHTML(INST
 function statusIcons(){const t=st.tog;$('#stIcons').innerHTML=(t.flash?'<i class="fa-solid fa-lightbulb" style="color:var(--acc)"></i>':'')+(t.dnd?'<i class="fa-solid fa-bell-slash"></i>':'')+(t.air?'<i class="fa-solid fa-plane"></i>':(t.bt?'<i class="fa-brands fa-bluetooth-b"></i>':'')+(t.wifi?'<i class="fa-solid fa-wifi"></i>':''))+'<i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-three-quarters"></i>'}
 function applyBright(){$('#dim').style.opacity=((100-st.lv.br)/100*.7).toFixed(2)}
 
-/* ───────── toast / layers ───────── */
+/* ───────── toast / layers / haptics ───────── */
 let tt;function toast(m,h){const e=$('#toast');e.innerHTML=esc(m)+(h?`<small>${esc(h)}</small>`:'');e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),h?3400:1500)}
+function haptic(type){
+  if(st.set&&st.set.haptic===false)return;
+  if(!navigator.vibrate)return;
+  try{
+    if(type==='tick')navigator.vibrate(10);
+    else if(type==='confirm')navigator.vibrate([24,28,36]);
+    else if(type==='pop')navigator.vibrate([15,20,15]);
+    else if(type==='warn')navigator.vibrate([35,40,35]);
+    else navigator.vibrate(12);
+  }catch(_){}
+}
 function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].forEach(s=>$(s).style.display='none');closeSheet();closePop()}
 
 /* ───────── popup: apply layout ───────── */
 function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   const v=(k,x)=>pop.style.setProperty(k,x);
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
+  v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
+  v('--pop-blur',(s.blur!=null?s.blur:32)+'px');
   fab.style.display=s.triggerEnabled===false?'none':'block';
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
   phone.style.setProperty('--ring-th',(s.ringThick||2.5)+'px');
   phone.style.setProperty('--ring-col',`rgba(255,255,255,.75)`);
-    phone.style.setProperty('--ring-bg',`rgba(255,255,255,${(s.ringOpacity!=null?s.ringOpacity:14)/100})`);
+  phone.style.setProperty('--ring-bg',`rgba(255,255,255,${(s.ringOpacity!=null?s.ringOpacity:14)/100})`);
   pop.classList.toggle('nolbl',!s.showLbl);
   pop.style.width=Math.min(s.w,ph.width-12)+'px';
   pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
@@ -605,7 +595,8 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
 let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
 function positionFabButtons(){
-  const ph=phone.getBoundingClientRect(),rightX=ph.width-34;
+  const s=st.set||{},isLeft=s.trigEdge==='left';
+  const ph=phone.getBoundingClientRect();
   let topTarget;
   if(isOpen()){
     topTarget=pop.offsetTop-34;
@@ -613,31 +604,45 @@ function positionFabButtons(){
     topTarget=fab.offsetTop-34;
   }
   topTarget=clamp(topTarget,32,ph.height-34);
-  fabSet.style.left=rightX+'px';
-  fabSet.style.top=topTarget+'px';
-  fabEdit.style.left=(rightX-30)+'px';
-  fabEdit.style.top=topTarget+'px';
-  fabAdd.style.left=(rightX-60)+'px';
-  fabAdd.style.top=topTarget+'px'}
+  if(isLeft){
+    fabSet.style.left='8px';
+    fabSet.style.top=topTarget+'px';
+    fabEdit.style.left='38px';
+    fabEdit.style.top=topTarget+'px';
+    fabAdd.style.left='68px';
+    fabAdd.style.top=topTarget+'px';
+  }else{
+    const rightX=ph.width-34;
+    fabSet.style.left=rightX+'px';
+    fabSet.style.top=topTarget+'px';
+    fabEdit.style.left=(rightX-30)+'px';
+    fabEdit.style.top=topTarget+'px';
+    fabAdd.style.left=(rightX-60)+'px';
+    fabAdd.style.top=topTarget+'px';
+  }
+}
 function placeRz(){
   const rzEl=$('#rz');
   if(!rzEl)return;
   if(isOpen()&&editMode){
     rzEl.style.display='flex';
-    rzEl.style.left=(pop.offsetLeft-9)+'px';
+    const isLeft=st.set&&st.set.trigEdge==='left';
+    rzEl.style.left=isLeft?(pop.offsetLeft+pop.offsetWidth-9)+'px':(pop.offsetLeft-9)+'px';
     rzEl.style.top=(pop.offsetTop+pop.offsetHeight-9)+'px';
   }else{
     rzEl.style.display='none';
   }
 }
 function placePop(){if(userMoved){placeRz();return;}
+  const s=st.set||{},isLeft=s.trigEdge==='left';
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
-  let l=ph.width-w-12;
+  let l=isLeft?8:(ph.width-w-12);
   let t=b.top-ph.top+(b.height/2)-(h/2);
   l=clamp(l,6,ph.width-w-6);
   t=clamp(t,82,ph.height-h-12);
   pop.style.left=l+'px';
   pop.style.top=t+'px';
+  pop.style.transformOrigin=isLeft?'left center':'right center';
   positionFabButtons();
   placeRz()}
 function maxFilledBottom(){
@@ -668,12 +673,14 @@ function closePop(){stopAutoScroll();pop.classList.remove('open');fab.classList.
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
-function placeFab(){const ph=phone.getBoundingClientRect();
-  const th=st.set.trigH||90;
+function placeFab(){const s=st.set||{},ph=phone.getBoundingClientRect();
+  const th=s.trigH||90;
   let y;
   if(st.btn&&typeof st.btn.y==='number'){y=st.btn.y}
-  else{const pct=(st.set.trigY!=null?st.set.trigY:50)/100;y=ph.height*pct-th/2}
-  fab.style.left=(ph.width-fab.offsetWidth)+'px';
+  else{const pct=(s.trigY!=null?s.trigY:50)/100;y=ph.height*pct-th/2}
+  const isLeft=s.trigEdge==='left';
+  fab.style.left=isLeft?'0px':(ph.width-fab.offsetWidth)+'px';
+  fab.style.borderRadius=isLeft?'0 4px 4px 0':'4px 0 0 4px';
   fab.style.top=clamp(y,36,ph.height-th-18)+'px';
   positionFabButtons()}
 const dtRing = document.createElement('div');
@@ -681,7 +688,7 @@ dtRing.className = 'dt-ring';
 phone.appendChild(dtRing);
 
 let fbDrag=false, fbEdgeDrag=false, fbStart={x:0,y:0}, fbWasOpen=false;
-let scrollTimer=null;
+let scrollTimer=null, lastHoveredDragItem=null;
 function startAutoScroll(dir){
   if(scrollTimer)return;
   const arrow=dir>0?$('#popScrollDown'):$('#popScrollUp');
@@ -761,16 +768,26 @@ fab.addEventListener('pointermove',e=>{
       stopAutoScroll();
     }
     if(el){
-      const it=el.closest('.it');
-      if(it)it.classList.add('drag-over');
-      const fb=el.closest('.fbtn');
-      if(fb){
-        fb.classList.add('drag-over');
-        fb.style.transform='scale(1.35)';
-        fb.style.zIndex='55';
-      }
-    }
-  });
+          const it=el.closest('.it');
+          if(it){
+            it.classList.add('drag-over');
+            if(it!==lastHoveredDragItem){
+              lastHoveredDragItem=it;
+              haptic('tick');
+            }
+          }else{
+            lastHoveredDragItem=null;
+          }
+          const fb=el.closest('.fbtn');
+          if(fb){
+            fb.classList.add('drag-over');
+            fb.style.transform='scale(1.35)';
+            fb.style.zIndex='55';
+          }
+        }else{
+          lastHoveredDragItem=null;
+        }
+      });
 fab.addEventListener('pointerup',e=>{
   if(fbEdgeDrag){
     fbEdgeDrag=false;
@@ -801,18 +818,19 @@ fab.addEventListener('pointerup',e=>{
           openDlg(null,firstFreeSlot());
           handled=true;
         }else if(targetIt){
-      const item=st.items.find(x=>x.id===targetIt.dataset.id);
-      if(item){
-        launch(item);
-        handled=true;
-        closePop();
-      }
-    }
-  }
-  if(!handled){
-    closePop();
-  }
-});
+              const item=st.items.find(x=>x.id===targetIt.dataset.id);
+              if(item){
+                haptic('confirm');
+                launch(item);
+                handled=true;
+                closePop();
+              }
+            }
+          }
+          if(!handled){
+            closePop();
+          }
+        });
 fab.addEventListener('pointercancel',()=>{
   stopAutoScroll();
   fbEdgeDrag=false;
@@ -946,7 +964,14 @@ function render(){
 /* ───────── settings panel ───────── */
 let sTab='grid';
 function stOn(){return $('#studio').classList.contains('on')}
-function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
+function setVars(el,s){
+  const v=(k,x)=>el.style.setProperty(k,x);
+  v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);
+  v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');
+  v('--glass',s.glass/100);
+  v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
+  v('--pop-blur',(s.blur!=null?s.blur:32)+'px');
+}
 function pvUpdate(){
   const stage=$('#stPrev'),phoneBox=$('#stPhone'),screen=$('#stScreen'),p=$('#pvpop'),pvF=$('#pvFab');
   if(!stage||!phoneBox||!screen||!p)return;
@@ -989,9 +1014,10 @@ function pvUpdate(){
   let popTop=trigTop+(th/2)-(popH/2);
   popTop=clamp(popTop,36,ph.height-popH-12);
 
+  const isLeft=s.trigEdge==='left';
   p.style.transform=`scale(${scale})`;
-  p.style.left='auto';
-  p.style.right=(12*scale)+'px';
+  p.style.left=isLeft?(12*scale)+'px':'auto';
+  p.style.right=isLeft?'auto':(12*scale)+'px';
   p.style.top=(popTop*scale)+'px';
 
   if(pvF){
@@ -1001,6 +1027,9 @@ function pvUpdate(){
     pvF.style.width=pvTw+'px';
     pvF.style.height=pvTh+'px';
     pvF.style.top=pvTop+'px';
+    pvF.style.left=isLeft?'0':'auto';
+    pvF.style.right=isLeft?'auto':'0';
+    pvF.style.borderRadius=isLeft?'0 4px 4px 0':'4px 0 0 4px';
   }
 
   const isRingTab=sTab==='ring';
@@ -1045,8 +1074,19 @@ function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody inpu
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
-  popup:{keys:['w','h','glass'],title:'Pop-up Size & Glass'},
-  trigger:{keys:['trigH','trigW','trigY'],title:'Trigger Size & Placement',extra:'<div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>'},
+  popup:{keys:['w','h','glass','popRad','blur'],title:'Pop-up Size & Styling'},
+  trigger:{
+    keys:['trigH','trigW','trigY'],
+    title:'Trigger Size & Placement',
+    extra:`<div class="sw" style="margin-top:12px">
+      <span>Screen Edge Placement</span>
+      <div class="seg" id="trigEdgeSeg" style="max-width:140px">
+        <button data-e="left">Left</button>
+        <button data-e="right">Right</button>
+      </div>
+    </div>
+    <div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>`
+  },
   ring:{keys:['ringSize','ringThick','ringOpacity'],title:'Selection Ring (Zone Pointer)'}
 };
 
@@ -1061,12 +1101,24 @@ function renderMainOverview(){
         <button class="tg${st.set.triggerEnabled!==false?' on':''}" id="ovTrig"></button>
       </div>
       <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Vibrate when dragging over shortcuts</small></div>
+        <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Tick on hover, firm pulse on launch</small></div>
         <button class="tg${st.set.haptic!==false?' on':''}" id="ovHaptic"></button>
       </div>
       <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Auto-close on Launch</b><small style="color:var(--dim)">Close launcher once a shortcut is tapped</small></div>
+        <div><b style="display:block;font-size:13px">Auto-close on Launch</b><small style="color:var(--dim)">Close launcher once a shortcut is executed</small></div>
         <button class="tg${st.set.autoClose!==false?' on':''}" id="ovAutoClose"></button>
+      </div>
+    </div>
+
+    <div class="set-card">
+      <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
+        <i class="fa-solid fa-database" style="color:var(--acc)"></i> Backup & Restore
+      </div>
+      <p style="font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.4">Save your layout, triggers, shortcuts, and custom icons to a JSON file or restore a previous export.</p>
+      <div style="display:flex;gap:10px">
+        <button class="sbtn" id="ovBackupBtn" style="flex:1;margin:0;padding:10px;justify-content:center"><i class="fa-solid fa-file-export"></i> Export JSON</button>
+        <button class="sbtn" id="ovRestoreBtn" style="flex:1;margin:0;padding:10px;justify-content:center"><i class="fa-solid fa-file-import"></i> Import JSON</button>
+        <input type="file" id="ovRestoreInput" accept=".json" style="display:none">
       </div>
     </div>
 
@@ -1133,16 +1185,62 @@ function buildStBody(){
     bindTg('#ovPermOverlay','permOverlay','Overlay permission');
     bindTg('#ovPermAcc','permAcc','Accessibility service');
     bindTg('#ovPermStorage','permStorage','Storage access');
-    bindTg('#ovPermUsage','permUsage','Usage access');
-    const goGrid=b.querySelector('#ovGoGrid');
-    if(goGrid){
-      goGrid.onclick=()=>{
-        sTab='grid';
-        buildStBody();
-        pvUpdate();
-      };
-    }
-  }else if(sTab==='items'){
+        bindTg('#ovPermUsage','permUsage','Usage access');
+
+        const bkpBtn=b.querySelector('#ovBackupBtn');
+        if(bkpBtn){
+          bkpBtn.onclick=()=>{
+            const dataStr="data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(st, null, 2));
+            const dlAnchor=document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `quick_launcher_backup_${Date.now()}.json`);
+            document.body.appendChild(dlAnchor);
+            dlAnchor.click();
+            dlAnchor.remove();
+            toast('Configuration exported as JSON');
+          };
+        }
+
+        const rstBtn=b.querySelector('#ovRestoreBtn');
+        const rstInp=b.querySelector('#ovRestoreInput');
+        if(rstBtn&&rstInp){
+          rstBtn.onclick=()=>rstInp.click();
+          rstInp.onchange=e=>{
+            const f=e.target.files&&e.target.files[0];
+            if(!f)return;
+            const reader=new FileReader();
+            reader.onload=ev=>{
+              try{
+                const parsed=JSON.parse(ev.target.result);
+                if(parsed&&parsed.items&&parsed.set){
+                  st=parsed;
+                  save();
+                  applySet();
+                  placeFab();
+                  render();
+                  buildStBody();
+                  pvUpdate();
+                  toast('Backup restored successfully');
+                }else{
+                  toast('Invalid launcher backup file');
+                }
+              }catch(err){
+                toast('Failed to parse backup JSON');
+              }
+            };
+            reader.readAsText(f);
+          };
+        }
+
+        const goGrid=b.querySelector('#ovGoGrid');
+        if(goGrid){
+          goGrid.onclick=()=>{
+            sTab='grid';
+            buildStBody();
+            pvUpdate();
+          };
+        }
+      }else if(sTab==='items'){
     b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 10px;width:100%;justify-content:center"><i class="fa-solid fa-plus"></i> Add Shortcut</button><div class="set-card">`+
     (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc((TYPES[it.t]||TYPES.app).label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts configured</div>')+`</div>`;
   }else{
@@ -1150,10 +1248,28 @@ function buildStBody(){
     const subset=CTRL.filter(c=>grp.keys.includes(c[0]));
     b.innerHTML=`<div class="set-card"><div class="set-hdr" style="margin-bottom:12px;padding-bottom:10px"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
       subset.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
-      (grp.extra||'')+
-      `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
-    syncSl();
-  }
+            (grp.extra||'')+
+            `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
+          syncSl();
+
+          if(sTab==='trigger'){
+            const edgeSeg=b.querySelector('#trigEdgeSeg');
+            if(edgeSeg){
+              const curEdge=st.set.trigEdge||'right';
+              edgeSeg.querySelectorAll('button').forEach(btn=>{
+                btn.classList.toggle('on',btn.dataset.e===curEdge);
+                btn.onclick=()=>{
+                  st.set.trigEdge=btn.dataset.e;
+                  edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===st.set.trigEdge));
+                  placeFab();
+                  save();
+                  pvUpdate();
+                  toast(`Trigger pinned to ${st.set.trigEdge} edge`);
+                };
+              });
+            }
+          }
+        }
   b.scrollTop=y}
 function studioRefresh(){if(sTab==='items')buildStBody();pvUpdate()}
 function openMgr(){
@@ -1451,14 +1567,18 @@ window.addEventListener('pointercancel',endDrag);
 
 /* ───────── launching shortcuts ───────── */
 function launch(it){
+  if(st.set&&st.set.autoClose!==false&&it.t!=='system')closePop();
   if(it.t==='system'){const s=SYS[it.v];if(!s)return;
     if(s.tog){st.tog[it.v]=st.tog[it.v]?0:1;save();statusIcons();render();toast(s.n+(st.tog[it.v]?' on':' off'),s.hint);return}
+    if(st.set&&st.set.autoClose!==false)closePop();
     toast(s.n,s.hint);setTimeout(s.run,s.run===SYS.screenoff.run?350:0);return}
   if(it.t==='app')return openApp(it);
-    if(it.t==='call')return openCall(it);
-    if(it.t==='sms')return openSim({n:'SMS: '+it.n,i:'fa-solid fa-comment-sms',c:it.c,sub:it.v,hint:HINTS.sms},`<div class="card"><p style="font-size:13px;color:var(--dim)">Preparing SMS message to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:70%"></div><div class="skel"></div></div>`);
-    if(it.t==='email')return openSim({n:'Email: '+it.n,i:'fa-solid fa-envelope',c:it.c,sub:it.v,hint:HINTS.email},`<div class="card"><p style="font-size:13px;color:var(--dim)">Drafting email to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:60%"></div><div class="skel"></div></div>`);
-    if(it.t==='folder')return openFolder(it.v);
+  if(it.t==='call')return openCall(it);
+  if(it.t==='directDial')return openSim({n:'Direct Call: '+it.n,i:'fa-solid fa-phone-flip',c:it.c,sub:it.v,hint:'Intent ACTION_CALL tel:'+it.v+' (Bypasses dialer prompt)'},`<div class="card"><p style="font-size:13px;color:var(--dim)">Immediately dialing <b style="color:var(--acc)">${esc(it.v)}</b> without presenting dial keypad.</p><div class="skel" style="margin-top:14px;width:65%"></div><div class="skel"></div></div>`);
+  if(it.t==='intent')return openSim({n:'Intent: '+it.n,i:'fa-solid fa-terminal',c:it.c,sub:it.v,hint:'Intent.parseUri(command, Intent.URI_INTENT_SCHEME) → startActivity()'},`<div class="card"><p style="font-size:12.5px;color:var(--dim)">Parsing generic Android Intent URI / command:</p><p style="margin-top:10px;font-family:monospace;font-size:12px;color:var(--acc);word-break:break-all">${esc(it.v)}</p><div class="skel" style="margin-top:14px;width:80%"></div></div>`);
+  if(it.t==='sms')return openSim({n:'SMS: '+it.n,i:'fa-solid fa-comment-sms',c:it.c,sub:it.v,hint:HINTS.sms},`<div class="card"><p style="font-size:13px;color:var(--dim)">Preparing SMS message to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:70%"></div><div class="skel"></div></div>`);
+  if(it.t==='email')return openSim({n:'Email: '+it.n,i:'fa-solid fa-envelope',c:it.c,sub:it.v,hint:HINTS.email},`<div class="card"><p style="font-size:13px;color:var(--dim)">Drafting email to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:60%"></div><div class="skel"></div></div>`);
+  if(it.t==='folder')return openFolder(it.v);
   if(it.t==='file')return openFile(it.v);
   if(it.t==='web')return openWeb(normUrl(it.v),it.n)}
 

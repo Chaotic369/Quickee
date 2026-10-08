@@ -637,31 +637,7 @@ bindTrigResize($('#trigRzTop'),'top');
 bindTrigResize($('#trigRzBottom'),'bottom');
 bindTrigResize($('#trigRzW'),'width');
 
-/* ───────── moving bar aside handle for trigger positioning ───────── */
-let trgBarDrag=null;
-const trigMoveBar=$('#trigMoveBar');
-trigMoveBar.addEventListener('pointerdown',e=>{
-  e.stopPropagation();
-  trgBarDrag={startY:e.clientY,initY:fab.offsetTop};
-  trigMoveBar.setPointerCapture(e.pointerId);
-});
-trigMoveBar.addEventListener('pointermove',e=>{
-  if(!trgBarDrag)return;
-  const ph=phone.getBoundingClientRect(), th=st.set.trigH||90;
-  const newY=clamp(trgBarDrag.initY+(e.clientY-trgBarDrag.startY),36,ph.height-th-18);
-  st.btn={y:newY};
-  st.set.trigY=Math.round(((newY+th/2)/ph.height)*100);
-  placeFab();
-  if(stOn()){syncSl();pvUpdate();}
-});
-trigMoveBar.addEventListener('pointerup',()=>{
-  if(trgBarDrag){
-    trgBarDrag=null;
-    save();
-    toast('Trigger position saved');
-  }
-});
-trigMoveBar.addEventListener('pointercancel',()=>{trgBarDrag=null});
+
 
 /* ───────── bottom mini-pill handle for moving popup up and down ───────── */
 let popMoveDrag=null;

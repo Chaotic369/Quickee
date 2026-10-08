@@ -345,13 +345,20 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
         </div>
         <label>Type</label><div class="seg" id="dType"></div>
         <label>Name</label><input type="text" id="dName" placeholder="Shown under the icon">
-        <label id="dTL">Target</label>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
-          <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
-        </div>
-        <select id="dSys"></select>
-        <datalist id="dl"></datalist>
+              <label id="dTL">Target</label>
+              <div id="dAppBox" style="display:none;flex-direction:column;gap:8px">
+                <select id="dAppSel" style="width:100%;height:44px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);padding:0 14px;font-size:14px;color:var(--ink)"></select>
+                <div id="dAppShortcutsBox" style="display:none;flex-direction:column;gap:4px">
+                  <label style="margin:2px 0 4px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">App Shortcuts</label>
+                  <div id="dAppShortcutsList" style="display:flex;flex-direction:column;gap:4px;max-height:130px;overflow-y:auto"></div>
+                </div>
+              </div>
+              <div id="dTargetBox" style="display:flex;gap:8px;align-items:center">
+                <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
+                <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
+              </div>
+              <select id="dSys"></select>
+              <datalist id="dl"></datalist>
         <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
           <label style="margin:0">Icon</label>
           <div style="display:flex;gap:6px">
@@ -365,8 +372,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
           <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
         </div>
         <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(255,255,255,.06)"></div>
-        <label>Color</label><div class="pick cols" id="dCols"></div>
-        <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
+              <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
       </div>
     </div>
 
@@ -465,20 +471,21 @@ const TYPES={
 };
 const ROOT='/storage/emulated/0/';
 const INSTALLED=[
- {n:'Camera',v:'com.android.camera',i:'fa-solid fa-camera',c:'#f2685b'},
- {n:'Gallery',v:'com.google.android.apps.photos',i:'fa-solid fa-images',c:'#a06bf0'},
- {n:'Maps',v:'com.google.android.apps.maps',i:'fa-solid fa-location-dot',c:'#34b36b'},
- {n:'Music',v:'com.spotify.music',i:'fa-solid fa-music',c:'#e24d9b'},
- {n:'Settings',v:'com.android.settings',i:'fa-solid fa-gear',c:'#7a8699'},
- {n:'Chrome',v:'com.android.chrome',i:'fa-brands fa-chrome',c:'#e8a63a'},
- {n:'YouTube',v:'com.google.android.youtube',i:'fa-brands fa-youtube',c:'#e5483f'},
+ {n:'Camera',v:'com.android.camera',i:'fa-solid fa-camera',c:'#f2685b',sc:[{n:'Take a Selfie',a:'camera:selfie',i:'fa-solid fa-camera-rotate'},{n:'Record Video',a:'camera:video',i:'fa-solid fa-video'}]},
+ {n:'Gallery',v:'com.google.android.apps.photos',i:'fa-solid fa-images',c:'#a06bf0',sc:[{n:'Favorites',a:'gallery:fav',i:'fa-solid fa-heart'},{n:'Search Photos',a:'gallery:search',i:'fa-solid fa-magnifying-glass'}]},
+ {n:'Maps',v:'com.google.android.apps.maps',i:'fa-solid fa-location-dot',c:'#34b36b',sc:[{n:'Navigate Home',a:'maps:home',i:'fa-solid fa-house'},{n:'Navigate to Work',a:'maps:work',i:'fa-solid fa-briefcase'}]},
+ {n:'Music',v:'com.spotify.music',i:'fa-solid fa-music',c:'#e24d9b',sc:[{n:'Liked Songs',a:'music:liked',i:'fa-solid fa-heart'},{n:'Search Music',a:'music:search',i:'fa-solid fa-magnifying-glass'}]},
+ {n:'Settings',v:'com.android.settings',i:'fa-solid fa-gear',c:'#7a8699',sc:[{n:'Battery',a:'settings:battery',i:'fa-solid fa-battery-half'},{n:'Wi-Fi',a:'settings:wifi',i:'fa-solid fa-wifi'}]},
+ {n:'Chrome',v:'com.android.chrome',i:'fa-brands fa-chrome',c:'#e8a63a',sc:[{n:'New Tab',a:'chrome:newtab',i:'fa-solid fa-plus'},{n:'New Incognito Tab',a:'chrome:incognito',i:'fa-solid fa-user-secret'}]},
+ {n:'YouTube',v:'com.google.android.youtube',i:'fa-brands fa-youtube',c:'#e5483f',sc:[{n:'Subscriptions',a:'yt:subs',i:'fa-solid fa-rectangle-list'},{n:'Search YouTube',a:'yt:search',i:'fa-solid fa-magnifying-glass'}]},
  {n:'Calculator',v:'com.android.calculator2',i:'fa-solid fa-calculator',c:'#3f8f87'},
- {n:'Clock',v:'com.android.deskclock',i:'fa-solid fa-clock',c:'#4c5fd1'},
- {n:'Notes',v:'com.google.android.keep',i:'fa-solid fa-note-sticky',c:'#d9a62e'},
- {n:'Telegram',v:'org.telegram.messenger',i:'fa-brands fa-telegram',c:'#2f9bd9'},
- {n:'Files',v:'com.google.android.documentsui',i:'fa-solid fa-folder-open',c:'#4f86d9'},
- {n:'Messages',v:'com.google.android.apps.messaging',i:'fa-solid fa-message',c:'#3f7be0'},
- {n:'Play Store',v:'com.android.vending',i:'fa-solid fa-bag-shopping',c:'#2f9e6a'}
+ {n:'Clock',v:'com.android.deskclock',i:'fa-solid fa-clock',c:'#4c5fd1',sc:[{n:'Set Alarm',a:'clock:alarm',i:'fa-solid fa-bell'},{n:'Start Stopwatch',a:'clock:stopwatch',i:'fa-solid fa-stopwatch'}]},
+ {n:'Notes',v:'com.google.android.keep',i:'fa-solid fa-note-sticky',c:'#d9a62e',sc:[{n:'New Note',a:'notes:new',i:'fa-solid fa-pen-to-square'},{n:'New List',a:'notes:list',i:'fa-solid fa-list-check'}]},
+ {n:'WhatsApp',v:'com.whatsapp',i:'fa-brands fa-whatsapp',c:'#2fb872',sc:[{n:'New Chat',a:'chat:new',i:'fa-solid fa-message'},{n:'Direct Chat: Sam',a:'chat:sam',i:'fa-solid fa-user'},{n:'Direct Chat: Office',a:'chat:office',i:'fa-solid fa-users'}]},
+ {n:'Telegram',v:'org.telegram.messenger',i:'fa-brands fa-telegram',c:'#2f9bd9',sc:[{n:'Saved Messages',a:'tg:saved',i:'fa-solid fa-bookmark'},{n:'Direct Chat: Dev group',a:'tg:dev',i:'fa-solid fa-user-group'}]},
+ {n:'Files',v:'com.google.android.documentsui',i:'fa-solid fa-folder-open',c:'#4f86d9',sc:[{n:'Downloads',a:'files:downloads',i:'fa-solid fa-download'}]},
+ {n:'Messages',v:'com.google.android.apps.messaging',i:'fa-solid fa-message',c:'#3f7be0',sc:[{n:'Start Chat',a:'msg:new',i:'fa-solid fa-comment-dots'}]},
+ {n:'Play Store',v:'com.android.vending',i:'fa-solid fa-bag-shopping',c:'#2f9e6a',sc:[{n:'My Apps',a:'play:myapps',i:'fa-solid fa-cubes'}]}
 ];
 const FILES=['Download/invoice-oct.pdf','Download/apk/app-debug.apk','Download/apk/launcher-release.apk','DCIM/Camera/IMG_2041.jpg','DCIM/Camera/IMG_2042.jpg','DCIM/Camera/VID_0192.mp4','Documents/Resume.pdf','Documents/notes/ideas.txt','Documents/notes/budget.xlsx','Documents/Projects/index.html','Documents/Projects/app.js','Music/Playlists/focus.mp3','Music/Playlists/drive.mp3','Pictures/Screenshots/Screenshot_1008.png','Movies/trip-2026.mp4','WhatsApp/Media/voice-note.opus'].map(p=>ROOT+p);
 const DIRS=(()=>{const s=new Set();FILES.forEach(f=>{const p=f.split('/');for(let i=4;i<p.length;i++)s.add(p.slice(0,i).join('/'))});return [...s].sort()})();
@@ -914,7 +921,7 @@ function iconInner(it){
   }
   return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`;
 }
-function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
+function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c||'#5b8def'}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
 function render(){
@@ -1024,15 +1031,15 @@ function pvUpdate(){
       ringSim.style.backgroundColor=`rgba(255,255,255,${rOp})`;
 
       const ringGrid=$('#ringGrid');
-      if(ringGrid){
-        const sampleItems=st.items.slice(0,4);
-        ringGrid.innerHTML=sampleItems.map(it=>`
-          <div class="ring-preview-item" data-id="${it.id}">
-            <div class="ic" style="background:${it.c}">${iconInner(it)}</div>
-            <div class="lb">${esc(it.n)}</div>
-          </div>
-        `).join('');
-      }
+            if(ringGrid){
+              const sampleItems=st.items.slice(0,4);
+              ringGrid.innerHTML=sampleItems.map(it=>`
+                <div class="ring-preview-item" data-id="${it.id}">
+                  <div class="ic" style="background:${it.c||'#5b8def'}">${iconInner(it)}</div>
+                  <div class="lb">${esc(it.n)}</div>
+                </div>
+              `).join('');
+            }
     }
     $('#stTag').textContent=isRingTab?'Selection Ring Preview':'Live Preview · '+Math.max(1,Math.round(scale*100))+'%'}
 function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
@@ -1372,8 +1379,11 @@ function openSim(o,html,wire,noPad){
 function closeSim(){sim.classList.remove('on');clearInterval(callTimer)}
 let callTimer;
 
-function openApp(it){openSim({n:it.n,i:it.i==='letter'?'fa-solid fa-cube':it.i,c:it.c,sub:it.v,hint:HINTS.app},
- `<div class="card"><div class="skel" style="width:60%;height:20px"></div><div class="skel"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:40%"></div></div><div class="card" style="margin-top:12px"><div class="skel" style="width:70%"></div><div class="skel"></div></div><p style="margin-top:18px;font-size:12.5px;color:var(--dim)">Simulated launch of <b style="color:var(--ink)">${esc(it.v)}</b>. The real app would take over the screen here.</p>`)}
+function openApp(it){
+  const subText=it.appAction?`Action: ${it.appAction} · ${it.v}`:it.v;
+  const hintText=it.appAction?`ShortcutManager.startShortcut(pkg, id) · Direct Action`:HINTS.app;
+  openSim({n:it.n,i:it.i==='letter'?'fa-solid fa-cube':it.i,c:it.c,sub:subText,hint:hintText},
+ `<div class="card">${it.appAction?`<div style="font-size:12px;color:var(--acc);font-weight:700;margin-bottom:8px"><i class="fa-solid fa-bolt"></i> Direct Shortcut Triggered</div><b style="font-size:15px;display:block;margin-bottom:4px">${esc(it.n)}</b><small style="color:var(--dim)">${esc(it.appAction)}</small>`:`<div class="skel" style="width:60%;height:20px"></div>`}<div class="skel"></div><div class="skel" style="width:85%"></div><div class="skel" style="width:40%"></div></div><div class="card" style="margin-top:12px"><div class="skel" style="width:70%"></div><div class="skel"></div></div><p style="margin-top:18px;font-size:12.5px;color:var(--dim)">Simulated launch of <b style="color:var(--ink)">${esc(it.n)}</b> (${esc(it.v)}). The real application would execute this task immediately.</p>`)}
 
 function openCall(it){openSim({n:'Calling…',i:'fa-solid fa-phone',c:'#3cc47c',sub:it.v,hint:HINTS.call},
  `<div class="callw"><div class="av">${esc((it.n[0]||'?').toUpperCase())}</div><h2 style="font-weight:600">${esc(it.n)}</h2><div style="color:var(--dim)">${esc(it.v)}</div><div id="ct" style="color:var(--acc);font-variant-numeric:tabular-nums">Ringing…</div><button class="end" id="ce" aria-label="End call"><i class="fa-solid fa-phone-slash"></i></button></div>`,
@@ -1424,17 +1434,22 @@ $('#sheet').addEventListener('pointerdown',e=>{if(e.target.id==='sheet')closeShe
 let dS=null;
 function openDlg(item,targetSlot){
   const destSlot=(item&&typeof item.slot==='number')?item.slot:(typeof targetSlot==='number'?targetSlot:firstFreeSlot());
-  dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,customImg:item.customImg||null,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,customImg:null,touched:false};
+  dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,appAction:item.appAction||null,actionName:item.actionName||null,customImg:item.customImg||null,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,appAction:null,actionName:null,customImg:null,touched:false};
   $('#dT').textContent=item?'Edit shortcut':'New shortcut';
   $('#dBatchBtn').style.display=item?'none':'inline-flex';
   $('#dName').value=item?item.n:'';
   $('#dDel').style.display=item?'block':'none';
   $('#dIcons').style.display='none';
   $('#dChangeIconBtn').innerHTML='<i class="fa-solid fa-pen"></i> Presets';
+  $('#dAppSel').innerHTML=INSTALLED.map(a=>`<option value="${esc(a.v)}">${esc(a.n)}</option>`).join('');
   $('#dSys').innerHTML=Object.keys(SYS).map(k=>`<option value="${k}">${SYS[k].n}</option>`).join('');
   $('#dType').innerHTML=Object.keys(TYPES).map(t=>`<button data-t="${t}">${TYPES[t].label}</button>`).join('');
+  if(item){
+    if(item.t==='system')$('#dSys').value=item.v;
+    else if(item.t==='app')$('#dAppSel').value=item.v;
+    else $('#dTarget').value=item.v;
+  }
   setDType(dS.t,true);
-  if(item){if(item.t==='system')$('#dSys').value=item.v;else $('#dTarget').value=item.v}
   buildPickers();$('#dlg').style.display='flex'}
 
 let batchSelected=new Set();
@@ -1507,20 +1522,79 @@ $('#batchAddBtn').onclick=()=>{
   render();
   toast(`${batchSelected.size} shortcuts added`);
 };
+function populateAppShortcuts(app, selAction){
+  const box=$('#dAppShortcutsBox');
+  const list=$('#dAppShortcutsList');
+  if(!app||!app.sc||!app.sc.length){
+    box.style.display='none';
+    list.innerHTML='';
+    return;
+  }
+  box.style.display='flex';
+  list.innerHTML=app.sc.map(sc=>`
+    <div class="res shortcut-item-btn" data-act="${esc(sc.a)}" data-name="${esc(sc.n)}" data-icon="${esc(sc.i)}" style="padding:6px 10px;border-radius:10px;background:${selAction===sc.a?'rgba(255,196,107,.2)':'rgba(255,255,255,.05)'};border:${selAction===sc.a?'1px solid var(--acc)':'1px solid transparent'}">
+      <div class="ic" style="background:${app.c};width:26px;height:26px;border-radius:8px;font-size:12px"><i class="${esc(sc.i)}"></i></div>
+      <div class="tx"><b style="font-size:12px">${esc(sc.n)}</b><small style="color:var(--dim)">Direct Shortcut</small></div>
+      <i class="fa-solid fa-arrow-turn-down" style="font-size:11px;color:var(--dim);margin-left:auto"></i>
+    </div>
+  `).join('');
+  list.querySelectorAll('.shortcut-item-btn').forEach(btn=>{
+    btn.onclick=()=>{
+      list.querySelectorAll('.shortcut-item-btn').forEach(b=>{b.style.background='rgba(255,255,255,.05)';b.style.border='1px solid transparent'});
+      btn.style.background='rgba(255,196,107,.2)';
+      btn.style.border='1px solid var(--acc)';
+      dS.appAction=btn.dataset.act;
+      dS.actionName=btn.dataset.name;
+      $('#dName').value=btn.dataset.name;
+      if(!dS.touched){
+        dS.i=btn.dataset.icon;
+        dS.c=app.c;
+        buildPickers();
+      }
+    };
+  });
+}
+
 function setDType(t,keep){dS.t=t;
   document.querySelectorAll('#dType button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
-  const sys=t==='system';
+  const isApp=t==='app';
+  const isSys=t==='system';
   const showPickerBtn=t==='file'||t==='folder';
-  $('#dSys').style.display=sys?'block':'none';
-  $('#dTarget').style.display=sys?'none':'block';
+  $('#dAppBox').style.display=isApp?'flex':'none';
+  $('#dTargetBox').style.display=(!isApp&&!isSys)?'flex':'none';
+  $('#dSys').style.display=isSys?'block':'none';
   $('#dPickBtn').style.display=showPickerBtn?'block':'none';
-  $('#dTL').textContent=sys?'Action':'Target';
+  $('#dTL').textContent=isSys?'Action':(isApp?'Application':'Target');
   $('#dTarget').placeholder=(TYPES[t]||TYPES.app).ph;
-  const opts=t==='app'?INSTALLED.map(a=>a.n):t==='folder'?DIRS:t==='file'?FILES:[];
+  const opts=t==='folder'?DIRS:t==='file'?FILES:[];
   $('#dl').innerHTML=opts.map(o=>`<option value="${esc(o)}">`).join('');
-  if(!keep){$('#dTarget').value='';if(!dS.touched){dS.i=(TYPES[t]||TYPES.app).icon;dS.c=(TYPES[t]||TYPES.app).color}}
-    if(sys&&!dS.touched){const s=SYS[$('#dSys').value];if(s){dS.i=s.i;dS.c=s.c}}
-    buildPickers()}
+  if(isApp){
+    const app=$('#dAppSel').value?INSTALLED.find(x=>x.v===$('#dAppSel').value)||INSTALLED[0]:INSTALLED[0];
+    if(!keep){
+      dS.appAction=null;
+      dS.actionName=null;
+      if(!dS.touched){dS.i=app.i;dS.c=app.c}
+      $('#dName').value=app.n;
+    }
+    populateAppShortcuts(app, dS.appAction);
+  }
+  if(!keep&&!isApp){$('#dTarget').value='';if(!dS.touched){dS.i=(TYPES[t]||TYPES.app).icon;dS.c=(TYPES[t]||TYPES.app).color}}
+  if(isSys&&!dS.touched){const s=SYS[$('#dSys').value];if(s){dS.i=s.i;dS.c=s.c}}
+  buildPickers()}
+
+$('#dAppSel').onchange=()=>{
+  const app=INSTALLED.find(x=>x.v===$('#dAppSel').value);
+  if(!app)return;
+  dS.appAction=null;
+  dS.actionName=null;
+  $('#dName').value=app.n;
+  if(!dS.touched){
+    dS.i=app.i;
+    dS.c=app.c;
+    buildPickers();
+  }
+  populateAppShortcuts(app, null);
+};
   $('#dSys').addEventListener('change',()=>{
     const s=SYS[$('#dSys').value];
     if(s&&!dS.touched){
@@ -1608,7 +1682,8 @@ $('#pickerCancel').onclick=()=>{$('#pickerDlg').style.display='none'};
 function updateIconPreview(){
   const curIcon=$('#dCurrentIcon');
   if(curIcon){
-    curIcon.style.background=dS.c;
+    curIcon.style.background=dS.c||'#5b8def';
+    curIcon.style.border='none';
     curIcon.style.overflow='hidden';
     if(dS.customImg){
       curIcon.innerHTML=`<img src="${esc(dS.customImg)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
@@ -1629,7 +1704,7 @@ function updateIconPreview(){
 function buildPickers(){
   updateIconPreview();
   $('#dIcons').innerHTML=ICONS.map(i=>`<button data-i="${i}" class="${i===dS.i?'on':''}">${i==='letter'?'<b>Aa</b>':`<i class="${i}"></i>`}</button>`).join('');
-  $('#dCols').innerHTML=COLORS.map(c=>`<button data-c="${c}" style="background:${c}" class="${c===dS.c?'on':''}" aria-label="${c}"></button>`).join('')}
+}
 $('#dChangeIconBtn').onclick=()=>{
   const icBox=$('#dIcons');
   const isOpen=icBox.style.display==='flex';
@@ -1731,7 +1806,7 @@ $('#cropApply').onclick=()=>{
   updateIconPreview();
   $('#cropDlg').style.display='none';
 };
-$('#dCols').onclick=e=>{const b=e.target.closest('button');if(b){dS.c=b.dataset.c;dS.touched=true;buildPickers()}};
+
 $('#dSys').onchange=()=>{const s=SYS[$('#dSys').value];if(!$('#dName').value||Object.values(SYS).some(x=>x.n===$('#dName').value))$('#dName').value=s.n;if(!dS.touched){dS.i=s.i;dS.c=s.c;buildPickers()}};
 $('#dTarget').addEventListener('input',()=>{
   if(dS.t==='web'){
@@ -1750,15 +1825,24 @@ $('#dTarget').addEventListener('change',()=>{
 $('#dCancel').onclick=()=>{$('#dlg').style.display='none'};
 $('#dDel').onclick=()=>{st.items=st.items.filter(x=>x.id!==dS.id);save();$('#dlg').style.display='none';render()};
 $('#dSave').onclick=()=>{
-  let name=$('#dName').value.trim(),v=dS.t==='system'?$('#dSys').value:$('#dTarget').value.trim();
+  let name=$('#dName').value.trim();
+  let v=dS.t==='system'?$('#dSys').value:(dS.t==='app'?$('#dAppSel').value:$('#dTarget').value.trim());
   if(dS.t==='system'&&!name)name=SYS[v].n;
-  if(!v){toast('Add a target first');return}
+  if(dS.t==='app'&&!name){
+    const a=INSTALLED.find(x=>x.v===v);
+    name=dS.actionName||(a?a.n:'App');
+  }
+  if(!v){toast('Select a target first');return}
   if(!name){toast('Add a name first');return}
   const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c,slot:dS.slot};
+  if(dS.appAction)rec.appAction=dS.appAction;
+  if(dS.actionName)rec.actionName=dS.actionName;
   if(dS.customImg)rec.customImg=dS.customImg;
   if(dS.id){
     const x=st.items.find(i=>i.id===dS.id);
     if(!dS.customImg)delete x.customImg;
+    if(!dS.appAction)delete x.appAction;
+    if(!dS.actionName)delete x.actionName;
     Object.assign(x,rec);
   }else{
     st.items=st.items.filter(x=>x.slot!==dS.slot);

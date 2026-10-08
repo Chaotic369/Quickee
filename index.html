@@ -245,11 +245,15 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 #studio{position:absolute;inset:0;z-index:62;background:var(--bg);display:none;flex-direction:column}
 #studio.on{display:flex;animation:stIn .24s cubic-bezier(.2,.8,.2,1)}
 @keyframes stIn{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
-.stp{position:relative;flex-shrink:0;height:min(300px,34dvh);margin:12px 14px 0;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#120e29 0%,#241a4a 35%,#662d5d 62%,#d45952 85%,#f59e56 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
-.stp .tag{position:absolute;top:9px;left:14px;z-index:2;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.65);pointer-events:none}
-.pvpop{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);pointer-events:none}
+.stp{position:relative;flex-shrink:0;height:240px;margin:10px 14px 0;border-radius:22px;overflow:hidden;background:#0d0918;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+.stp-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 80%,rgba(255,160,95,.45),transparent 65%),linear-gradient(180deg,#120e29 0%,#241a4a 45%,#3a1a3a 100%);opacity:.85}
+.stp .tag{position:absolute;top:9px;left:14px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.75);pointer-events:none}
+.stp-phone{position:relative;height:92%;aspect-ratio:9/19.5;border-radius:26px;border:2.5px solid rgba(255,255,255,.22);background:#000;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.85);isolation:isolate}
+.stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 72%,rgba(255,217,160,.92) 0 6%,rgba(255,160,95,.8) 12%,rgba(255,120,90,0) 38%),linear-gradient(180deg,#120e29 0%,#241a4a 30%,#662d5d 58%,#d45952 82%,#f59e56 100%)}
+.stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
+.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:18px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 14px 34px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.16);pointer-events:none;transform-origin:top left}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
-.pv-fab{position:absolute;right:0;z-index:5;background:var(--acc);border-radius:4px 0 0 4px;box-shadow:-2px 0 10px rgba(255,196,107,.5);pointer-events:none}
+.pv-fab{position:absolute;right:0;z-index:5;background:var(--acc);border-radius:3px 0 0 3px;box-shadow:-2px 0 8px rgba(255,196,107,.7);pointer-events:none}
 .stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .stabs::-webkit-scrollbar{display:none}
 .stabs button{flex:0 0 auto;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
@@ -696,11 +700,16 @@ let sTab='grid';
 function stOn(){return $('#studio').classList.contains('on')}
 function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
 function pvUpdate(){
-  const stage=$('#stPrev'),p=$('#pvpop'),pvF=$('#pvFab');if(!stage||!p||!stage.clientWidth)return;
+  const stage=$('#stPrev'),screen=$('#stScreen'),p=$('#pvpop'),pvF=$('#pvFab');
+  if(!stage||!screen||!p||!screen.clientHeight)return;
   const s=st.set,ph=phone.getBoundingClientRect();
-  setVars(p,s);p.classList.toggle('nolbl',!s.showLbl);
+  const scale=screen.clientHeight/ph.height;
+
+  setVars(p,s);
+  p.classList.toggle('nolbl',!s.showLbl);
   p.style.width=Math.min(s.w,ph.width-12)+'px';
   p.style.maxHeight=Math.min(s.h,ph.height-70)+'px';
+
   const cols=Math.max(1,parseInt(s.cols)||4);
   const rows=Math.max(1,parseInt(s.rows)||5);
   const bySlot=new Map();
@@ -714,23 +723,30 @@ function pvUpdate(){
     html+=`<div class="grid-cell" style="min-height:calc(var(--icon) + 12px)">${it?itemHTML(it):''}</div>`;
   }
   $('#pvgrid').innerHTML=html;
-  const w=p.offsetWidth,h=p.offsetHeight,aw=stage.clientWidth-24,ah=stage.clientHeight-40,k=Math.min(1,aw/w,ah/h);
-  p.style.transform='scale('+k+')';
-  p.style.left=((stage.clientWidth-w*k)/2)+'px';
-  p.style.top=(28+(ah-h*k)/2)+'px';
+
+  const pw=Math.min(s.w,ph.width-12);
+  const phgt=p.offsetHeight||360;
+  const rawTop=pop.offsetTop||(ph.height/2-phgt/2);
+  const clampedTop=clamp(rawTop,40,ph.height-phgt-16);
+  const rawLeft=pop.offsetLeft||(ph.width-pw-12);
+  const clampedLeft=clamp(rawLeft,6,ph.width-pw-6);
+
+  p.style.transform=`scale(${scale})`;
+  p.style.left=(clampedLeft*scale)+'px';
+  p.style.top=(clampedTop*scale)+'px';
+
   if(pvF){
-    const previewScale=stage.clientHeight/ph.height;
-    const th=Math.max(8,(s.trigH||90)*previewScale);
-    const tw=Math.max(3,(s.trigW||6)*previewScale);
+    const th=Math.max(6,(s.trigH||90)*scale);
+    const tw=Math.max(2,(s.trigW||6)*scale);
     let topPx;
-    if(st.btn&&typeof st.btn.y==='number'){topPx=st.btn.y*previewScale}
-    else{const pct=(s.trigY!=null?s.trigY:50)/100;topPx=stage.clientHeight*pct-th/2}
-    topPx=clamp(topPx,4,stage.clientHeight-th-4);
+    if(st.btn&&typeof st.btn.y==='number'){topPx=st.btn.y*scale}
+    else{const pct=(s.trigY!=null?s.trigY:50)/100;topPx=screen.clientHeight*pct-th/2}
+    topPx=clamp(topPx,2,screen.clientHeight-th-2);
     pvF.style.width=tw+'px';
     pvF.style.height=th+'px';
     pvF.style.top=topPx+'px';
   }
-  $('#stTag').textContent='Live preview'+(k<0.995?' · '+Math.round(k*100)+'%':'')}
+  $('#stTag').textContent='Mini Phone Preview · '+Math.round(scale*100)+'%'}
 function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
@@ -759,7 +775,7 @@ function studioRefresh(){pvUpdate();if(sTab==='items')buildStBody()}
 function openStudio(){
   closePop();sTab='grid';
   const s=$('#studio');
-  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
   $('#stBack').onclick=closeStudio;
   $('#stTry').onclick=()=>{closeStudio();openPop()};
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();$('#stBody').scrollTop=0};

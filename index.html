@@ -51,7 +51,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
   background:rgba(255,255,255,.32);box-shadow:none;transition:width .18s,background .2s;color:transparent}
 #fab i{display:none}
 #fab:hover,#fab:active,#fab.open{width:calc(var(--trig-w,6px) + 4px);background:rgba(255,255,255,.55);box-shadow:none}
-.fbtn{position:absolute;z-index:45;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:12px;color:var(--ink);
+.fbtn{position:absolute;z-index:45;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;font-size:10px;color:var(--ink);
   background:rgba(27,22,41,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 0 0 1px rgba(255,255,255,.14);
   opacity:0;pointer-events:none;transform:scale(.7);transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.34,1.56,.64,1),color .15s}
 .fbtn.open{opacity:1;pointer-events:auto;transform:scale(1)}
@@ -243,21 +243,26 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .hi[data-app]{cursor:pointer}
 #studio{position:absolute;inset:0;z-index:62;background:var(--bg);display:none;flex-direction:column}
 #studio.on{display:flex}
-.stp{position:relative;flex-shrink:0;height:260px;margin:10px 14px 0;border-radius:22px;overflow:hidden;background:#0d0918;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
-.stp-bg{position:absolute;inset:0;background:linear-gradient(180deg,#120e29 0%,#241a4a 45%,#3a1a3a 100%);opacity:.85}
-.stp .tag{position:absolute;top:9px;left:14px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.75);pointer-events:none}
-.stp-phone{position:relative;height:90%;border-radius:24px;border:2px solid rgba(255,255,255,.25);background:#000;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.85);isolation:isolate}
+.stp{position:relative;flex-shrink:0;height:245px;margin:8px 14px 4px;border-radius:20px;overflow:hidden;background:#090611;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center}
+.stp-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(124,92,255,.18),transparent 70%),#0c0817}
+.stp .tag{position:absolute;top:8px;left:12px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:rgba(255,255,255,.5);background:rgba(0,0,0,.4);padding:2px 8px;border-radius:6px;pointer-events:none}
+.stp-phone{position:relative;height:92%;border-radius:24px;border:2.5px solid rgba(255,255,255,.18);background:#000;overflow:hidden;box-shadow:0 10px 28px rgba(0,0,0,.8);isolation:isolate}
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 72%,rgba(255,217,160,.92) 0 6%,rgba(255,160,95,.8) 12%,rgba(255,120,90,0) 38%),linear-gradient(180deg,#120e29 0%,#241a4a 30%,#662d5d 58%,#d45952 82%,#f59e56 100%)}
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
-.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);pointer-events:none;transform-origin:top left}
+.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14);pointer-events:none;transform-origin:top left}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
-.pv-fab{position:absolute;right:0;z-index:5;background:rgba(255,255,255,.55);border-radius:4px 0 0 4px;box-shadow:none;pointer-events:none}
-.stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.pv-fab{position:absolute;right:0;z-index:5;background:rgba(255,255,255,.6);border-radius:4px 0 0 4px;pointer-events:none}
+.stabs{display:flex;gap:4px;padding:8px 14px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.05)}
 .stabs::-webkit-scrollbar{display:none}
-.stabs button{flex:0 0 auto;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
-.stabs button.on{background:var(--acc);color:#1c1304;border-color:transparent}
-.stbody{flex:1;min-height:0;overflow-y:auto;padding:12px 16px 24px;scrollbar-width:none}
+.stabs button{flex:0 0 auto;padding:7px 13px;border-radius:10px;background:transparent;border:0;font-size:12px;font-weight:600;color:var(--dim);transition:all .15s}
+.stabs button:hover{color:var(--ink);background:rgba(255,255,255,.05)}
+.stabs button.on{background:rgba(255,196,107,.15);color:var(--acc);font-weight:700}
+.stbody{flex:1;min-height:0;overflow-y:auto;padding:12px 14px 28px;scrollbar-width:none}
 .stbody::-webkit-scrollbar{display:none}
+.set-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:14px 14px 4px;margin-bottom:12px}
+.sg{margin-bottom:12px}
+.sg .row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:500;margin-bottom:2px}
+.sg .row span:last-child{color:var(--acc);font-variant-numeric:tabular-nums;font-weight:700;font-size:12px;background:rgba(255,196,107,.1);padding:2px 8px;border-radius:6px}
 .res .pin.dl{color:#ff7b72}
 </style>
 </head>
@@ -387,7 +392,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',search:'Intent ACTION_WEB_SEARCH with query',deep:'Intent ACTION_VIEW Uri.parse(customUri)',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:58,radius:30,cols:4,rows:5,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50,ringSize:52,ringThick:3,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,trigH:72,trigW:5,trigY:50,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 
 const DEF=[
@@ -471,19 +476,19 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
 let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
 function positionFabButtons(){
-  const ph=phone.getBoundingClientRect(),rightX=ph.width-44;
+  const ph=phone.getBoundingClientRect(),rightX=ph.width-34;
   let topTarget;
   if(isOpen()){
-    topTarget=pop.offsetTop-42;
+    topTarget=pop.offsetTop-34;
   }else{
-    topTarget=fab.offsetTop-42;
+    topTarget=fab.offsetTop-34;
   }
-  topTarget=clamp(topTarget,38,ph.height-44);
+  topTarget=clamp(topTarget,32,ph.height-34);
   fabSet.style.left=rightX+'px';
   fabSet.style.top=topTarget+'px';
-  fabEdit.style.left=(rightX-38)+'px';
+  fabEdit.style.left=(rightX-30)+'px';
   fabEdit.style.top=topTarget+'px';
-  fabAdd.style.left=(rightX-76)+'px';
+  fabAdd.style.left=(rightX-60)+'px';
   fabAdd.style.top=topTarget+'px'}
 function placePop(){if(userMoved)return;
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
@@ -789,15 +794,15 @@ function buildStBody(){
   const b=$('#stBody');if(!b)return;const y=b.scrollTop;
   document.querySelectorAll('#stTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===sTab));
   if(sTab==='items'){
-    b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 6px"><i class="fa-solid fa-plus"></i> Add shortcut</button><p style="font-size:11.5px;color:var(--dim);margin:4px 0 8px">Tap any shortcut to customize. Use arrows to reorder.</p>`+
-    (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc((TYPES[it.t]||TYPES.app).label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts yet.</div>');
+    b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 10px;width:100%;justify-content:center"><i class="fa-solid fa-plus"></i> Add Shortcut</button><div class="set-card">`+
+    (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc((TYPES[it.t]||TYPES.app).label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts configured</div>')+`</div>`;
   }else{
     const grp=SET_GROUPS[sTab]||SET_GROUPS.grid;
     const subset=CTRL.filter(c=>grp.keys.includes(c[0]));
-    b.innerHTML=`<div class="set-hdr"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
+    b.innerHTML=`<div class="set-card"><div class="set-hdr" style="margin-bottom:12px;padding-bottom:10px"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
       subset.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
       (grp.extra||'')+
-      `<button class="sbtn" id="sReset" style="margin-top:10px">Reset to defaults</button>`;
+      `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
     syncSl();
   }
   b.scrollTop=y}

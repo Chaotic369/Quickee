@@ -64,12 +64,16 @@ input,select{font:inherit;color:var(--ink);outline:none}
   box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);
   opacity:0;transform:scale(.94) translateY(6px);pointer-events:none;transition:opacity .2s cubic-bezier(.16,1,.3,1),transform .2s cubic-bezier(.16,1,.3,1)}
 #pop.open{opacity:1;transform:none;pointer-events:auto}
-.search{margin:var(--pad) var(--pad) 0;display:flex;align-items:center;gap:8px;height:44px;padding:0 6px 0 14px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 2px 4px rgba(0,0,0,.2);transition:border-color .15s,box-shadow .15s;cursor:grab;touch-action:none}
-.search input{cursor:text;touch-action:auto}
-.mbtn{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:13px;color:var(--dim);transition:all .15s;flex-shrink:0}
+.pheader{display:flex;align-items:center;justify-content:space-between;padding:var(--pad) var(--pad) 0;cursor:grab;touch-action:none}
+.pager{display:flex;align-items:center;gap:7px;flex:1}
+.pg-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:all .18s;cursor:pointer;border:0;padding:0}
+.pg-dot.on{background:var(--acc);transform:scale(1.25)}
+.pg-btn{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;font-size:10px;color:var(--dim);background:rgba(255,255,255,.06);transition:all .15s;border:0;cursor:pointer;margin-left:4px}
+.pg-btn:hover{background:rgba(255,255,255,.12);color:var(--ink)}
+.mbtn{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:13px;color:var(--dim);transition:all .15s;flex-shrink:0;margin-left:auto}
 .mbtn:hover{background:rgba(255,255,255,.08);color:var(--ink)}
 .mbtn.on{background:rgba(255,196,107,.18);color:var(--acc)}
-.menu-pop{position:absolute;top:calc(var(--pad) + 48px);right:var(--pad);z-index:50;min-width:180px;background:rgba(27,21,45,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 16px 36px rgba(0,0,0,.5);padding:6px;display:none;flex-direction:column;gap:2px}
+.menu-pop{position:absolute;top:calc(var(--pad) + 38px);right:var(--pad);z-index:50;min-width:180px;background:rgba(27,21,45,.96);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 16px 36px rgba(0,0,0,.5);padding:6px;display:none;flex-direction:column;gap:2px}
 .menu-pop.open{display:flex}
 .menu-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;font-size:12.5px;font-weight:600;color:var(--ink);transition:background .12s;text-align:left;width:100%}
 .menu-item:hover{background:rgba(255,255,255,.08)}
@@ -77,13 +81,6 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .menu-item i{width:16px;text-align:center;font-size:13px;color:var(--acc)}
 .menu-sep{height:1px;background:rgba(255,255,255,.06);margin:4px 0}
 .set-hdr{display:flex;align-items:center;gap:10px;padding:4px 0 14px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:14px;font-size:13.5px;font-weight:700}
-.search:focus-within{border-color:rgba(255,196,107,.5);box-shadow:inset 0 2px 4px rgba(0,0,0,.2)}
-.search i.lead{color:var(--dim);font-size:14px;width:16px;text-align:center}
-.search input{flex:1;min-width:0;background:transparent;border:0;font-size:13.5px;font-weight:500;height:100%}
-.search input::placeholder{color:rgba(246,239,228,.45)}
-.search .clr{display:none;width:30px;height:30px;color:var(--dim);transition:color .12s}
-.search .clr:hover{color:var(--ink)}
-.search.has .clr{display:grid;place-items:center}
 .chips{display:flex;gap:7px;padding:10px var(--pad) 4px;overflow-x:auto;scrollbar-width:none;flex-shrink:0}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex-shrink:0;padding:6px 13px;border-radius:999px;font-size:11.5px;font-weight:600;color:var(--dim);background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);transition:all .15s}
@@ -242,28 +239,24 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
   <button id="fab" aria-label="Open launcher"><i class="fa-solid fa-plus"></i></button>
 
   <div id="pop" role="dialog" aria-label="Quick launcher">
-      <div class="search" id="search">
-        <i class="fa-solid fa-magnifying-glass lead" id="sLead"></i>
-        <input id="q" type="search" enterkeyhint="go" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search, type a URL, or find a file">
-        <button class="clr" id="qClr" aria-label="Clear"><i class="fa-solid fa-circle-xmark"></i></button>
-        <button class="mbtn" id="bMenu" title="Menu" aria-label="Menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
-      </div>
-      <div class="menu-pop" id="menuPop">
+      <div class="pheader" id="pheader">
+            <div class="pager" id="pager"></div>
+            <button class="mbtn" id="bMenu" title="Menu" aria-label="Menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+          </div>
+          <div class="menu-pop" id="menuPop">
         <button class="menu-item" id="bAdd"><i class="fa-solid fa-plus"></i><span>Add shortcut</span></button>
         <button class="menu-item" id="bEdit"><i class="fa-solid fa-pen"></i><span id="bEditTxt">Reorder / edit</span></button>
         <button class="menu-item" id="bSet"><i class="fa-solid fa-sliders"></i><span>Layout settings</span></button>
         <div class="menu-sep"></div>
         <button class="menu-item" id="bClose"><i class="fa-solid fa-xmark"></i><span>Close launcher</span></button>
       </div>
-    <div class="chips" id="chips"></div>
-        <div class="pager" id="pager"></div>
-        <div class="pbody" id="pbody">
-      <div id="grid"></div>
-      <div id="results" style="display:none"></div>
-      <div id="settings"></div>
+      <div class="chips" id="chips"></div>
+      <div class="pbody" id="pbody">
+        <div id="grid"></div>
+        <div id="settings"></div>
+      </div>
+      <div class="rz" id="rz" title="Drag to resize"></div>
     </div>
-    <div class="rz" id="rz" title="Drag to resize"></div>
-  </div>
 
   <div id="sim"></div>
   <div class="ov" id="off"><span>Screen off · tap to wake</span></div>
@@ -427,11 +420,11 @@ fab.addEventListener('pointercancel',()=>{bd=null});
 
 /* ───────── popup: drag ───────── */
 let pdg=null;
-$('#search').addEventListener('pointerdown',e=>{if(e.target.closest('button,input'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};$('#search').setPointerCapture(e.pointerId)});
-$('#search').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
+$('#pheader').addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};$('#pheader').setPointerCapture(e.pointerId)});
+$('#pheader').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
   pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,24,ph.height-60)+'px'});
-$('#search').addEventListener('pointerup',()=>{pdg=null});
-$('#search').addEventListener('pointercancel',()=>{pdg=null});
+$('#pheader').addEventListener('pointerup',()=>{pdg=null});
+$('#pheader').addEventListener('pointercancel',()=>{pdg=null});
 
 /* ───────── popup: resize corner ───────── */
 let rz=null;
@@ -451,11 +444,13 @@ function iconInner(it){return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperC
 function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
 function renderChips(){$('#chips').innerHTML=CHIPS.map(c=>`<button class="chip${c[0]===chip?' on':''}" data-c="${c[0]}">${c[1]}</button>`).join('')}
 
+const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
+
 let curPage=0;
 function pageCount(){const maxP=st.items.reduce((m,it)=>Math.max(m,it.page||0),0);return Math.max(1,maxP+1)}
 function renderPager(){
   const p=$('#pager');if(!p)return;
-  if(!st.set.usePages||view==='settings'||$('#q').value.trim()){p.style.display='none';return}
+  if(!st.set.usePages||view==='settings'){p.style.display='none';return}
   p.style.display='flex';const total=pageCount();if(curPage>=total)curPage=total-1;
   let dots='';for(let i=0;i<total;i++)dots+=`<button class="pg-dot${i===curPage?' on':''}" data-pg="${i}" aria-label="Page ${i+1}"></button>`;
   p.innerHTML=`${dots}${editMode&&total>1?`<button class="pg-btn" id="pgDel" title="Remove page" aria-label="Remove page"><i class="fa-solid fa-xmark"></i></button>`:''}`}
@@ -470,52 +465,23 @@ function removeCurPage(){
   if(curPage>=total-1)curPage=Math.max(0,total-2);
   save();render();toast('Page removed');
 }
-function addPage(){curPage=pageCount();save();render();toast('Page '+(curPage+1)+' added')}
 $('#pager').onclick=e=>{
   const d=e.target.closest('.pg-dot');if(d){curPage=+d.dataset.pg;render();return}
-  if(e.target.closest('#pgAdd')){addPage();return}
   if(e.target.closest('#pgDel')){removeCurPage();return}};
 
 function render(){
-  const q=$('#q').value.trim();
   const showSet=view==='settings';
   closeMenu();
-  $('#grid').style.display=(!showSet&&!q)?'grid':'none';
-  $('#results').style.display=(!showSet&&q)?'block':'none';
+  $('#grid').style.display=showSet?'none':'grid';
   $('#settings').style.display=showSet?'block':'none';
-  $('#chips').style.display=(!showSet&&!q&&st.set.showChips!==false)?'flex':'none';
-  $('#search').style.display=showSet?'none':'flex';
+  $('#chips').style.display=(!showSet&&st.set.showChips!==false)?'flex':'none';
   if(showSet){renderPager();buildSettings()}
-  else if(q){renderPager();buildResults(q)}
   else{
     renderChips();renderPager();
     const l=st.items.filter(it=>chipOK(it)&&(!st.set.usePages||(it.page||0)===curPage));
     grid.innerHTML=l.length?l.map(itemHTML).join(''):`<div class="empty">Nothing here yet.<br>Tap + to add a shortcut.</div>`}
   requestAnimationFrame(placePop)}
 $('#chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;chip=b.dataset.c;render()});
-
-/* ───────── search / URL bar ───────── */
-const isUrl=q=>!/\s/.test(q)&&(/^(https?:\/\/|file:\/\/)/i.test(q)||/^([\w-]+\.)+[a-z]{2,}([\/?#].*)?$/i.test(q)||/^localhost(:\d+)?/i.test(q));
-const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
-let resActs=[];
-function pinRes(it){st.items.push({id:uid(),...it});save();toast('Added "'+it.n+'" to launcher')}
-function buildResults(q){
-  const ql=q.toLowerCase(),out=[];
-  if(isUrl(q)){const u=normUrl(q);out.push({i:'fa-solid fa-globe',c:'#4aa3ff',t:u.replace(/^https?:\/\//,''),s:'Open website',go:()=>openWeb(u),pin:()=>pinRes({t:'web',n:u.replace(/^https?:\/\/(www\.)?/,'').split(/[\/?#]/)[0],v:q,i:'fa-solid fa-globe',c:'#4aa3ff'})})}
-  const sh=st.items.filter(it=>(it.n+' '+(it.t==='system'?SYS[it.v].n:it.v)).toLowerCase().includes(ql)).slice(0,6);
-  sh.forEach(it=>out.push({i:it.i,c:it.c,t:it.n,s:TYPES[it.t].label+' shortcut',go:()=>launch(it),letter:it}));
-  const have=new Set(st.items.filter(i=>i.t==='app').map(i=>i.v));
-  INSTALLED.filter(a=>!have.has(a.v)&&a.n.toLowerCase().includes(ql)).slice(0,3).forEach(a=>out.push({i:a.i,c:a.c,t:a.n,s:'Installed app',go:()=>launch({t:'app',n:a.n,v:a.v,i:a.i,c:a.c}),pin:()=>pinRes({t:'app',n:a.n,v:a.v,i:a.i,c:a.c})}));
-  DIRS.filter(d=>d.split('/').pop().toLowerCase().includes(ql)).slice(0,4).forEach(d=>out.push({i:'fa-solid fa-folder',c:'#f0a93b',t:d.split('/').pop(),s:d.replace(ROOT,'Internal storage/'),go:()=>openFolder(d),pin:()=>pinRes({t:'folder',n:d.split('/').pop(),v:d,i:'fa-solid fa-folder',c:'#f0a93b'})}));
-  FILES.filter(f=>f.split('/').pop().toLowerCase().includes(ql)).slice(0,6).forEach(f=>out.push({i:fileIcon(f),c:'#8f9bb3',t:f.split('/').pop(),s:f.replace(ROOT,'Internal storage/'),go:()=>openFile(f),pin:()=>pinRes({t:'file',n:f.split('/').pop().replace(/\.[^.]+$/,''),v:f,i:fileIcon(f),c:'#8f9bb3'})}));
-  out.push({i:'fa-brands fa-google',c:'#4a5568',t:'Search the web for "'+q+'"',s:'Google',go:()=>openWeb('https://www.google.com/search?q='+encodeURIComponent(q),'Search: '+q)});
-  resActs=out;
-  $('#results').innerHTML=out.map((o,k)=>`<div class="res" data-k="${k}"><div class="ic" style="background:${o.c}">${o.letter?iconInner(o.letter):`<i class="${o.i}"></i>`}</div><div class="tx"><b>${esc(o.t)}</b><small>${esc(o.s)}</small></div>${o.pin?`<button class="pin" data-pin="${k}" title="Add as shortcut"><i class="fa-solid fa-thumbtack"></i></button>`:''}</div>`).join('')}
-$('#results').addEventListener('click',e=>{const p=e.target.closest('.pin');if(p){e.stopPropagation();resActs[+p.dataset.pin].pin();return}const r=e.target.closest('.res');if(r)resActs[+r.dataset.k].go()});
-const qEl=$('#q');
-qEl.addEventListener('input',()=>{const v=qEl.value.trim();$('#search').classList.toggle('has',!!qEl.value);$('#sLead').className='lead fa-solid '+(isUrl(v)?'fa-globe':'fa-magnifying-glass');render()});
-qEl.addEventListener('keydown',e=>{if(e.key==='Enter'&&resActs.length&&qEl.value.trim()){e.preventDefault();resActs[0].go()}if(e.key==='Escape'){qEl.value='';qEl.dispatchEvent(new Event('input'))}});
-$('#qClr').onclick=()=>{qEl.value='';qEl.dispatchEvent(new Event('input'));qEl.focus()};
 
 /* ───────── settings panel ───────── */
 function buildSettings(){
@@ -672,7 +638,7 @@ $('#dSave').onclick=()=>{
   if(!v){toast('Add a target first');return}
   if(!name){toast('Add a name first');return}
   const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c};
-    if(dS.id){const x=st.items.find(i=>i.id===dS.id);Object.assign(x,rec)}else st.items.push({id:uid(),page:st.set.usePages?curPage:0,...rec});
+      if(dS.id){const x=st.items.find(i=>i.id===dS.id);Object.assign(x,rec)}else st.items.push({id:uid(),page:st.set.usePages?curPage:0,...rec});
   save();$('#dlg').style.display='none';if(chip!=='all'&&!chipOK(rec))chip='all';render();
   const g=pbody;if(!dS.id)setTimeout(()=>{g.scrollTop=g.scrollHeight},30);toast(dS.id?'Shortcut updated':'Shortcut added')};
 $('#bAdd').onclick=()=>{closeMenu();openDlg(null)};

@@ -245,15 +245,15 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 #studio{position:absolute;inset:0;z-index:62;background:var(--bg);display:none;flex-direction:column}
 #studio.on{display:flex;animation:stIn .24s cubic-bezier(.2,.8,.2,1)}
 @keyframes stIn{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
-.stp{position:relative;flex-shrink:0;height:240px;margin:10px 14px 0;border-radius:22px;overflow:hidden;background:#0d0918;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
-.stp-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 80%,rgba(255,160,95,.45),transparent 65%),linear-gradient(180deg,#120e29 0%,#241a4a 45%,#3a1a3a 100%);opacity:.85}
+.stp{position:relative;flex-shrink:0;height:260px;margin:10px 14px 0;border-radius:22px;overflow:hidden;background:#0d0918;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center}
+.stp-bg{position:absolute;inset:0;background:radial-gradient(circle at 50% 80%,rgba(255,160,95,.35),transparent 65%),linear-gradient(180deg,#120e29 0%,#241a4a 45%,#3a1a3a 100%);opacity:.85}
 .stp .tag{position:absolute;top:9px;left:14px;z-index:10;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.75);pointer-events:none}
-.stp-phone{position:relative;height:92%;aspect-ratio:9/19.5;border-radius:26px;border:2.5px solid rgba(255,255,255,.22);background:#000;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.85);isolation:isolate}
+.stp-phone{position:relative;height:90%;border-radius:24px;border:2px solid rgba(255,255,255,.25);background:#000;overflow:hidden;box-shadow:0 12px 36px rgba(0,0,0,.85);isolation:isolate}
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 72%,rgba(255,217,160,.92) 0 6%,rgba(255,160,95,.8) 12%,rgba(255,120,90,0) 38%),linear-gradient(180deg,#120e29 0%,#241a4a 30%,#662d5d 58%,#d45952 82%,#f59e56 100%)}
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
-.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:18px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 14px 34px rgba(0,0,0,.7),0 0 0 1px rgba(255,255,255,.16);pointer-events:none;transform-origin:top left}
+.pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);pointer-events:none;transform-origin:top left}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
-.pv-fab{position:absolute;right:0;z-index:5;background:var(--acc);border-radius:3px 0 0 3px;box-shadow:-2px 0 8px rgba(255,196,107,.7);pointer-events:none}
+.pv-fab{position:absolute;right:0;z-index:5;background:var(--acc);border-radius:4px 0 0 4px;box-shadow:-2px 0 10px rgba(255,196,107,.55);pointer-events:none}
 .stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
 .stabs::-webkit-scrollbar{display:none}
 .stabs button{flex:0 0 auto;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
@@ -700,10 +700,14 @@ let sTab='grid';
 function stOn(){return $('#studio').classList.contains('on')}
 function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
 function pvUpdate(){
-  const stage=$('#stPrev'),screen=$('#stScreen'),p=$('#pvpop'),pvF=$('#pvFab');
-  if(!stage||!screen||!p||!screen.clientHeight)return;
+  const stage=$('#stPrev'),phoneBox=$('#stPhone'),screen=$('#stScreen'),p=$('#pvpop'),pvF=$('#pvFab');
+  if(!stage||!phoneBox||!screen||!p)return;
   const s=st.set,ph=phone.getBoundingClientRect();
-  const scale=screen.clientHeight/ph.height;
+  const phoneAspect=ph.width/ph.height;
+  phoneBox.style.aspectRatio=`${ph.width} / ${ph.height}`;
+  phoneBox.style.width=(phoneBox.clientHeight*phoneAspect)+'px';
+
+  const scale=phoneBox.clientHeight/ph.height;
 
   setVars(p,s);
   p.classList.toggle('nolbl',!s.showLbl);
@@ -724,29 +728,32 @@ function pvUpdate(){
   }
   $('#pvgrid').innerHTML=html;
 
+  const th=Math.max(8,(s.trigH||90));
+  let trigTop;
+  if(st.btn&&typeof st.btn.y==='number'){trigTop=st.btn.y}
+  else{const pct=(s.trigY!=null?s.trigY:50)/100;trigTop=ph.height*pct-th/2}
+  trigTop=clamp(trigTop,36,ph.height-th-18);
+
   const pw=Math.min(s.w,ph.width-12);
-  const phgt=p.offsetHeight||360;
-  const rawTop=pop.offsetTop||(ph.height/2-phgt/2);
-  const clampedTop=clamp(rawTop,40,ph.height-phgt-16);
-  const rawLeft=pop.offsetLeft||(ph.width-pw-12);
-  const clampedLeft=clamp(rawLeft,6,ph.width-pw-6);
+  const popH=p.offsetHeight||Math.min(s.h,ph.height-70);
+  let popLeft=ph.width-pw-12;
+  let popTop=trigTop+(th/2)-(popH/2);
+  popLeft=clamp(popLeft,6,ph.width-pw-6);
+  popTop=clamp(popTop,36,ph.height-popH-12);
 
   p.style.transform=`scale(${scale})`;
-  p.style.left=(clampedLeft*scale)+'px';
-  p.style.top=(clampedTop*scale)+'px';
+  p.style.left=(popLeft*scale)+'px';
+  p.style.top=(popTop*scale)+'px';
 
   if(pvF){
-    const th=Math.max(6,(s.trigH||90)*scale);
-    const tw=Math.max(2,(s.trigW||6)*scale);
-    let topPx;
-    if(st.btn&&typeof st.btn.y==='number'){topPx=st.btn.y*scale}
-    else{const pct=(s.trigY!=null?s.trigY:50)/100;topPx=screen.clientHeight*pct-th/2}
-    topPx=clamp(topPx,2,screen.clientHeight-th-2);
-    pvF.style.width=tw+'px';
-    pvF.style.height=th+'px';
-    pvF.style.top=topPx+'px';
+    const pvTh=Math.max(6,th*scale);
+    const pvTw=Math.max(2,(s.trigW||6)*scale);
+    const pvTop=clamp(trigTop*scale,2,phoneBox.clientHeight-pvTh-2);
+    pvF.style.width=pvTw+'px';
+    pvF.style.height=pvTh+'px';
+    pvF.style.top=pvTop+'px';
   }
-  $('#stTag').textContent='Mini Phone Preview · '+Math.round(scale*100)+'%'}
+  $('#stTag').textContent='Live Preview · '+Math.round(scale*100)+'%'}
 function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},

@@ -146,16 +146,14 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .sbtn:active{transform:scale(.96)}
 .rz{position:absolute;right:0;bottom:0;width:34px;height:34px;touch-action:none;cursor:nwse-resize;z-index:50;display:flex;align-items:flex-end;justify-content:flex-end;padding:4px}
 .rz::after{content:"";display:block;width:14px;height:14px;border-right:3px solid var(--acc);border-bottom:3px solid var(--acc);border-bottom-right-radius:8px;box-shadow:2px 2px 6px rgba(0,0,0,.6)}
-.trig-rz{display:none;position:absolute;left:-14px;width:30px;height:24px;border-radius:12px;background:var(--acc);color:#1b152d;box-shadow:0 4px 12px rgba(0,0,0,.6);cursor:ns-resize;touch-action:none;align-items:center;justify-content:center;font-size:10px;z-index:46;user-select:none}
-.trig-rz.top{top:-12px}
-.trig-rz.bottom{bottom:-12px}
-.trig-rz-w{display:none;position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:20px;height:28px;border-radius:8px;background:var(--acc);color:#1b152d;box-shadow:0 4px 12px rgba(0,0,0,.6);cursor:ew-resize;touch-action:none;align-items:center;justify-content:center;font-size:10px;z-index:46;user-select:none}
-.trig-move-bar{display:none;position:absolute;right:calc(100% + 7px);top:0;bottom:0;width:14px;border-radius:7px;background:rgba(255,196,107,.25);border:1.5px dashed var(--acc);touch-action:none;cursor:ns-resize;align-items:center;justify-content:center;color:var(--acc);font-size:9px;z-index:46;user-select:none}
+.trig-handle{display:none;position:absolute;right:100%;z-index:48;touch-action:none;user-select:none;align-items:center;justify-content:center;color:#fff}
+.trig-handle.end-cap{width:22px;height:24px;background:#3a3842;border:1px solid rgba(255,255,255,.2);clip-path:polygon(0% 25%, 65% 25%, 100% 50%, 65% 75%, 0% 75%);cursor:ns-resize}
+.trig-handle.top-cap{top:-12px}
+.trig-handle.bot-cap{bottom:-12px}
+.trig-handle.width-tab{top:50%;transform:translateY(-50%);width:26px;height:26px;background:transparent;cursor:ew-resize;font-size:13px;letter-spacing:-1px;font-weight:700;color:rgba(255,255,255,.85);text-shadow:0 1px 3px rgba(0,0,0,.8)}
+.edit #fab .trig-handle{display:flex}
 .pop-bottom-bar{display:none;position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:46px;height:14px;align-items:center;justify-content:center;touch-action:none;cursor:ns-resize;z-index:50;user-select:none}
 .pop-bottom-bar::after{content:"";width:32px;height:4.5px;border-radius:3px;background:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.6)}
-.trig-puller{display:none;position:absolute;left:-24px;top:50%;transform:translateY(-50%);width:24px;height:38px;border-radius:12px 0 0 12px;background:var(--acc);box-shadow:-3px 0 12px rgba(255,196,107,.5);touch-action:none;align-items:center;justify-content:center;color:#1b152d;font-size:11px;z-index:47;cursor:grab}
-.trig-puller:active{cursor:grabbing}
-.edit #fab .trig-rz, .edit #fab .trig-rz-w, .edit #fab .trig-move-bar, .edit #fab .trig-puller{display:flex}
 .edit #pop .pop-bottom-bar{display:flex}
 
 /* ───── simulated app window ───── */
@@ -279,11 +277,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
     <button id="fabSet" class="fbtn" aria-label="Launcher settings" title="Launcher settings"><i class="fa-solid fa-gear"></i></button>
     <div id="fab" aria-label="Open launcher">
           <i class="fa-solid fa-plus"></i>
-          <div class="trig-puller" id="trigPuller" title="Pull to move & position trigger"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>
-          <div class="trig-move-bar" id="trigMoveBar" title="Drag up or down to move trigger"><i class="fa-solid fa-grip-vertical"></i></div>
-          <div class="trig-rz top" id="trigRzTop" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
-          <div class="trig-rz-w" id="trigRzW" title="Drag to adjust width"><i class="fa-solid fa-arrows-left-right"></i></div>
-          <div class="trig-rz bottom" id="trigRzBottom" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
+          <div class="trig-handle end-cap top-cap" id="trigRzTop" title="Drag to adjust height"></div>
+          <div class="trig-handle width-tab" id="trigRzW" title="Drag to adjust width">< ></div>
+          <div class="trig-handle end-cap bot-cap" id="trigRzBottom" title="Drag to adjust height"></div>
         </div>
 
     <div id="pop" role="dialog" aria-label="Quick launcher">
@@ -640,32 +636,6 @@ function bindTrigResize(el, mode){
 bindTrigResize($('#trigRzTop'),'top');
 bindTrigResize($('#trigRzBottom'),'bottom');
 bindTrigResize($('#trigRzW'),'width');
-
-/* ───────── trigger puller handle for moving ───────── */
-let pullerDrag=null;
-const trigPuller=$('#trigPuller');
-trigPuller.addEventListener('pointerdown',e=>{
-  e.stopPropagation();
-  pullerDrag={startY:e.clientY,initY:fab.offsetTop};
-  trigPuller.setPointerCapture(e.pointerId);
-});
-trigPuller.addEventListener('pointermove',e=>{
-  if(!pullerDrag)return;
-  const ph=phone.getBoundingClientRect(), th=st.set.trigH||90;
-  const newY=clamp(pullerDrag.initY+(e.clientY-pullerDrag.startY),36,ph.height-th-18);
-  st.btn={y:newY};
-  st.set.trigY=Math.round(((newY+th/2)/ph.height)*100);
-  placeFab();
-  if(stOn()){syncSl();pvUpdate();}
-});
-trigPuller.addEventListener('pointerup',()=>{
-  if(pullerDrag){
-    pullerDrag=null;
-    save();
-    toast('Trigger position saved');
-  }
-});
-trigPuller.addEventListener('pointercancel',()=>{pullerDrag=null});
 
 /* ───────── moving bar aside handle for trigger positioning ───────── */
 let trgBarDrag=null;

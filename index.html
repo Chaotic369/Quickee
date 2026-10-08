@@ -93,6 +93,12 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .pbody{flex:1;min-height:0;overflow-y:auto;padding:var(--pad);scrollbar-width:none}
 .pbody::-webkit-scrollbar{display:none}
 #grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
+.grid-cell{position:relative;width:100%;min-height:calc(var(--icon) + 18px);display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.edit .grid-cell{border:1.5px dashed rgba(255,255,255,.16);border-radius:calc(var(--icon)*var(--rad)/100 + 4px);min-height:calc(var(--icon) + 24px);background:rgba(255,255,255,.02);transition:border-color .15s,background .15s}
+.edit .grid-cell.cell-over{border-color:var(--acc);background:rgba(255,196,107,.12)}
+.cell-add{display:none;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);place-items:center;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;transition:all .15s}
+.cell-add:hover{color:var(--acc);background:rgba(255,196,107,.1)}
+.edit .grid-cell.empty-slot .cell-add{display:grid}
 .it{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;width:100%;cursor:pointer}
 .it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s}
 .it .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
@@ -379,8 +385,21 @@ function mk(r){const[t,n,v,i,c]=r;
   if(t==='app'){const a=INSTALLED.find(x=>x.n===n);return{id:uid(),t,n,v:a.v,i:a.i,c:a.c}}
   if(t==='system'){const s=SYS[v];return{id:uid(),t,n:s.n,v,i:s.i,c:s.c}}
   return{id:uid(),t,n,v,i:i||TYPES[t].icon,c:c||TYPES[t].color}}
-function fresh(){return{items:DEF.map(mk),set:{...S_DEF},tog:{wifi:1,bt:1,flash:0,air:0,rot:1,dnd:0},lv:{vol:60,br:80},btn:null}}
-function load(){try{const r=JSON.parse(localStorage.getItem(KEY));if(r&&r.items){const f=fresh();return{...f,...r,set:{...S_DEF,...r.set},tog:{...f.tog,...r.tog},lv:{...f.lv,...r.lv}}}}catch(e){}return fresh()}
+function fresh(){
+  const items=DEF.map(mk).map((it,idx)=>({...it,slot:idx}));
+  return{items,set:{...S_DEF},tog:{wifi:1,bt:1,flash:0,air:0,rot:1,dnd:0},lv:{vol:60,br:80},btn:null};
+}
+function load(){
+  try{
+    const r=JSON.parse(localStorage.getItem(KEY));
+    if(r&&r.items){
+      const f=fresh();
+      const loadedItems=r.items.map((it,idx)=>({slot:idx,...it}));
+      return{...f,...r,items:loadedItems,set:{...S_DEF,...r.set},tog:{...f.tog,...r.tog},lv:{...f.lv,...r.lv}};
+    }
+  }catch(e){}
+  return fresh();
+}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
 let st=load();
 
@@ -545,9 +564,23 @@ function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.i
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
 function render(){
-  const l=st.items;
-    grid.innerHTML=l.length?l.map(itemHTML).join(''):`<div class="empty">Nothing here yet.<br>Add shortcuts from the Launcher app.</div>`;
-    if(stOn())studioRefresh();
+  const cols=Math.max(1,parseInt(st.set.cols)||4);
+  const bySlot=new Map();
+  st.items.forEach(it=>{if(typeof it.slot==='number')bySlot.set(it.slot,it)});
+  let maxSlot=-1;
+  st.items.forEach(it=>{if(typeof it.slot==='number'&&it.slot>maxSlot)maxSlot=it.slot});
+  const totalCount=Math.max(cols*4,Math.ceil((maxSlot+2)/cols)*cols);
+  let html='';
+  for(let s=0;s<totalCount;s++){
+    const it=bySlot.get(s);
+    if(it){
+      html+=`<div class="grid-cell" data-slot="${s}">${itemHTML(it)}</div>`;
+    }else{
+      html+=`<div class="grid-cell empty-slot" data-slot="${s}"><div class="cell-add" title="Add shortcut here"><i class="fa-solid fa-plus"></i></div></div>`;
+    }
+  }
+  grid.innerHTML=html;
+  if(stOn())studioRefresh();
   requestAnimationFrame(placePop)}
 /* ───────── settings panel ───────── */
 let sTab='grid';
@@ -559,7 +592,18 @@ function pvUpdate(){
   setVars(p,s);p.classList.toggle('nolbl',!s.showLbl);
   p.style.width=Math.min(s.w,ph.width-12)+'px';
   p.style.maxHeight=Math.min(s.h,ph.height-70)+'px';
-  $('#pvgrid').innerHTML=st.items.length?st.items.map(itemHTML).join(''):'<div class="empty">No shortcuts yet.</div>';
+  const cols=Math.max(1,parseInt(s.cols)||4);
+  const bySlot=new Map();
+  st.items.forEach(it=>{if(typeof it.slot==='number')bySlot.set(it.slot,it)});
+  let maxSlot=-1;
+  st.items.forEach(it=>{if(typeof it.slot==='number'&&it.slot>maxSlot)maxSlot=it.slot});
+  const totalCount=Math.max(cols*3,Math.ceil((maxSlot+1)/cols)*cols);
+  let html='';
+  for(let slot=0;slot<totalCount;slot++){
+    const it=bySlot.get(slot);
+    html+=`<div class="grid-cell" style="min-height:calc(var(--icon) + 12px)">${it?itemHTML(it):''}</div>`;
+  }
+  $('#pvgrid').innerHTML=html;
   const w=p.offsetWidth,h=p.offsetHeight,aw=stage.clientWidth-24,ah=stage.clientHeight-40,k=Math.min(1,aw/w,ah/h);
   p.style.transform='scale('+k+')';
   p.style.left=((stage.clientWidth-w*k)/2)+'px';
@@ -626,40 +670,117 @@ fabEdit.onclick=()=>{
   }else{
     fabAdd.classList.remove('open','show');
   }
-  toast(editMode?'Tap (X) to delete · Tap + to add':'Order saved')};
+  render();
+  toast(editMode?'Edit mode: Drag anywhere, tap (+) or gaps to add':'Changes saved')};
 
-fabAdd.onclick=()=>{openDlg(null)};
+function firstFreeSlot(){
+  const taken=new Set(st.items.map(x=>x.slot));
+  let s=0;
+  while(taken.has(s))s++;
+  return s;
+}
+
+fabAdd.onclick=()=>{openDlg(null,firstFreeSlot())};
 fabSet.onclick=()=>{openStudio()};
 
 let suppress=false;
-grid.addEventListener('click',e=>{if(suppress)return;const it=e.target.closest('.it');if(!it)return;const item=st.items.find(x=>x.id===it.dataset.id);if(!item)return;
-  if(e.target.closest('.x')){st.items=st.items.filter(x=>x.id!==item.id);save();render();return}
-  if(editMode){openDlg(item)}else launch(item)});
+grid.addEventListener('click',e=>{
+  if(suppress)return;
+  const addCell=e.target.closest('.grid-cell.empty-slot');
+  if(addCell&&editMode){
+    const s=parseInt(addCell.dataset.slot,10);
+    openDlg(null,isNaN(s)?firstFreeSlot():s);
+    return;
+  }
+  const it=e.target.closest('.it');
+  if(!it)return;
+  const item=st.items.find(x=>x.id===it.dataset.id);
+  if(!item)return;
+  if(e.target.closest('.x')){
+    st.items=st.items.filter(x=>x.id!==item.id);
+    save();
+    render();
+    return;
+  }
+  if(editMode){openDlg(item,item.slot)}else launch(item);
+});
 grid.addEventListener('contextmenu',e=>e.preventDefault());
 
-/* ───────── drag & drop sorting (long-press) ───────── */
+/* ───────── drag & drop spatial positioning (long-press or edit) ───────── */
 let dr=null;
-grid.addEventListener('pointerdown',e=>{const it=e.target.closest('.it');if(!it||e.target.closest('.x')||(e.button!==0&&e.pointerType==='mouse'))return;
-  dr={it,x:e.clientX,y:e.clientY,ready:false,on:false,ghost:null};
-  dr.t=setTimeout(()=>{if(!dr)return;dr.ready=true;if(navigator.vibrate)navigator.vibrate(30)},300)});
+grid.addEventListener('pointerdown',e=>{
+  const it=e.target.closest('.it');
+  if(!it||e.target.closest('.x')||(e.button!==0&&e.pointerType==='mouse'))return;
+  dr={it,x:e.clientX,y:e.clientY,ready:false,on:false,ghost:null,targetSlot:null};
+  const delay=editMode?60:280;
+  dr.t=setTimeout(()=>{
+    if(!dr)return;
+    dr.ready=true;
+    if(navigator.vibrate)navigator.vibrate(30);
+  },delay);
+});
 grid.addEventListener('touchmove',e=>{if(dr&&dr.ready&&e.cancelable)e.preventDefault()},{passive:false});
-window.addEventListener('pointermove',e=>{if(!dr)return;
-  if(!dr.ready){if(Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>8){clearTimeout(dr.t);dr=null}return}
+window.addEventListener('pointermove',e=>{
+  if(!dr)return;
+  if(!dr.ready){
+    if(Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>8){clearTimeout(dr.t);dr=null}
+    return;
+  }
   if(e.cancelable)e.preventDefault();
-  if(!dr.on){dr.on=true;const r=dr.it.getBoundingClientRect();const g=dr.it.cloneNode(true);g.className='it ghost';g.style.width=r.width+'px';g.style.left=r.left+'px';g.style.top=r.top+'px';
-    g.style.setProperty('--icon',getComputedStyle(pop).getPropertyValue('--icon'));g.style.setProperty('--rad',getComputedStyle(pop).getPropertyValue('--rad'));g.style.setProperty('--lbl',getComputedStyle(pop).getPropertyValue('--lbl'));
-    document.body.appendChild(g);dr.ghost=g;dr.it.classList.add('lift')}
-  const g=dr.ghost;g.style.left=(e.clientX-g.offsetWidth/2)+'px';g.style.top=(e.clientY-g.offsetHeight/2)+'px';
-  const tgt=document.elementFromPoint(e.clientX,e.clientY),over=tgt&&tgt.closest('#grid .it');
-  if(over&&over!==dr.it){const r=over.getBoundingClientRect();grid.insertBefore(dr.it,e.clientX<r.left+r.width/2?over:over.nextSibling)}
-  const pr=pbody.getBoundingClientRect();if(e.clientY<pr.top+36)pbody.scrollTop-=9;else if(e.clientY>pr.bottom-36)pbody.scrollTop+=9},{passive:false});
-function endDrag(){if(!dr)return;clearTimeout(dr.t);
-  if(dr.on){const ids=[...grid.querySelectorAll('.it')].map(x=>x.dataset.id),vis=new Set(ids),slots=[];
-    st.items.forEach((x,i)=>{if(vis.has(x.id))slots.push(i)});
-    const by=Object.fromEntries(st.items.map(x=>[x.id,x]));slots.forEach((s,k)=>{st.items[s]=by[ids[k]]});
-    dr.ghost.remove();dr.it.classList.remove('lift');save();suppress=true;setTimeout(()=>suppress=false,250);toast('Order saved')}
-  dr=null}
-window.addEventListener('pointerup',endDrag);window.addEventListener('pointercancel',endDrag);
+  if(!dr.on){
+    dr.on=true;
+    const r=dr.it.getBoundingClientRect();
+    const g=dr.it.cloneNode(true);
+    g.className='it ghost';
+    g.style.width=r.width+'px';
+    g.style.left=r.left+'px';
+    g.style.top=r.top+'px';
+    g.style.setProperty('--icon',getComputedStyle(pop).getPropertyValue('--icon'));
+    g.style.setProperty('--rad',getComputedStyle(pop).getPropertyValue('--rad'));
+    g.style.setProperty('--lbl',getComputedStyle(pop).getPropertyValue('--lbl'));
+    document.body.appendChild(g);
+    dr.ghost=g;
+    dr.it.classList.add('lift');
+  }
+  const g=dr.ghost;
+  g.style.left=(e.clientX-g.offsetWidth/2)+'px';
+  g.style.top=(e.clientY-g.offsetHeight/2)+'px';
+  const tgt=document.elementFromPoint(e.clientX,e.clientY);
+  document.querySelectorAll('.grid-cell.cell-over').forEach(c=>c.classList.remove('cell-over'));
+  const cell=tgt&&tgt.closest('#grid .grid-cell');
+  if(cell){
+    cell.classList.add('cell-over');
+    dr.targetSlot=parseInt(cell.dataset.slot,10);
+  }
+  const pr=pbody.getBoundingClientRect();
+  if(e.clientY<pr.top+36)pbody.scrollTop-=9;
+  else if(e.clientY>pr.bottom-36)pbody.scrollTop+=9;
+},{passive:false});
+function endDrag(){
+  if(!dr)return;
+  clearTimeout(dr.t);
+  document.querySelectorAll('.grid-cell.cell-over').forEach(c=>c.classList.remove('cell-over'));
+  if(dr.on){
+    const item=st.items.find(x=>x.id===dr.it.dataset.id);
+    if(item&&typeof dr.targetSlot==='number'&&!isNaN(dr.targetSlot)){
+      const occupant=st.items.find(x=>x.slot===dr.targetSlot&&x.id!==item.id);
+      if(occupant){
+        occupant.slot=item.slot;
+      }
+      item.slot=dr.targetSlot;
+      save();
+    }
+    dr.ghost.remove();
+    dr.it.classList.remove('lift');
+    suppress=true;
+    setTimeout(()=>suppress=false,250);
+    render();
+    toast('Position updated');
+  }
+  dr=null;
+}
+window.addEventListener('pointerup',endDrag);
+window.addEventListener('pointercancel',endDrag);
 
 /* ───────── launching shortcuts ───────── */
 function launch(it){
@@ -735,8 +856,9 @@ $('#sheet').addEventListener('pointerdown',e=>{if(e.target.id==='sheet')closeShe
 
 /* ───────── add / edit dialog ───────── */
 let dS=null;
-function openDlg(item){
-  dS=item?{id:item.id,t:item.t,i:item.i,c:item.c,touched:true}:{id:null,t:'app',i:TYPES.app.icon,c:TYPES.app.color,touched:false};
+function openDlg(item,targetSlot){
+  const destSlot=(item&&typeof item.slot==='number')?item.slot:(typeof targetSlot==='number'?targetSlot:firstFreeSlot());
+  dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,touched:false};
   $('#dT').textContent=item?'Edit shortcut':'New shortcut';
   $('#dName').value=item?item.n:'';
   $('#dDel').style.display=item?'block':'none';
@@ -769,10 +891,16 @@ $('#dSave').onclick=()=>{
   if(dS.t==='system'&&!name)name=SYS[v].n;
   if(!v){toast('Add a target first');return}
   if(!name){toast('Add a name first');return}
-  const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c};
-      if(dS.id){const x=st.items.find(i=>i.id===dS.id);Object.assign(x,rec)}else st.items.push({id:uid(),...rec});
+  const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c,slot:dS.slot};
+  if(dS.id){
+    const x=st.items.find(i=>i.id===dS.id);
+    Object.assign(x,rec);
+  }else{
+    st.items=st.items.filter(x=>x.slot!==dS.slot);
+    st.items.push({id:uid(),...rec});
+  }
   save();$('#dlg').style.display='none';render();
-  const g=pbody;if(!dS.id)setTimeout(()=>{g.scrollTop=g.scrollHeight},30);toast(dS.id?'Shortcut updated':'Shortcut added')};
+  toast(dS.id?'Shortcut updated':'Shortcut added')};
 
 
 /* ───────── keyboard + resize + init ───────── */

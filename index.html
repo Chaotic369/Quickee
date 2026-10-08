@@ -216,6 +216,22 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .acts .pri{background:var(--acc);color:#2a1b05;border-color:transparent}
 .acts .del{color:#ff7b72;background:rgba(229,83,75,.14);border-color:rgba(229,83,75,.2)}
 :focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.grab{display:flex;align-items:center;justify-content:center;width:100%;height:24px;flex-shrink:0;cursor:grab;touch-action:none}
+.grab::after{content:"";width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
+.hi[data-app]{cursor:pointer}
+#studio{position:absolute;inset:0;z-index:62;background:var(--bg);display:none;flex-direction:column}
+#studio.on{display:flex;animation:stIn .24s cubic-bezier(.2,.8,.2,1)}
+@keyframes stIn{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.stp{position:relative;flex-shrink:0;height:min(300px,34dvh);margin:12px 14px 0;border-radius:22px;overflow:hidden;background:linear-gradient(180deg,#120e29 0%,#241a4a 35%,#662d5d 62%,#d45952 85%,#f59e56 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+.stp .tag{position:absolute;top:9px;left:14px;z-index:2;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.65);pointer-events:none}
+.pvpop{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);pointer-events:none}
+#pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
+.stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0}
+.stabs button{flex:1;padding:9px 0;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
+.stabs button.on{background:var(--acc);color:#1c1304;border-color:transparent}
+.stbody{flex:1;min-height:0;overflow-y:auto;padding:12px 16px 24px;scrollbar-width:none}
+.stbody::-webkit-scrollbar{display:none}
+.res .pin.dl{color:#ff7b72}
 </style>
 </head>
 <body>
@@ -235,20 +251,15 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
   <button id="fab" aria-label="Open launcher"><i class="fa-solid fa-plus"></i></button>
 
   <div id="pop" role="dialog" aria-label="Quick launcher">
-      <div class="top-bar" id="topBar">
-                    <div style="flex:1;min-width:0;height:32px"></div>
-                    <button class="mbtn" id="bAdd" aria-label="Add shortcut" title="Add shortcut"><i class="fa-solid fa-plus"></i></button>
-                    <button class="mbtn" id="bEdit" aria-label="Reorder / edit" title="Reorder / edit"><i class="fa-solid fa-pen"></i></button>
-                    <button class="mbtn" id="bSet" aria-label="Layout settings" title="Layout settings"><i class="fa-solid fa-sliders"></i></button>
-                  </div>
+      <div class="grab" id="topBar"></div>
       <div class="pbody" id="pbody">
         <div id="grid"></div>
-        <div id="settings"></div>
       </div>
       <div class="rz" id="rz" title="Drag to resize"></div>
     </div>
 
   <div id="sim"></div>
+    <div id="studio"></div>
   <div class="ov" id="off"><span>Screen off · tap to wake</span></div>
   <div class="ov" id="lock"><div class="t" id="lkT">9:41</div><small id="lkD"></small><div class="u">Tap to unlock</div></div>
   <div class="ov" id="recents"></div>
@@ -322,7 +333,7 @@ const SYS={
  recents:{n:'Recents',i:'fa-solid fa-clone',c:'#5c6ad6',hint:'GLOBAL_ACTION_RECENTS',run(){showRecents()}},
  notif:{n:'Notifications',i:'fa-solid fa-bell',c:'#c9843a',hint:'GLOBAL_ACTION_NOTIFICATIONS',run(){showNotif()}},
  home:{n:'Home',i:'fa-solid fa-house',c:'#4a8f6a',hint:'GLOBAL_ACTION_HOME',run(){closeLayers();toast('Home')}},
- back:{n:'Back',i:'fa-solid fa-chevron-left',c:'#6b6f80',hint:'GLOBAL_ACTION_BACK',run(){if(sim.classList.contains('on'))closeSim();else toast('Back')}},
+ back:{n:'Back',i:'fa-solid fa-chevron-left',c:'#6b6f80',hint:'GLOBAL_ACTION_BACK',run(){if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else toast('Back')}},
  volume:{n:'Volume',i:'fa-solid fa-volume-high',c:'#7a58d6',hint:'AudioManager.setStreamVolume()',run(){slider('Volume','fa-solid fa-volume-high',st.lv.vol,v=>{st.lv.vol=v;save()})}},
  bright:{n:'Brightness',i:'fa-solid fa-sun',c:'#e0a22e',hint:'Settings.System.SCREEN_BRIGHTNESS (WRITE_SETTINGS)',run(){slider('Brightness','fa-solid fa-sun',st.lv.br,v=>{st.lv.br=v;applyBright();save()})}},
  wifi:{n:'Wi-Fi',i:'fa-solid fa-wifi',c:'#3b82d6',tog:1,hint:'Settings.Panel.ACTION_INTERNET_CONNECTIVITY (API 29+)'},
@@ -361,14 +372,15 @@ function tick(){const d=new Date();const h=d.getHours()%12||12,m=String(d.getMin
   const ds=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});$('#date').textContent=ds;$('#lkD').textContent=ds}
 tick();setInterval(tick,15000);
 function icHTML(a){return`<div class="ic" style="background:${a.c}"><i class="${a.i}"></i></div>`}
-$('#homeGrid').innerHTML=['Camera','Gallery','Maps','Music','YouTube','Notes','Clock','Play Store'].map(n=>{const a=INSTALLED.find(x=>x.n===n);return`<div class="hi">${icHTML(a)}<span>${a.n}</span></div>`}).join('');
+$('#homeGrid').innerHTML=[{n:'Launcher',i:'fa-solid fa-sliders',c:'#7c5cff',app:1}].concat(['Camera','Gallery','Maps','Music','YouTube','Notes','Clock'].map(n=>INSTALLED.find(x=>x.n===n))).map(a=>`<div class="hi"${a.app?' data-app="studio"':''}>${icHTML(a)}<span>${a.n}</span></div>`).join('');
+$('#homeGrid').addEventListener('click',e=>{if(e.target.closest('[data-app="studio"]'))openStudio()});
 $('#dock').innerHTML=['Messages','Chrome','Files','Settings'].map(n=>icHTML(INSTALLED.find(x=>x.n===n))).join('');
 function statusIcons(){const t=st.tog;$('#stIcons').innerHTML=(t.flash?'<i class="fa-solid fa-lightbulb" style="color:var(--acc)"></i>':'')+(t.dnd?'<i class="fa-solid fa-bell-slash"></i>':'')+(t.air?'<i class="fa-solid fa-plane"></i>':(t.bt?'<i class="fa-brands fa-bluetooth-b"></i>':'')+(t.wifi?'<i class="fa-solid fa-wifi"></i>':''))+'<i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-three-quarters"></i>'}
 function applyBright(){$('#dim').style.opacity=((100-st.lv.br)/100*.7).toFixed(2)}
 
 /* ───────── toast / layers ───────── */
 let tt;function toast(m,h){const e=$('#toast');e.innerHTML=esc(m)+(h?`<small>${esc(h)}</small>`:'');e.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('on'),h?3400:1500)}
-function closeLayers(){closeSim();['#recents','#notif','#lock'].forEach(s=>$(s).style.display='none');closeSheet();closePop()}
+function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].forEach(s=>$(s).style.display='none');closeSheet();closePop()}
 
 /* ───────── popup: apply layout ───────── */
 function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
@@ -379,7 +391,7 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
 
 /* ───────── popup: open/close/place ───────── */
-let userMoved=false,view='grid',editMode=false;
+let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
 function placePop(){if(userMoved)return;
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
@@ -388,7 +400,7 @@ function placePop(){if(userMoved)return;
   l=clamp(l,ph.left+6,ph.right-w-6);t=clamp(t,ph.top+32,ph.bottom-h-8);
   pop.style.left=(l-ph.left)+'px';pop.style.top=(t-ph.top)+'px'}
 function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');$('#scrim').classList.add('on');placePop()}
-function closePop(){pop.classList.remove('open');fab.classList.remove('open');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');$('#bEdit').classList.remove('on');$('#bEdit i').className='fa-solid fa-pen';if(document.activeElement)document.activeElement.blur()}
+function closePop(){pop.classList.remove('open');fab.classList.remove('open');$('#scrim').classList.remove('on');if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── floating plus: drag + tap ───────── */
@@ -417,7 +429,7 @@ $('#rz').addEventListener('pointerdown',e=>{e.stopPropagation();rz={x:e.clientX,
 $('#rz').addEventListener('pointermove',e=>{if(!rz)return;const ph=phone.getBoundingClientRect();
   st.set.w=Math.round(clamp(rz.w+e.clientX-rz.x,240,Math.min(420,ph.width-12)));
   st.set.h=Math.round(clamp(rz.h+e.clientY-rz.y,260,Math.min(780,ph.height-70)));
-  applySet();if(view==='settings')syncSliders()});
+  applySet()});
 $('#rz').addEventListener('pointerup',()=>{if(rz){rz=null;save()}});
 $('#rz').addEventListener('pointercancel',()=>{rz=null});
 
@@ -428,42 +440,77 @@ function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.i
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
 function render(){
-  const showSet=view==='settings';
-    $('#grid').style.display=showSet?'none':'grid';
-    $('#settings').style.display=showSet?'block':'none';
-    $('#topBar').style.display=showSet?'none':'flex';
-    if(showSet){buildSettings()}
-    else{
-      const l=st.items;
-    grid.innerHTML=l.length?l.map(itemHTML).join(''):`<div class="empty">Nothing here yet.<br>Tap + to add a shortcut.</div>`}
+  const l=st.items;
+    grid.innerHTML=l.length?l.map(itemHTML).join(''):`<div class="empty">Nothing here yet.<br>Add shortcuts from the Launcher app.</div>`;
+    if(stOn())studioRefresh();
   requestAnimationFrame(placePop)}
 /* ───────── settings panel ───────── */
-function buildSettings(){
-  $('#settings').innerHTML=`<div class="set-hdr"><button class="mbtn" id="sBackSet" title="Back"><i class="fa-solid fa-arrow-left"></i></button><span>Layout settings</span></div>`+CTRL.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
-  `<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>`+
-  `<button class="sbtn" id="sReset">Reset layout</button><button class="sbtn" id="sDone">Done</button>`;
-  syncSliders();
-  $('#sBackSet').onclick=()=>{view='grid';render()};
-  $('#tgLbl').onclick=()=>{st.set.showLbl=!st.set.showLbl;$('#tgLbl').classList.toggle('on',st.set.showLbl);applySet();save()};
-  $('#sReset').onclick=()=>{st.set={...S_DEF};applySet();syncSliders();save();toast('Layout reset')};
-  $('#sDone').onclick=()=>{view='grid';render()}}
-function syncSliders(){CTRL.forEach(c=>{const el=document.querySelector(`#settings input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];$('#v_'+c[0]).textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',st.set.showLbl)}
-$('#settings').addEventListener('input',e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k;st.set[k]=parseFloat(el.value);const c=CTRL.find(x=>x[0]===k);$('#v_'+k).textContent=st.set[k]+c[5];applySet();placePop();save()});
-$('#bSet').onclick=()=>{view=view==='settings'?'grid':'settings';render()};
+let sTab='layout';
+function stOn(){return $('#studio').classList.contains('on')}
+function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
+function pvUpdate(){
+  const stage=$('#stPrev'),p=$('#pvpop');if(!stage||!p||!stage.clientWidth)return;
+  const s=st.set,ph=phone.getBoundingClientRect();
+  setVars(p,s);p.classList.toggle('nolbl',!s.showLbl);
+  p.style.width=Math.min(s.w,ph.width-12)+'px';
+  p.style.maxHeight=Math.min(s.h,ph.height-70)+'px';
+  $('#pvgrid').innerHTML=st.items.length?st.items.map(itemHTML).join(''):'<div class="empty">No shortcuts yet.</div>';
+  const w=p.offsetWidth,h=p.offsetHeight,aw=stage.clientWidth-24,ah=stage.clientHeight-40,k=Math.min(1,aw/w,ah/h);
+  p.style.transform='scale('+k+')';
+  p.style.left=((stage.clientWidth-w*k)/2)+'px';
+  p.style.top=(28+(ah-h*k)/2)+'px';
+  $('#stTag').textContent='Live preview'+(k<0.995?' · '+Math.round(k*100)+'%':'')}
+function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];$('#v_'+c[0]).textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
+function buildStBody(){
+  const b=$('#stBody');if(!b)return;const y=b.scrollTop;
+  document.querySelectorAll('#stTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===sTab));
+  if(sTab==='layout'){
+    b.innerHTML=CTRL.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
+    `<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>`+
+    `<button class="sbtn" id="sReset">Reset layout</button>`;
+    syncSl()}
+  else{
+    b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 6px"><i class="fa-solid fa-plus"></i> Add shortcut</button><p style="font-size:11.5px;color:var(--dim);margin:4px 0 8px">Tap a shortcut to edit it. Use the arrows to reorder.</p>`+
+    (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc(TYPES[it.t].label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts yet.</div>')}
+  b.scrollTop=y}
+function studioRefresh(){pvUpdate();if(sTab==='items')buildStBody()}
+function openStudio(){
+  closePop();sTab='layout';
+  const s=$('#studio');
+  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher</b><small>Popup editor</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Try it</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="layout">Layout</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
+  $('#stBack').onclick=closeStudio;
+  $('#stTry').onclick=()=>{closeStudio();openPop()};
+  $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();$('#stBody').scrollTop=0};
+  $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL.find(x=>x[0]===k);st.set[k]=parseFloat(el.value);$('#v_'+k).textContent=st.set[k]+c[5];applySet();pvUpdate();save()};
+  $('#stBody').onclick=e=>{
+    if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
+    if(e.target.closest('#sReset')){st.set={...S_DEF};applySet();syncSl();pvUpdate();save();toast('Layout reset');return}
+    if(e.target.closest('#stAdd')){openDlg(null);return}
+    const r=e.target.closest('.res');if(!r)return;
+    const i=st.items.findIndex(x=>x.id===r.dataset.id);if(i<0)return;
+    const a=e.target.closest('.pin');
+    if(!a){openDlg(st.items[i]);return}
+    const d=a.dataset.a;
+    if(d==='del')st.items.splice(i,1);
+    else{const j=d==='up'?i-1:i+1;if(j<0||j>=st.items.length)return;const t=st.items[i];st.items[i]=st.items[j];st.items[j]=t}
+    save();render()};
+  buildStBody();
+  s.classList.add('on');
+  requestAnimationFrame(pvUpdate)}
+function closeStudio(){$('#studio').classList.remove('on')}
 
 /* ───────── edit mode + click handling ───────── */
-$('#bEdit').onclick=()=>{editMode=!editMode;pop.classList.toggle('edit',editMode);$('#bEdit').classList.toggle('on',editMode);$('#bEdit i').className=editMode?'fa-solid fa-check':'fa-solid fa-pen';if(view!=='grid')view='grid';render();toast(editMode?'Tap (X) to delete · drag to reorder':'Order saved')};
+
 let suppress=false;
 grid.addEventListener('click',e=>{if(suppress)return;const it=e.target.closest('.it');if(!it)return;const item=st.items.find(x=>x.id===it.dataset.id);if(!item)return;
-  if(e.target.closest('.x')){st.items=st.items.filter(x=>x.id!==item.id);save();render();return}
-  if(editMode){openDlg(item)}else launch(item)});
+  launch(item)});
 grid.addEventListener('contextmenu',e=>e.preventDefault());
 
 /* ───────── drag & drop sorting (long-press) ───────── */
 let dr=null;
 grid.addEventListener('pointerdown',e=>{const it=e.target.closest('.it');if(!it||e.target.closest('.x')||(e.button!==0&&e.pointerType==='mouse'))return;
   dr={it,x:e.clientX,y:e.clientY,ready:false,on:false,ghost:null};
-  dr.t=setTimeout(()=>{if(!dr)return;dr.ready=true;if(navigator.vibrate)navigator.vibrate(30)},editMode?90:300)});
+  dr.t=setTimeout(()=>{if(!dr)return;dr.ready=true;if(navigator.vibrate)navigator.vibrate(30)},300)});
 grid.addEventListener('touchmove',e=>{if(dr&&dr.ready&&e.cancelable)e.preventDefault()},{passive:false});
 window.addEventListener('pointermove',e=>{if(!dr)return;
   if(!dr.ready){if(Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>8){clearTimeout(dr.t);dr=null}return}
@@ -591,11 +638,11 @@ $('#dSave').onclick=()=>{
       if(dS.id){const x=st.items.find(i=>i.id===dS.id);Object.assign(x,rec)}else st.items.push({id:uid(),...rec});
   save();$('#dlg').style.display='none';render();
   const g=pbody;if(!dS.id)setTimeout(()=>{g.scrollTop=g.scrollHeight},30);toast(dS.id?'Shortcut updated':'Shortcut added')};
-$('#bAdd').onclick=()=>{openDlg(null)};
+
 
 /* ───────── keyboard + resize + init ───────── */
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(isOpen())closePop()});
-window.addEventListener('resize',()=>{placeFab();applySet();placePop()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
+window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';
 statusIcons();applyBright();applySet();placeFab();
 })();

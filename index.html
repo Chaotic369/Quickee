@@ -521,16 +521,33 @@ fab.addEventListener('pointerup',e=>{
   dtRing.style.display='none';
   document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
   const el=document.elementFromPoint(e.clientX,e.clientY);
-  let launched=false;
+  let handled=false;
   if(el){
-    const it=el.closest('.it');
-    if(it){
-      const item=st.items.find(x=>x.id===it.dataset.id);
-      if(item){launch(item);launched=true;closePop()}
+    const targetSet=el.closest('#fabSet');
+    const targetEdit=el.closest('#fabEdit');
+    const targetAdd=el.closest('#fabAdd');
+    const targetIt=el.closest('.it');
+
+    if(targetSet){
+      openStudio();
+      handled=true;
+    }else if(targetEdit){
+      fabEdit.click();
+      handled=true;
+    }else if(targetAdd){
+      openDlg(null,firstFreeSlot());
+      handled=true;
+    }else if(targetIt){
+      const item=st.items.find(x=>x.id===targetIt.dataset.id);
+      if(item){
+        launch(item);
+        handled=true;
+        closePop();
+      }
     }
   }
-  if(!launched && Math.hypot(e.clientX-fbStart.x, e.clientY-fbStart.y)<6){
-     if(fbWasOpen) closePop();
+  if(!handled){
+    closePop();
   }
 });
 fab.addEventListener('pointercancel',()=>{

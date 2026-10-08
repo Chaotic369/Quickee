@@ -389,9 +389,9 @@ const TYPES={
   sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
   email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
   web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'example.com'},
-  folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder',ph:'/storage/emulated/0/…'},
+  folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder-open',ph:'/storage/emulated/0/…'},
   file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'/storage/emulated/0/…'},
-  system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-gear',ph:''}
+  system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-sliders',ph:''}
 };
 const ROOT='/storage/emulated/0/';
 const INSTALLED=[
@@ -412,7 +412,15 @@ const INSTALLED=[
 ];
 const FILES=['Download/invoice-oct.pdf','Download/apk/app-debug.apk','Download/apk/launcher-release.apk','DCIM/Camera/IMG_2041.jpg','DCIM/Camera/IMG_2042.jpg','DCIM/Camera/VID_0192.mp4','Documents/Resume.pdf','Documents/notes/ideas.txt','Documents/notes/budget.xlsx','Documents/Projects/index.html','Documents/Projects/app.js','Music/Playlists/focus.mp3','Music/Playlists/drive.mp3','Pictures/Screenshots/Screenshot_1008.png','Movies/trip-2026.mp4','WhatsApp/Media/voice-note.opus'].map(p=>ROOT+p);
 const DIRS=(()=>{const s=new Set();FILES.forEach(f=>{const p=f.split('/');for(let i=4;i<p.length;i++)s.add(p.slice(0,i).join('/'))});return [...s].sort()})();
-const ICONS=['fa-solid fa-cube','fa-solid fa-camera','fa-solid fa-images','fa-solid fa-location-dot','fa-solid fa-music','fa-solid fa-gear','fa-solid fa-phone','fa-solid fa-message','fa-solid fa-folder','fa-solid fa-file-lines','fa-solid fa-globe','fa-solid fa-bolt','fa-solid fa-power-off','fa-solid fa-lock','fa-solid fa-star','fa-solid fa-heart','fa-solid fa-house','fa-solid fa-envelope','fa-solid fa-calendar','fa-solid fa-calculator','fa-solid fa-video','fa-solid fa-gamepad','fa-solid fa-cart-shopping','fa-solid fa-wallet','fa-solid fa-book','fa-solid fa-code','fa-solid fa-terminal','fa-solid fa-cloud','fa-brands fa-whatsapp','fa-brands fa-telegram','fa-brands fa-youtube','fa-brands fa-github','fa-brands fa-google','fa-brands fa-chrome','fa-brands fa-x-twitter','fa-brands fa-instagram','letter'];
+const ICONS=[
+  'fa-solid fa-cube','fa-solid fa-camera','fa-solid fa-images','fa-solid fa-location-dot','fa-solid fa-music','fa-solid fa-gear',
+  'fa-solid fa-phone','fa-solid fa-comment-sms','fa-solid fa-envelope','fa-solid fa-globe','fa-solid fa-folder','fa-solid fa-folder-open',
+  'fa-solid fa-file-lines','fa-solid fa-file-pdf','fa-solid fa-film','fa-solid fa-image',
+  'fa-solid fa-moon','fa-solid fa-power-off','fa-solid fa-lock','fa-solid fa-expand','fa-solid fa-clone','fa-solid fa-bell',
+  'fa-solid fa-house','fa-solid fa-chevron-left','fa-solid fa-volume-high','fa-solid fa-volume-xmark','fa-solid fa-sun','fa-solid fa-wifi',
+  'fa-brands fa-bluetooth-b','fa-solid fa-lightbulb','fa-solid fa-plane','fa-solid fa-rotate','fa-solid fa-bell-slash','fa-solid fa-tower-broadcast',
+  'fa-solid fa-sliders','fa-solid fa-shield-halved','letter'
+];
 const COLORS=['#5b8def','#2fb872','#f0a93b','#f2685b','#a06bf0','#e24d9b','#4aa3ff','#3f8f87','#6c63ff','#7a8699','#d9a62e','#2a2438'];
 
 const SYS={
@@ -1364,8 +1372,16 @@ function setDType(t,keep){dS.t=t;
   const opts=t==='app'?INSTALLED.map(a=>a.n):t==='folder'?DIRS:t==='file'?FILES:[];
   $('#dl').innerHTML=opts.map(o=>`<option value="${esc(o)}">`).join('');
   if(!keep){$('#dTarget').value='';if(!dS.touched){dS.i=(TYPES[t]||TYPES.app).icon;dS.c=(TYPES[t]||TYPES.app).color}}
-  if(sys&&!dS.touched){const s=SYS[$('#dSys').value];if(s){dS.i=s.i;dS.c=s.c}}
-  buildPickers()}
+    if(sys&&!dS.touched){const s=SYS[$('#dSys').value];if(s){dS.i=s.i;dS.c=s.c}}
+    buildPickers()}
+  $('#dSys').addEventListener('change',()=>{
+    const s=SYS[$('#dSys').value];
+    if(s&&!dS.touched){
+      dS.i=s.i;
+      dS.c=s.c;
+      buildPickers();
+    }
+  });
 
 let curPickerDir=ROOT.slice(0,-1);
 function openFilePicker(mode){

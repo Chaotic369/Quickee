@@ -460,15 +460,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
         </div>
 
         
-            <h3 style="margin-bottom:8px;justify-content:center">Remove Shortcut?</h3>
-            <p id="confirmMsg" style="font-size:12.5px;color:var(--dim);line-height:1.45;margin-bottom:18px"></p>
-            <div class="acts" style="margin:0;gap:8px">
-              <button id="confirmCancel" style="flex:1">Cancel</button>
-              <button class="del" id="confirmOk" style="flex:1;background:#e5534b;color:#fff">Remove</button>
             </div>
-          </div>
-        </div>
-</div>
 
 <script>
 (function(){
@@ -660,17 +652,28 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
     phone.style.removeProperty('--user-wall');
   }
   fab.style.display=s.triggerEnabled===false?'none':'block';
-    phone.classList.toggle('edge-left', s.trigEdge==='left');
-    phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
-    phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
+  phone.classList.toggle('edge-left', s.trigEdge==='left');
+  phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
+  phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
   phone.style.setProperty('--ring-th',(s.ringThick||2.5)+'px');
   const ro=(s.ringOpacity!=null?s.ringOpacity:40)/100;
-    phone.style.setProperty('--ring-col',`rgba(255,255,255,${ro})`);
-    phone.style.setProperty('--ring-bg',`transparent`);
+  phone.style.setProperty('--ring-col',`rgba(255,255,255,${ro})`);
+  phone.style.setProperty('--ring-bg',`transparent`);
   pop.classList.toggle('nolbl',!s.showLbl);
-  pop.style.width=Math.min(s.w,ph.width-12)+'px';
-  pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
+  const isLeft=s.trigEdge==='left';
+  const targetW=clamp(s.w,180,ph.width-12);
+  const targetH=clamp(s.h,180,ph.height-70);
+  pop.style.width=targetW+'px';
+  pop.style.height=targetH+'px';
+  pop.style.maxHeight=targetH+'px';
+  if(isLeft){
+    pop.style.left='0px';
+    pop.style.right='auto';
+  }else{
+    pop.style.right='0px';
+    pop.style.left='auto';
+  }}
 
 /* ───────── popup: open/close/place ───────── */
 let userMoved=false;
@@ -718,14 +721,24 @@ function placeRz(){
     rzEl.style.display='none';
   }
 }
-function placePop(){if(userMoved){placeRz();return;}
+function placePop(){
   const s=st.set||{},isLeft=s.trigEdge==='left';
-  const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
-  let l=isLeft?8:(ph.width-w-12);
-  let t=b.top-ph.top+(b.height/2)-(h/2);
-  l=clamp(l,6,ph.width-w-6);
-  t=clamp(t,82,ph.height-h-12);
-  pop.style.left=l+'px';
+  const ph=phone.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
+  const maxT=Math.max(36,ph.height-h-54);
+  let t;
+  if(userMoved){
+    t=clamp(pop.offsetTop,36,maxT);
+  }else{
+    const b=fab.getBoundingClientRect();
+    t=clamp(b.top-ph.top+(b.height/2)-(h/2),36,maxT);
+  }
+  if(isLeft){
+    pop.style.left='0px';
+    pop.style.right='auto';
+  }else{
+    pop.style.right='0px';
+    pop.style.left='auto';
+  }
   pop.style.top=t+'px';
   pop.style.transformOrigin=isLeft?'left center':'right center';
   positionFabButtons();
@@ -959,9 +972,9 @@ $('#rz').addEventListener('pointermove',e=>{
   const deltaX=isLeft?(e.clientX-rz.x):(rz.x-e.clientX);
   const deltaY=e.clientY-rz.y;
   const maxW=Math.floor(ph.width-12);
-  const maxH=Math.floor(ph.height-pop.offsetTop-12);
-  const nw=Math.round(clamp(rz.w+deltaX,200,maxW));
-  const nh=Math.round(clamp(rz.h+deltaY,220,Math.max(220,maxH)));
+  const maxH=Math.floor(ph.height-pop.offsetTop-54);
+  const nw=Math.round(clamp(rz.w+deltaX,180,maxW));
+  const nh=Math.round(clamp(rz.h+deltaY,180,Math.max(180,maxH)));
   st.set.w=nw;
   st.set.h=nh;
   save();
@@ -1021,9 +1034,17 @@ popBottomBar.addEventListener('pointerdown',e=>{
 popBottomBar.addEventListener('pointermove',e=>{
   if(!popMoveDrag)return;
   const ph=phone.getBoundingClientRect();
-  const maxTop=ph.height-pop.offsetHeight-12;
-  const newTop=clamp(popMoveDrag.initTop+(e.clientY-popMoveDrag.startY),36,Math.max(36,maxTop));
+  const isLeft=st.set&&st.set.trigEdge==='left';
+  const maxTop=Math.max(36,ph.height-pop.offsetHeight-54);
+  const newTop=clamp(popMoveDrag.initTop+(e.clientY-popMoveDrag.startY),36,maxTop);
   pop.style.top=newTop+'px';
+  if(isLeft){
+    pop.style.left='0px';
+    pop.style.right='auto';
+  }else{
+    pop.style.right='0px';
+    pop.style.left='auto';
+  }
   positionFabButtons();
   placeRz();
 });

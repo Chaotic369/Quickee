@@ -301,7 +301,14 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 <body>
 <div id="phone">
   <div id="wall"></div>
-  <div id="home">
+    <input type="file" id="demoWallInput" accept="image/*">
+    <div class="demo-wall-bar" id="demoWallBar">
+      <i class="fa-solid fa-image" style="color:var(--acc);font-size:13px"></i>
+      <span>Demo Wallpaper</span>
+      <button class="demo-wall-btn" id="btnPickDemoWall"><i class="fa-solid fa-upload"></i> Set</button>
+      <button class="demo-wall-reset" id="btnResetDemoWall"><i class="fa-solid fa-rotate-left"></i></button>
+    </div>
+    <div id="home">
     <div id="clock">9:41</div>
     <div id="date"></div>
     <div id="homeGrid"></div>
@@ -577,6 +584,7 @@ renderHomeGrid();
 $('#homeGrid').addEventListener('click',e=>{
   const it=e.target.closest('.hi');
   if(!it)return;
+  e.stopPropagation();
   const app=it.dataset.app;
   if(app==='studio'){
     openStudio(false);
@@ -613,9 +621,13 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
   v('--pop-blur',(s.blur!=null?s.blur:32)+'px');
-  phone.classList.toggle('has-custom-wall',Boolean(s.customWall));
-  if(s.customWall)phone.style.setProperty('--user-wall',`url("${s.customWall}")`);
-  else phone.style.removeProperty('--user-wall');
+  if(s.customWall){
+    phone.classList.add('has-custom-wall');
+    phone.style.setProperty('--user-wall',`url("${s.customWall}")`);
+  }else{
+    phone.classList.remove('has-custom-wall');
+    phone.style.removeProperty('--user-wall');
+  }
   fab.style.display=s.triggerEnabled===false?'none':'block';
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
@@ -1000,7 +1012,7 @@ function render(){
 /* ───────── settings panel ───────── */
 let sTab='grid';
 let stOpenedFromPop=false;
-function stOn(){return $('#studio').classList.contains('on')}
+function stOn(){const s=$('#studio');return Boolean(s&&(s.classList.contains('on')||s.style.display==='flex'))}
 function setVars(el,s){
   const v=(k,x)=>el.style.setProperty(k,x);
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);
@@ -1074,38 +1086,51 @@ function pvUpdate(){
     phoneBox.style.display=isRingTab?'none':'block';
 
     const ringArea=$('#ringArea');
-    const ringCard=$('#ringCard');
-    const ringSim=$('#ringSimPointer');
-    if(isRingTab&&ringArea&&ringCard&&ringSim){
-      setVars(ringCard,s);
-      ringCard.classList.toggle('nolbl',!s.showLbl);
-      const colCount=Math.max(1,parseInt(s.cols)||4);
-      const cardPad=(s.pad||10)*2;
-      const gapWidth=(s.cgap||8);
-      const singleColW=(s.w-cardPad-(colCount-1)*gapWidth)/colCount;
-      ringCard.style.width=(singleColW*2+gapWidth+cardPad)+'px';
+        const ringCard=$('#ringCard');
+        const ringSim=$('#ringSimPointer');
+        if(isRingTab&&ringArea&&ringCard&&ringSim){
+          setVars(ringCard,s);
+          ringCard.classList.toggle('nolbl',!s.showLbl);
+          const colCount=Math.max(1,parseInt(s.cols)||4);
+          const cardPad=(s.pad||10)*2;
+          const gapWidth=(s.cgap||8);
+          const singleColW=Math.max(30,(s.w-cardPad-(colCount-1)*gapWidth)/colCount);
+          ringCard.style.width=(singleColW*2+gapWidth+cardPad)+'px';
 
-      const rSz=s.ringSize||42;
-      const rTh=s.ringThick||2.5;
-      const rOp=(s.ringOpacity!=null?s.ringOpacity:14)/100;
-      ringSim.style.width=rSz+'px';
-      ringSim.style.height=rSz+'px';
-      ringSim.style.borderWidth=rTh+'px';
-      ringSim.style.borderStyle='solid';
-      ringSim.style.borderColor='rgba(255,255,255,0.75)';
-      ringSim.style.backgroundColor=`rgba(255,255,255,${rOp})`;
+          const rSz=s.ringSize||42;
+          const rTh=s.ringThick||2.5;
+          const rOp=(s.ringOpacity!=null?s.ringOpacity:14)/100;
+          ringSim.style.width=rSz+'px';
+          ringSim.style.height=rSz+'px';
+          ringSim.style.borderWidth=rTh+'px';
+          ringSim.style.borderStyle='solid';
+          ringSim.style.borderColor='rgba(255,255,255,0.75)';
+          ringSim.style.backgroundColor=`rgba(255,255,255,${rOp})`;
+          ringSim.style.display='block';
 
-      const ringGrid=$('#ringGrid');
-            if(ringGrid){
-              const sampleItems=st.items.slice(0,4);
-              ringGrid.innerHTML=sampleItems.map(it=>`
-                <div class="ring-preview-item" data-id="${it.id}">
-                  <div class="ic" style="background:${it.c||'#5b8def'}">${iconInner(it)}</div>
-                  <div class="lb">${esc(it.n)}</div>
-                </div>
-              `).join('');
+          const ringGrid=$('#ringGrid');
+          if(ringGrid){
+            const sampleItems=st.items.slice(0,4);
+            ringGrid.innerHTML=sampleItems.map(it=>`
+              <div class="ring-preview-item" data-id="${it.id}">
+                ${itemHTML(it)}
+              </div>
+            `).join('');
+          }
+
+          requestAnimationFrame(()=>{
+            if(!ringCard.dataset.userMoved){
+              const firstItem=ringCard.querySelector('.ring-preview-item');
+              if(firstItem){
+                const rect=ringCard.getBoundingClientRect();
+                const ir=firstItem.getBoundingClientRect();
+                ringSim.style.left=(ir.left+ir.width/2-rect.left)+'px';
+                ringSim.style.top=(ir.top+ir.height/2-rect.top)+'px';
+                ringCard.querySelectorAll('.ring-preview-item').forEach(x=>x.classList.toggle('hovered',x===firstItem));
+              }
             }
-    }
+          });
+        }
     $('#stTag').textContent=isRingTab?'Selection Ring Preview':'Live Preview · '+Math.max(1,Math.round(scale*100))+'%'}
 function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+(c[5]||'')});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
 const SET_GROUPS={
@@ -1484,51 +1509,45 @@ function openStudio(fromPop=false){
   buildStBody();
   s.classList.add('on');
   const rCard=$('#ringCard');
-  const rSim=$('#ringSimPointer');
-  if(rCard&&rSim){
-    const updatePointer=e=>{
-      rSim.style.display='block';
-      const rect=rCard.getBoundingClientRect();
-      const x=e.clientX-rect.left;
-      const y=e.clientY-rect.top;
-      rSim.style.left=x+'px';
-      rSim.style.top=y+'px';
-      let hoveredItem=null;
-      rCard.querySelectorAll('.ring-preview-item').forEach(it=>{
-        const ir=it.getBoundingClientRect();
-        const ix=ir.left+ir.width/2-rect.left;
-        const iy=ir.top+ir.height/2-rect.top;
-        if(Math.hypot(x-ix,y-iy)<=((st.set.icon||46)/2+10)){
-          hoveredItem=it;
-        }
-      });
-      rCard.querySelectorAll('.ring-preview-item').forEach(it=>it.classList.toggle('hovered',it===hoveredItem));
-    };
-    rCard.onpointerdown=e=>{
-      rCard.setPointerCapture(e.pointerId);
-      updatePointer(e);
-    };
-    rCard.onpointerenter=e=>{
-      rSim.style.display='block';
-      const rect=rCard.getBoundingClientRect();
-      rSim.style.left=(e.clientX-rect.left)+'px';
-      rSim.style.top=(e.clientY-rect.top)+'px';
-    };
-    rCard.onpointerleave=()=>{
-      rSim.style.display='none';
-      rCard.querySelectorAll('.ring-preview-item').forEach(x=>x.classList.remove('hovered'));
-    };
-    rCard.onpointermove=updatePointer;
-    rCard.onpointerup=e=>{
-      try{rCard.releasePointerCapture(e.pointerId)}catch(_){}
-      rSim.style.display='none';
-      rCard.querySelectorAll('.ring-preview-item').forEach(x=>x.classList.remove('hovered'));
-    };
-    rCard.onpointercancel=rCard.onpointerleave;
+    const rSim=$('#ringSimPointer');
+    if(rCard&&rSim){
+      const updatePointer=e=>{
+        rCard.dataset.userMoved='true';
+        rSim.style.display='block';
+        const rect=rCard.getBoundingClientRect();
+        const x=e.clientX-rect.left;
+        const y=e.clientY-rect.top;
+        rSim.style.left=x+'px';
+        rSim.style.top=y+'px';
+        let hoveredItem=null;
+        rCard.querySelectorAll('.ring-preview-item').forEach(it=>{
+          const ir=it.getBoundingClientRect();
+          const ix=ir.left+ir.width/2-rect.left;
+          const iy=ir.top+ir.height/2-rect.top;
+          if(Math.hypot(x-ix,y-iy)<=((st.set.icon||46)/2+16)){
+            hoveredItem=it;
+          }
+        });
+        rCard.querySelectorAll('.ring-preview-item').forEach(it=>it.classList.toggle('hovered',it===hoveredItem));
+      };
+      rCard.onpointerdown=e=>{
+        rCard.setPointerCapture(e.pointerId);
+        updatePointer(e);
+      };
+      rCard.onpointerenter=updatePointer;
+      rCard.onpointermove=updatePointer;
+      rCard.onpointerup=e=>{
+        try{rCard.releasePointerCapture(e.pointerId)}catch(_){}
+      };
+    }
+    pvUpdate();
+    requestAnimationFrame(pvUpdate)}
+  function closeStudio(){
+    const s=$('#studio');
+    if(!s)return;
+    s.classList.remove('on');
+    s.style.display='none';
   }
-  pvUpdate();
-  requestAnimationFrame(pvUpdate)}
-function closeStudio(){$('#studio').classList.remove('on')}
 
 /* ───────── edit mode + click handling ───────── */
 let editMode=false;
@@ -2173,13 +2192,6 @@ $('#dSave').onclick=()=>{
 
 
 /* ───────── keyboard + resize + init ───────── */
-$('#phone').addEventListener('click',e=>{
-  if(!stOn())return;
-  if(e.target.id==='phone'||e.target.id==='wall'||e.target.id==='home'||e.target.closest('#dock,#homeGrid')){
-    closeStudio();
-  }
-});
-
 $('#nbBack').onclick=()=>{
   haptic('tick');
   if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none';return}
@@ -2207,10 +2219,44 @@ $('#nbRecents').onclick=()=>{
   showRecents();
 };
 
+const dWallInput=$('#demoWallInput');
+const btnPickWall=$('#btnPickDemoWall');
+const btnResetWall=$('#btnResetDemoWall');
+
+if(btnPickWall&&dWallInput){
+  btnPickWall.onclick=()=>{
+    dWallInput.value='';
+    dWallInput.click();
+  };
+  dWallInput.onchange=e=>{
+    const file=e.target.files&&e.target.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      st.set.customWall=ev.target.result;
+      applySet();
+      save();
+      if(stOn())pvUpdate();
+      toast('Wallpaper updated');
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+if(btnResetWall){
+  btnResetWall.onclick=()=>{
+    st.set.customWall=null;
+    applySet();
+    save();
+    if(stOn())pvUpdate();
+    toast('Wallpaper reset to default');
+  };
+}
+
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';
-statusIcons();applyBright();applySet();placeFab();
+statusIcons();applyBright();applySet();placeFab();render();
 })();
 </script>
 </body>

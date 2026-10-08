@@ -1796,10 +1796,32 @@ $('#dImgFileInput').onchange=e=>{
 $('#cropCancel').onclick=()=>{$('#cropDlg').style.display='none'};
 $('#cropApply').onclick=()=>{
   const outC=document.createElement('canvas');
-  outC.width=140;
-  outC.height=140;
+  outC.width=256;
+  outC.height=256;
   const outCtx=outC.getContext('2d');
-  outCtx.drawImage(cropC,cropC.width/2-90,cropC.height/2-90,180,180,0,0,140,140);
+  
+  if(cropImg.src){
+    const baseW=cropImg.width, baseH=cropImg.height;
+    const aspect=baseW/baseH;
+    let dw=cropC.width, dh=cropC.height;
+    if(aspect>1) dw=cropC.height*aspect; else dh=cropC.width/aspect;
+    
+    const finalW=dw*cropState.scale;
+    const finalH=dh*cropState.scale;
+    const drawX=(cropC.width-finalW)/2+cropState.x;
+    const drawY=(cropC.height-finalH)/2+cropState.y;
+
+    const cropBoxX=cropC.width/2-90;
+    const cropBoxY=cropC.height/2-90;
+    const cropBoxSize=180;
+
+    const sx=(cropBoxX-drawX)*(baseW/finalW);
+    const sy=(cropBoxY-drawY)*(baseH/finalH);
+    const sSize=cropBoxSize*(baseW/finalW);
+
+    outCtx.drawImage(cropImg, sx, sy, sSize, sSize, 0, 0, 256, 256);
+  }
+  
   dS.customImg=outC.toDataURL('image/png');
   dS.touched=true;
   updateIconPreview();

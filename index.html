@@ -234,8 +234,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .stp .tag{position:absolute;top:9px;left:14px;z-index:2;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.65);pointer-events:none}
 .pvpop{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;overflow:hidden;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 26px 70px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.2);pointer-events:none}
 #pvgrid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
-.stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0}
-.stabs button{flex:1;padding:9px 0;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
+.stabs{display:flex;gap:6px;padding:12px 14px 4px;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.stabs::-webkit-scrollbar{display:none}
+.stabs button{flex:0 0 auto;padding:9px 14px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12.5px;font-weight:600;color:var(--dim);transition:all .15s}
 .stabs button.on{background:var(--acc);color:#1c1304;border-color:transparent}
 .stbody{flex:1;min-height:0;overflow-y:auto;padding:12px 16px 24px;scrollbar-width:none}
 .stbody::-webkit-scrollbar{display:none}
@@ -309,9 +310,13 @@ const TYPES={
   app:{label:'App',color:'#5b8def',icon:'fa-solid fa-cube',ph:'Package name or pick an installed app'},
   chat:{label:'Chat',color:'#2fb872',icon:'fa-brands fa-whatsapp',ph:'Phone number or username'},
   call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number'},
+  sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
+  email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
+  web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'example.com'},
+  search:{label:'Search',color:'#fbbc05',icon:'fa-solid fa-magnifying-glass',ph:'Search keywords'},
+  deep:{label:'Deep Link',color:'#9c27b0',icon:'fa-solid fa-link',ph:'spotify://, slack://, etc.'},
   folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder',ph:'/storage/emulated/0/…'},
   file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'/storage/emulated/0/…'},
-  web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'example.com'},
   system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-gear',ph:''}
 };
 const ROOT='/storage/emulated/0/';
@@ -352,9 +357,11 @@ const SYS={
  flash:{n:'Flashlight',i:'fa-solid fa-lightbulb',c:'#d6a21f',tog:1,hint:'CameraManager.setTorchMode()'},
  air:{n:'Airplane',i:'fa-solid fa-plane',c:'#5e7ea6',tog:1,hint:'Settings.ACTION_AIRPLANE_MODE_SETTINGS'},
  rot:{n:'Auto-rotate',i:'fa-solid fa-rotate',c:'#4d9a86',tog:1,hint:'Settings.System.ACCELEROMETER_ROTATION'},
- dnd:{n:'Do not disturb',i:'fa-solid fa-bell-slash',c:'#8a5bc2',tog:1,hint:'NotificationManager.setInterruptionFilter()'}
+ dnd:{n:'Do not disturb',i:'fa-solid fa-bell-slash',c:'#8a5bc2',tog:1,hint:'NotificationManager.setInterruptionFilter()'},
+ hotspot:{n:'Hotspot',i:'fa-solid fa-tower-broadcast',c:'#e65100',tog:1,hint:'TetheringManager.startTethering()'},
+ mute:{n:'Mute / Silent',i:'fa-solid fa-volume-xmark',c:'#c2185b',tog:1,hint:'AudioManager.RINGER_MODE_SILENT'}
 };
-const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
+const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',search:'Intent ACTION_WEB_SEARCH with query',deep:'Intent ACTION_VIEW Uri.parse(customUri)',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
 const S_DEF={icon:58,radius:30,cols:4,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%']];
@@ -406,27 +413,35 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
 /* ───────── popup: open/close/place ───────── */
 let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
+function positionFabButtons(){
+  const ph=phone.getBoundingClientRect(),rightX=ph.width-44;
+  let topTarget;
+  if(isOpen()){
+    topTarget=pop.offsetTop-42;
+  }else{
+    topTarget=fab.offsetTop-42;
+  }
+  topTarget=clamp(topTarget,38,ph.height-44);
+  fabSet.style.left=rightX+'px';
+  fabSet.style.top=topTarget+'px';
+  fabEdit.style.left=(rightX-38)+'px';
+  fabEdit.style.top=topTarget+'px';
+  fabAdd.style.left=(rightX-76)+'px';
+  fabAdd.style.top=topTarget+'px'}
 function placePop(){if(userMoved)return;
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
   let l=ph.width-w-12;
   let t=b.top-ph.top+(b.height/2)-(h/2);
   l=clamp(l,6,ph.width-w-6);
-  t=clamp(t,36,ph.height-h-12);
+  t=clamp(t,82,ph.height-h-12);
   pop.style.left=l+'px';
-  pop.style.top=t+'px'}
+  pop.style.top=t+'px';
+  positionFabButtons()}
 function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop()}
 function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
-function positionFabButtons(){
-  const ph=phone.getBoundingClientRect(),fy=fab.offsetTop,rightX=ph.width-44;
-  fabSet.style.left=rightX+'px';
-  fabSet.style.top=clamp(fy-40,36,ph.height-44)+'px';
-  fabEdit.style.left=rightX+'px';
-  fabEdit.style.top=clamp(fy-78,36,ph.height-44)+'px';
-  fabAdd.style.left=rightX+'px';
-  fabAdd.style.top=clamp(fy-116,36,ph.height-44)+'px'}
 function placeFab(){const ph=phone.getBoundingClientRect();
   const th=st.set.trigH||90;
   let y;
@@ -439,8 +454,14 @@ const dtRing = document.createElement('div');
 dtRing.className = 'dt-ring';
 phone.appendChild(dtRing);
 
-let fbDrag=false, fbStart={x:0,y:0}, fbWasOpen=false;
+let fbDrag=false, fbEdgeDrag=false, fbStart={x:0,y:0}, fbWasOpen=false;
 fab.addEventListener('pointerdown',e=>{
+  if(editMode){
+    fbEdgeDrag=true;
+    fab.setPointerCapture(e.pointerId);
+    e.stopPropagation();
+    return;
+  }
   fbDrag=true; fbStart={x:e.clientX,y:e.clientY}; fbWasOpen=isOpen();
   fab.setPointerCapture(e.pointerId);
   if(!fbWasOpen)openPop();
@@ -450,6 +471,15 @@ fab.addEventListener('pointerdown',e=>{
   dtRing.style.top=(e.clientY-pr.top)+'px';
 });
 fab.addEventListener('pointermove',e=>{
+  if(fbEdgeDrag){
+    const ph=phone.getBoundingClientRect(),th=st.set.trigH||90;
+    const y=clamp(e.clientY-ph.top-th/2,36,ph.height-th-18);
+    st.btn={y};
+    st.set.trigY=Math.round(((y+th/2)/ph.height)*100);
+    placeFab();
+    save();
+    return;
+  }
   if(!fbDrag)return;
   const pr=phone.getBoundingClientRect();
   dtRing.style.left=(e.clientX-pr.left)+'px';
@@ -462,6 +492,11 @@ fab.addEventListener('pointermove',e=>{
   }
 });
 fab.addEventListener('pointerup',e=>{
+  if(fbEdgeDrag){
+    fbEdgeDrag=false;
+    toast('Trigger position saved');
+    return;
+  }
   if(!fbDrag)return;
   fbDrag=false;
   dtRing.style.display='none';
@@ -480,6 +515,7 @@ fab.addEventListener('pointerup',e=>{
   }
 });
 fab.addEventListener('pointercancel',()=>{
+  fbEdgeDrag=false;
   fbDrag=false; dtRing.style.display='none';
   document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
 });
@@ -488,7 +524,7 @@ fab.addEventListener('pointercancel',()=>{
 let pdg=null;
 $('#pop').addEventListener('pointerdown',e=>{if(e.target.closest('.it,button,input,select,.rz'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};pop.setPointerCapture(e.pointerId)});
 $('#pop').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
-  pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,24,ph.height-60)+'px'});
+  pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,82,ph.height-60)+'px';positionFabButtons()});
 $('#pop').addEventListener('pointerup',()=>{pdg=null});
 $('#pop').addEventListener('pointercancel',()=>{pdg=null});
 
@@ -514,7 +550,7 @@ function render(){
     if(stOn())studioRefresh();
   requestAnimationFrame(placePop)}
 /* ───────── settings panel ───────── */
-let sTab='layout';
+let sTab='grid';
 function stOn(){return $('#studio').classList.contains('on')}
 function setVars(el,s){const v=(k,x)=>el.style.setProperty(k,x);v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100)}
 function pvUpdate(){
@@ -529,31 +565,41 @@ function pvUpdate(){
   p.style.left=((stage.clientWidth-w*k)/2)+'px';
   p.style.top=(28+(ah-h*k)/2)+'px';
   $('#stTag').textContent='Live preview'+(k<0.995?' · '+Math.round(k*100)+'%':'')}
-function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];$('#v_'+c[0]).textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
+function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
+const SET_GROUPS={
+  grid:{keys:['cols','cgap','rgap','pad'],title:'Grid Management'},
+  icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
+  popup:{keys:['w','h','glass'],title:'Pop-up Size & Glass'},
+  trigger:{keys:['trigH','trigW','trigY'],title:'Trigger Size & Placement',extra:'<div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Drag & Set:</b> You can also directly touch and drag the side trigger in Edit mode to set its location on screen.</div>'}
+};
 function buildStBody(){
   const b=$('#stBody');if(!b)return;const y=b.scrollTop;
   document.querySelectorAll('#stTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===sTab));
-  if(sTab==='layout'){
-    b.innerHTML=CTRL.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
-    `<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>`+
-    `<button class="sbtn" id="sReset">Reset layout</button>`;
-    syncSl()}
-  else{
-    b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 6px"><i class="fa-solid fa-plus"></i> Add shortcut</button><p style="font-size:11.5px;color:var(--dim);margin:4px 0 8px">Tap a shortcut to edit it. Use the arrows to reorder.</p>`+
-    (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc(TYPES[it.t].label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts yet.</div>')}
+  if(sTab==='items'){
+    b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 6px"><i class="fa-solid fa-plus"></i> Add shortcut</button><p style="font-size:11.5px;color:var(--dim);margin:4px 0 8px">Tap any shortcut to customize. Use arrows to reorder.</p>`+
+    (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc((TYPES[it.t]||TYPES.app).label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts yet.</div>');
+  }else{
+    const grp=SET_GROUPS[sTab]||SET_GROUPS.grid;
+    const subset=CTRL.filter(c=>grp.keys.includes(c[0]));
+    b.innerHTML=`<div class="set-hdr"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
+      subset.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
+      (grp.extra||'')+
+      `<button class="sbtn" id="sReset" style="margin-top:10px">Reset to defaults</button>`;
+    syncSl();
+  }
   b.scrollTop=y}
 function studioRefresh(){pvUpdate();if(sTab==='items')buildStBody()}
 function openStudio(){
-  closePop();sTab='layout';
+  closePop();sTab='grid';
   const s=$('#studio');
-  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher</b><small>Popup editor</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Try it</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="layout">Layout</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
   $('#stBack').onclick=closeStudio;
   $('#stTry').onclick=()=>{closeStudio();openPop()};
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();$('#stBody').scrollTop=0};
-  $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL.find(x=>x[0]===k);st.set[k]=parseFloat(el.value);$('#v_'+k).textContent=st.set[k]+c[5];applySet();pvUpdate();save()};
+  $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL.find(x=>x[0]===k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;$('#v_'+k).textContent=st.set[k]+c[5];applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
     if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
-    if(e.target.closest('#sReset')){st.set={...S_DEF};applySet();syncSl();pvUpdate();save();toast('Layout reset');return}
+    if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
     if(e.target.closest('#stAdd')){openDlg(null);return}
     const r=e.target.closest('.res');if(!r)return;
     const i=st.items.findIndex(x=>x.id===r.dataset.id);if(i<0)return;
@@ -623,6 +669,10 @@ function launch(it){
   if(it.t==='app')return openApp(it);
   if(it.t==='chat')return openChat(it);
   if(it.t==='call')return openCall(it);
+  if(it.t==='sms')return openSim({n:'SMS: '+it.n,i:'fa-solid fa-comment-sms',c:it.c,sub:it.v,hint:HINTS.sms},`<div class="card"><p style="font-size:13px;color:var(--dim)">Preparing SMS message to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:70%"></div><div class="skel"></div></div>`);
+  if(it.t==='email')return openSim({n:'Email: '+it.n,i:'fa-solid fa-envelope',c:it.c,sub:it.v,hint:HINTS.email},`<div class="card"><p style="font-size:13px;color:var(--dim)">Drafting email to <b style="color:var(--ink)">${esc(it.v)}</b></p><div class="skel" style="margin-top:14px;width:60%"></div><div class="skel"></div></div>`);
+  if(it.t==='search')return openWeb('https://www.google.com/search?q='+encodeURIComponent(it.v),'Search: '+it.n);
+  if(it.t==='deep')return openSim({n:it.n,i:it.i,c:it.c,sub:it.v,hint:HINTS.deep},`<div class="card"><p style="font-size:13px;color:var(--dim)">Invoking custom application URI:</p><p style="margin-top:10px;font-weight:700;color:var(--acc);word-break:break-all">${esc(it.v)}</p></div>`);
   if(it.t==='folder')return openFolder(it.v);
   if(it.t==='file')return openFile(it.v);
   if(it.t==='web')return openWeb(normUrl(it.v),it.n)}
@@ -698,11 +748,11 @@ function openDlg(item){
 function setDType(t,keep){dS.t=t;
   document.querySelectorAll('#dType button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   const sys=t==='system';$('#dSys').style.display=sys?'block':'none';$('#dTarget').style.display=sys?'none':'block';
-  $('#dTL').textContent=sys?'Action':'Target';$('#dTarget').placeholder=TYPES[t].ph;
+  $('#dTL').textContent=sys?'Action':'Target';$('#dTarget').placeholder=(TYPES[t]||TYPES.app).ph;
   const opts=t==='app'?INSTALLED.map(a=>a.n):t==='folder'?DIRS:t==='file'?FILES:[];
   $('#dl').innerHTML=opts.map(o=>`<option value="${esc(o)}">`).join('');
-  if(!keep){$('#dTarget').value='';if(!dS.touched){dS.i=TYPES[t].icon;dS.c=TYPES[t].color}}
-  if(sys&&!dS.touched){const s=SYS[$('#dSys').value];dS.i=s.i;dS.c=s.c}
+  if(!keep){$('#dTarget').value='';if(!dS.touched){dS.i=(TYPES[t]||TYPES.app).icon;dS.c=(TYPES[t]||TYPES.app).color}}
+  if(sys&&!dS.touched){const s=SYS[$('#dSys').value];if(s){dS.i=s.i;dS.c=s.c}}
   buildPickers()}
 function buildPickers(){
   $('#dIcons').innerHTML=ICONS.map(i=>`<button data-i="${i}" class="${i===dS.i?'on':''}">${i==='letter'?'<b>Aa</b>':`<i class="${i}"></i>`}</button>`).join('');

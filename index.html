@@ -345,7 +345,22 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
   <div id="flash"></div>
   <div id="toast"></div>
 
-  <div class="dlgw" id="dlg">
+  <div class="dlgw" id="batchDlg" style="z-index:82">
+          <div class="dc">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:var(--acc)"></i> Add Multiple Apps</h3>
+              <span id="batchCount" style="font-size:11.5px;color:var(--acc);font-weight:700">0 selected</span>
+            </div>
+            <div id="batchAppList" style="max-height:340px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+            <div class="acts" style="margin-top:16px">
+              <button id="batchCancel">Cancel</button>
+              <span class="sp"></span>
+              <button class="pri" id="batchAddBtn">Add Selected</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="dlgw" id="dlg">
       <div class="dc">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
           <h3 id="dT" style="margin:0">New shortcut</h3>
@@ -494,6 +509,7 @@ const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivit
 
 const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
+const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
 const DEF=[
  ['app','Camera'],['app','Gallery'],['app','Maps'],['app','Music'],['app','Settings'],['app','Chrome'],['app','YouTube'],['app','Calculator'],
@@ -1065,7 +1081,7 @@ function pvUpdate(){
             }
     }
     $('#stTag').textContent=isRingTab?'Selection Ring Preview':'Live Preview · '+Math.max(1,Math.round(scale*100))+'%'}
-function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
+function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+(c[5]||'')});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
@@ -1380,7 +1396,7 @@ function openStudio(fromPop=false){
     };
   }
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();pvUpdate();$('#stBody').scrollTop=0};
-  $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL.find(x=>x[0]===k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;$('#v_'+k).textContent=st.set[k]+c[5];applySet();placeFab();pvUpdate();save()};
+  $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL_MAP.get(k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;const vEl=$('#v_'+k);if(vEl)vEl.textContent=st.set[k]+((c&&c[5])||'');applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
     if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
     if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}

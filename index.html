@@ -256,9 +256,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .ring-preview-area{position:relative;flex:1;height:100%;display:none;align-items:center;justify-content:center;z-index:8}
 .stp.ring-mode .ring-preview-area{display:flex}
 .ring-preview-card{position:relative;display:flex;flex-direction:column;border-radius:26px;background:rgba(20,15,35,var(--glass));backdrop-filter:blur(30px) saturate(1.5);-webkit-backdrop-filter:blur(30px) saturate(1.5);box-shadow:0 16px 40px rgba(0,0,0,.65),0 0 0 1px rgba(255,255,255,.14);padding:var(--pad);touch-action:none}
-.ring-preview-grid{display:grid;grid-template-columns:repeat(2,var(--icon));column-gap:var(--cgap);row-gap:var(--rgap);align-items:center;justify-content:center}
-.ring-preview-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;width:var(--icon)}
-.ring-preview-item .ic{position:relative;width:var(--icon);height:var(--icon);aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1)}
+.ring-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);align-items:center;justify-content:center;width:100%}
+.ring-preview-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;width:100%}
+.ring-preview-item .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1)}
 .ring-preview-item .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
 .ring-preview-item .lb{max-width:100%;font-size:var(--lbl);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-weight:500;color:rgba(246,239,228,.9)}
 .ring-preview-card.nolbl .ring-preview-item .lb{display:none}
@@ -807,6 +807,11 @@ function pvUpdate(){
     if(isRingTab&&ringArea&&ringCard&&ringSim){
       setVars(ringCard,s);
       ringCard.classList.toggle('nolbl',!s.showLbl);
+      const colCount=Math.max(1,parseInt(s.cols)||4);
+      const cardPad=(s.pad||10)*2;
+      const gapWidth=(s.cgap||8);
+      const singleColW=(s.w-cardPad-(colCount-1)*gapWidth)/colCount;
+      ringCard.style.width=(singleColW*2+gapWidth+cardPad)+'px';
 
       const rSz=s.ringSize||42;
       const rTh=s.ringThick||2.5;

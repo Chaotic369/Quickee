@@ -236,15 +236,11 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 
   <div id="pop" role="dialog" aria-label="Quick launcher">
       <div class="top-bar" id="topBar">
-                    <div class="chips" id="chips"></div>
-                    <button class="mbtn" id="bMenu" aria-label="Menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>
+                    <div style="flex:1;min-width:0;height:32px"></div>
+                    <button class="mbtn" id="bAdd" aria-label="Add shortcut" title="Add shortcut"><i class="fa-solid fa-plus"></i></button>
+                    <button class="mbtn" id="bEdit" aria-label="Reorder / edit" title="Reorder / edit"><i class="fa-solid fa-pen"></i></button>
+                    <button class="mbtn" id="bSet" aria-label="Layout settings" title="Layout settings"><i class="fa-solid fa-sliders"></i></button>
                   </div>
-            <div class="menu-pop" id="menu">
-              <button class="menu-item" id="bAdd"><i class="fa-solid fa-plus"></i><span>Add shortcut</span></button>
-              <button class="menu-item" id="bEdit"><i class="fa-solid fa-pen"></i><span id="bEditTxt">Reorder / edit</span></button>
-              <div class="menu-sep"></div>
-              <button class="menu-item" id="bSet"><i class="fa-solid fa-sliders"></i><span>Layout settings</span></button>
-            </div>
       <div class="pbody" id="pbody">
         <div id="grid"></div>
         <div id="settings"></div>
@@ -383,7 +379,7 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
 
 /* ───────── popup: open/close/place ───────── */
-let userMoved=false,view='grid',chip='all',editMode=false;
+let userMoved=false,view='grid',editMode=false;
 const isOpen=()=>pop.classList.contains('open');
 function placePop(){if(userMoved)return;
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
@@ -392,7 +388,7 @@ function placePop(){if(userMoved)return;
   l=clamp(l,ph.left+6,ph.right-w-6);t=clamp(t,ph.top+32,ph.bottom-h-8);
   pop.style.left=(l-ph.left)+'px';pop.style.top=(t-ph.top)+'px'}
 function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');$('#scrim').classList.add('on');placePop()}
-function closePop(){pop.classList.remove('open');fab.classList.remove('open');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');if(document.activeElement)document.activeElement.blur()}
+function closePop(){pop.classList.remove('open');fab.classList.remove('open');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');$('#bEdit').classList.remove('on');$('#bEdit i').className='fa-solid fa-pen';if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── floating plus: drag + tap ───────── */
@@ -409,7 +405,7 @@ fab.addEventListener('pointercancel',()=>{bd=null});
 
 /* ───────── popup: drag ───────── */
 let pdg=null;
-$('#topBar').addEventListener('pointerdown',e=>{if(e.target.closest('.chip,.mbtn'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};$('#topBar').setPointerCapture(e.pointerId)});
+$('#topBar').addEventListener('pointerdown',e=>{if(e.target.closest('.mbtn'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};$('#topBar').setPointerCapture(e.pointerId)});
 $('#topBar').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
   pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,24,ph.height-60)+'px'});
 $('#topBar').addEventListener('pointerup',()=>{pdg=null});
@@ -426,51 +422,37 @@ $('#rz').addEventListener('pointerup',()=>{if(rz){rz=null;save()}});
 $('#rz').addEventListener('pointercancel',()=>{rz=null});
 
 /* ───────── views: grid / results / settings ───────── */
-const CHIPS=[['all','All'],['app','Apps'],['people','Chat & calls'],['files','Files'],['web','Websites'],['system','System']];
-function chipOK(it){return chip==='all'||(chip==='app'&&it.t==='app')||(chip==='people'&&(it.t==='chat'||it.t==='call'))||(chip==='files'&&(it.t==='file'||it.t==='folder'))||(chip==='web'&&it.t==='web')||(chip==='system'&&it.t==='system')}
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}
 function iconInner(it){return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`}
 function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
-function renderChips(){$('#chips').innerHTML=CHIPS.map(c=>`<button class="chip${c[0]===chip?' on':''}" data-c="${c[0]}">${c[1]}</button>`).join('')}
-
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
 function render(){
   const showSet=view==='settings';
-  closeMenu();
-  $('#grid').style.display=showSet?'none':'grid';
-  $('#settings').style.display=showSet?'block':'none';
-  $('#topBar').style.display=showSet?'none':'flex';
-  $('#chips').style.display=st.set.showChips!==false?'flex':'none';
-  if(showSet){buildSettings()}
-  else{
-    renderChips();
-    const l=st.items.filter(chipOK);
+    $('#grid').style.display=showSet?'none':'grid';
+    $('#settings').style.display=showSet?'block':'none';
+    $('#topBar').style.display=showSet?'none':'flex';
+    if(showSet){buildSettings()}
+    else{
+      const l=st.items;
     grid.innerHTML=l.length?l.map(itemHTML).join(''):`<div class="empty">Nothing here yet.<br>Tap + to add a shortcut.</div>`}
   requestAnimationFrame(placePop)}
-$('#chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;chip=b.dataset.c;render()});
-
 /* ───────── settings panel ───────── */
 function buildSettings(){
   $('#settings').innerHTML=`<div class="set-hdr"><button class="mbtn" id="sBackSet" title="Back"><i class="fa-solid fa-arrow-left"></i></button><span>Layout settings</span></div>`+CTRL.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
   `<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>`+
-  `<div class="sw"><span>Category tabs</span><button class="tg" id="tgChips" aria-label="Category tabs"></button></div>`+
   `<button class="sbtn" id="sReset">Reset layout</button><button class="sbtn" id="sDone">Done</button>`;
   syncSliders();
   $('#sBackSet').onclick=()=>{view='grid';render()};
   $('#tgLbl').onclick=()=>{st.set.showLbl=!st.set.showLbl;$('#tgLbl').classList.toggle('on',st.set.showLbl);applySet();save()};
-  $('#tgChips').onclick=()=>{st.set.showChips=st.set.showChips===false?true:false;$('#tgChips').classList.toggle('on',st.set.showChips!==false);render();save()};
   $('#sReset').onclick=()=>{st.set={...S_DEF};applySet();syncSliders();save();toast('Layout reset')};
   $('#sDone').onclick=()=>{view='grid';render()}}
-function syncSliders(){CTRL.forEach(c=>{const el=document.querySelector(`#settings input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];$('#v_'+c[0]).textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',st.set.showLbl);const tc=$('#tgChips');if(tc)tc.classList.toggle('on',st.set.showChips!==false)}
+function syncSliders(){CTRL.forEach(c=>{const el=document.querySelector(`#settings input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];$('#v_'+c[0]).textContent=st.set[c[0]]+c[5]});const t=$('#tgLbl');if(t)t.classList.toggle('on',st.set.showLbl)}
 $('#settings').addEventListener('input',e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k;st.set[k]=parseFloat(el.value);const c=CTRL.find(x=>x[0]===k);$('#v_'+k).textContent=st.set[k]+c[5];applySet();placePop();save()});
-function closeMenu(){const m=$('#menu'),b=$('#bMenu');if(m)m.classList.remove('open');if(b)b.classList.remove('on')}
-$('#bMenu').onclick=e=>{e.stopPropagation();const m=$('#menu'),o=!m.classList.contains('open');closeMenu();if(o){m.classList.add('open');$('#bMenu').classList.add('on')}};
-$('#pbody').addEventListener('pointerdown',closeMenu);
-$('#bSet').onclick=()=>{closeMenu();view=view==='settings'?'grid':'settings';render()};
+$('#bSet').onclick=()=>{view=view==='settings'?'grid':'settings';render()};
 
 /* ───────── edit mode + click handling ───────── */
-$('#bEdit').onclick=()=>{closeMenu();editMode=!editMode;pop.classList.toggle('edit',editMode);const et=$('#bEditTxt');if(et){et.textContent=editMode?'Done editing':'Reorder / edit';$('#bEdit i').className=editMode?'fa-solid fa-check':'fa-solid fa-pen'}if(view!=='grid')view='grid';render();toast(editMode?'Tap (X) to delete · drag to reorder':'Order saved')};
+$('#bEdit').onclick=()=>{editMode=!editMode;pop.classList.toggle('edit',editMode);$('#bEdit').classList.toggle('on',editMode);$('#bEdit i').className=editMode?'fa-solid fa-check':'fa-solid fa-pen';if(view!=='grid')view='grid';render();toast(editMode?'Tap (X) to delete · drag to reorder':'Order saved')};
 let suppress=false;
 grid.addEventListener('click',e=>{if(suppress)return;const it=e.target.closest('.it');if(!it)return;const item=st.items.find(x=>x.id===it.dataset.id);if(!item)return;
   if(e.target.closest('.x')){st.items=st.items.filter(x=>x.id!==item.id);save();render();return}
@@ -607,9 +589,9 @@ $('#dSave').onclick=()=>{
   if(!name){toast('Add a name first');return}
   const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c};
       if(dS.id){const x=st.items.find(i=>i.id===dS.id);Object.assign(x,rec)}else st.items.push({id:uid(),...rec});
-  save();$('#dlg').style.display='none';if(chip!=='all'&&!chipOK(rec))chip='all';render();
+  save();$('#dlg').style.display='none';render();
   const g=pbody;if(!dS.id)setTimeout(()=>{g.scrollTop=g.scrollHeight},30);toast(dS.id?'Shortcut updated':'Shortcut added')};
-$('#bAdd').onclick=()=>{closeMenu();openDlg(null)};
+$('#bAdd').onclick=()=>{openDlg(null)};
 
 /* ───────── keyboard + resize + init ───────── */
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(isOpen())closePop()});

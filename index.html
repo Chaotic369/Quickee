@@ -27,17 +27,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 #phone::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:92px;height:24px;border-radius:20px;background:#000;z-index:8;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
 @media (min-width:500px){#phone{height:min(900px,96dvh);border-radius:44px;box-shadow:0 0 0 10px #1a1628,0 0 0 12px #2d2642,0 35px 85px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.1)}}
 
-/* ───── wallpaper + home ───── */
-#wall{position:absolute;inset:0;z-index:0;
-  background:
-   radial-gradient(circle at 50% 70%,rgba(35,35,35,.8) 0 8%,rgba(18,18,18,.9) 24%,transparent 55%),
-   linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%);}
-#wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;
-  background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%);filter:drop-shadow(0 -4px 14px rgba(0,0,0,.85))}
-#phone.has-custom-wall #wall,
-#phone.has-custom-wall .stp-wall{background:var(--user-wall) center/cover no-repeat !important}
-#phone.has-custom-wall #wall::after,
-#phone.has-custom-wall .stp-wall::after{display:none}
+/* ───── home ───── */
 #dim{position:absolute;inset:0;z-index:3;background:#000;opacity:0;pointer-events:none;transition:opacity .15s}
 #status{position:absolute;top:0;left:0;right:0;height:34px;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:12px;font-weight:600;pointer-events:none}
 #status .r{display:flex;gap:8px;align-items:center;font-size:11px}
@@ -287,8 +277,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .ring-preview-card.nolbl .ring-preview-item .lb{display:none}
 .ring-preview-item.hovered .ic{transform:scale(1.35);z-index:12;box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.4);transition:none !important}
 .ring-sim-pointer{position:absolute;pointer-events:none;z-index:20;transform:translate(-50%,-50%);border-radius:50%;display:block;background:transparent !important;box-shadow:none}
-.stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 70%,rgba(35,35,35,.8) 0 8%,rgba(18,18,18,.9) 24%,transparent 55%),linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%)}
-.stp-wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%)}
+
 .stp-screen{position:absolute;inset:0;z-index:1;overflow:hidden}
 .pvpop{position:absolute;display:flex;flex-direction:column;overflow:hidden;border:none !important;border-radius:var(--pop-rad,26px);background:var(--pop-bg,rgba(0,0,0,var(--glass)));backdrop-filter:blur(var(--pop-blur,30px));-webkit-backdrop-filter:blur(var(--pop-blur,30px));box-shadow:0 16px 40px rgba(0,0,0,.85);pointer-events:none;transform-origin:top right}
 .pvpop.solid-black{background:#000 !important;backdrop-filter:none !important;-webkit-backdrop-filter:none !important}
@@ -309,15 +298,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 </head>
 <body>
 <div id="phone">
-  <div id="wall"></div>
-    <input type="file" id="demoWallInput" accept="image/*">
-    <div class="demo-wall-bar" id="demoWallBar">
-      <i class="fa-solid fa-image" style="color:var(--acc);font-size:13px"></i>
-      <span>Demo Wallpaper</span>
-      <button class="demo-wall-btn" id="btnPickDemoWall"><i class="fa-solid fa-upload"></i> Set</button>
-      <button class="demo-wall-reset" id="btnResetDemoWall"><i class="fa-solid fa-rotate-left"></i></button>
-    </div>
-    <div id="home">
+  <div id="home">
     <div id="clock">9:41</div>
     <div id="date"></div>
     <div id="homeGrid"></div>
@@ -537,7 +518,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true,customWall:null};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
@@ -644,14 +625,7 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   v('--pop-blur',(isFullBlack?0:(s.blur!=null?s.blur:32))+'px');
   v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
   pop.classList.toggle('solid-black',isFullBlack);
-  if(s.customWall){
-    phone.classList.add('has-custom-wall');
-    phone.style.setProperty('--user-wall',`url("${s.customWall}")`);
-  }else{
-    phone.classList.remove('has-custom-wall');
-    phone.style.removeProperty('--user-wall');
-  }
-  fab.style.display=s.triggerEnabled===false?'none':'block';
+    fab.style.display=s.triggerEnabled===false?'none':'block';
   phone.classList.toggle('edge-left', s.trigEdge==='left');
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
@@ -1218,18 +1192,9 @@ const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
   popup:{
-      keys:['w','h','glass','popRad','blur'],
-      title:'Pop-up Size & Styling',
-      extra:`<div style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:12.5px;font-weight:600">Background Wallpaper</span>
-          <button id="wpResetBtn" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-rotate-left"></i> Reset</button>
-        </div>
-        <p style="font-size:11.5px;color:var(--dim);margin-bottom:10px">Test your popup glass & transparency against your own photos or wallpapers.</p>
-        <input type="file" id="wpFileInput" accept="image/*" style="display:none">
-        <button id="wpUploadBtn" class="sbtn" style="width:100%;margin:0;padding:10px;justify-content:center;color:var(--acc);font-weight:600"><i class="fa-solid fa-image"></i> Change Custom Wallpaper</button>
-      </div>`
-    },
+        keys:['w','h','glass','popRad','blur'],
+        title:'Pop-up Size & Styling'
+      },
   trigger:{
     keys:['trigH','trigW','trigY'],
     title:'Trigger Size & Placement',
@@ -1286,14 +1251,10 @@ function renderMainOverview(){
         <button class="tg${st.set.permAcc?' on':''}" id="ovPermAcc"></button>
       </div>
       <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">All Files Access</b><small style="color:var(--dim)">Read storage, pick folders & files</small></div>
-        <button class="tg${st.set.permStorage?' on':''}" id="ovPermStorage"></button>
-      </div>
-      <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Usage Access</b><small style="color:var(--dim)">Sort apps by recent usage</small></div>
-        <button class="tg${st.set.permUsage?' on':''}" id="ovPermUsage"></button>
-      </div>
-    </div>
+              <div><b style="display:block;font-size:13px">All Files Access</b><small style="color:var(--dim)">Read storage, pick folders & files</small></div>
+              <button class="tg${st.set.permStorage?' on':''}" id="ovPermStorage"></button>
+            </div>
+          </div>
 
     <div class="set-card" style="padding-bottom:14px">
       <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
@@ -1335,7 +1296,6 @@ function buildStBody(){
         bindTg('#ovPermOverlay','permOverlay','Overlay permission');
     bindTg('#ovPermAcc','permAcc','Accessibility service');
     bindTg('#ovPermStorage','permStorage','Storage access');
-        bindTg('#ovPermUsage','permUsage','Usage access');
 
         const bkpBtn=b.querySelector('#ovBackupBtn');
         if(bkpBtn){
@@ -1402,36 +1362,7 @@ function buildStBody(){
             `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
           syncSl();
 
-          if(sTab==='popup'){
-                      const upBtn=b.querySelector('#wpUploadBtn');
-                      const fileInp=b.querySelector('#wpFileInput');
-                      const rstBtn=b.querySelector('#wpResetBtn');
-                      if(upBtn&&fileInp){
-                        upBtn.onclick=()=>{fileInp.value='';fileInp.click();};
-                        fileInp.onchange=e=>{
-                          const f=e.target.files&&e.target.files[0];
-                          if(!f)return;
-                          const reader=new FileReader();
-                          reader.onload=ev=>{
-                            st.set.customWall=ev.target.result;
-                            applySet();
-                            save();
-                            pvUpdate();
-                            toast('Custom wallpaper applied');
-                          };
-                          reader.readAsDataURL(f);
-                        };
-                      }
-                      if(rstBtn){
-                        rstBtn.onclick=()=>{
-                          st.set.customWall=null;
-                          applySet();
-                          save();
-                          pvUpdate();
-                          toast('Wallpaper reset to default');
-                        };
-                      }
-                    }
+          
 
                     if(sTab==='trigger'){
                       const edgeSeg=b.querySelector('#trigEdgeSeg');
@@ -1493,20 +1424,12 @@ function openMgr(){
       </div>
 
       <div class="sw" style="margin:8px 0;padding-top:6px">
-        <div>
-          <b style="display:block;font-size:13px">All Files Access</b>
-          <small style="color:var(--dim)">Browse folders and open files</small>
-        </div>
-        <button class="tg${st.set.permStorage?' on':''}" id="mgPermStorage"></button>
-      </div>
-
-      <div class="sw" style="margin:8px 0;padding-top:6px">
-        <div>
-          <b style="display:block;font-size:13px">Usage Data Access</b>
-          <small style="color:var(--dim)">Detect running apps and sort recent</small>
-        </div>
-        <button class="tg${st.set.permUsage?' on':''}" id="mgPermUsage"></button>
-      </div>
+              <div>
+                <b style="display:block;font-size:13px">All Files Access</b>
+                <small style="color:var(--dim)">Browse folders and open files</small>
+              </div>
+              <button class="tg${st.set.permStorage?' on':''}" id="mgPermStorage"></button>
+            </div>
     </div>
 
     <div class="card">
@@ -1541,7 +1464,6 @@ function openMgr(){
     bindTg('#mgPermOverlay','permOverlay','Display overlay permission');
     bindTg('#mgPermAcc','permAcc','Accessibility service');
     bindTg('#mgPermStorage','permStorage','Files access permission');
-    bindTg('#mgPermUsage','permUsage','Usage access permission');
 
     const openStudioBtn=b.querySelector('#mgOpenStudio');
     if(openStudioBtn){
@@ -1560,7 +1482,7 @@ function openStudio(fromPop=false){
   const s=$('#studio');
   if(!s)return;
   s.style.display='flex';
-  s.innerHTML=`${stOpenedFromPop?`<div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 14px 2px;flex-shrink:0"><button id="stDoneBtn" class="sbtn" style="margin:0;padding:6px 16px;background:var(--acc);color:#1c1304;border-color:transparent;font-weight:700"><i class="fa-solid fa-check"></i> Done</button></div>`:''}<div class="stp" id="stPrev" style="margin-top:${stOpenedFromPop?'4px':'14px'}"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-wall"></div><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`${stOpenedFromPop?`<div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 14px 2px;flex-shrink:0"><button id="stDoneBtn" class="sbtn" style="margin:0;padding:6px 16px;background:var(--acc);color:#1c1304;border-color:transparent;font-weight:700"><i class="fa-solid fa-check"></i> Done</button></div>`:''}<div class="stp" id="stPrev" style="margin-top:${stOpenedFromPop?'4px':'14px'}"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
   const doneBtn=$('#stDoneBtn');
   if(doneBtn){
     doneBtn.onclick=()=>{
@@ -2340,39 +2262,7 @@ $('#nbRecents').onclick=()=>{
   showRecents();
 };
 
-const dWallInput=$('#demoWallInput');
-const btnPickWall=$('#btnPickDemoWall');
-const btnResetWall=$('#btnResetDemoWall');
 
-if(btnPickWall&&dWallInput){
-  btnPickWall.onclick=()=>{
-    dWallInput.value='';
-    dWallInput.click();
-  };
-  dWallInput.onchange=e=>{
-    const file=e.target.files&&e.target.files[0];
-    if(!file)return;
-    const reader=new FileReader();
-    reader.onload=ev=>{
-      st.set.customWall=ev.target.result;
-      applySet();
-      save();
-      if(stOn())pvUpdate();
-      toast('Wallpaper updated');
-    };
-    reader.readAsDataURL(file);
-  };
-}
-
-if(btnResetWall){
-  btnResetWall.onclick=()=>{
-    st.set.customWall=null;
-    applySet();
-    save();
-    if(stOn())pvUpdate();
-    toast('Wallpaper reset to default');
-  };
-}
 
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#confirmDlg').style.display==='flex'){$('#confirmDlg').style.display='none';pendingDeleteFn=null;}else if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});

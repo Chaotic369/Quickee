@@ -104,14 +104,14 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .pbody{flex:1;min-height:0;overflow-y:auto;padding:var(--pad);scrollbar-width:none}
 .pbody::-webkit-scrollbar{display:none}
 #grid{display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));grid-template-rows:repeat(var(--rows,auto),minmax(0,auto));column-gap:var(--cgap);row-gap:var(--rgap);width:100%}
-.grid-cell{position:relative;width:100%;min-height:calc(var(--icon) + 18px);display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
-.edit .grid-cell{border:1.5px dashed rgba(255,255,255,.1);border-radius:calc(var(--icon)*var(--rad)/100 + 4px);min-height:calc(var(--icon) + 24px);background:rgba(255,255,255,.015);transition:border-color .15s,background .15s}
-.edit .grid-cell.cell-over{border-color:var(--acc);background:rgba(255,196,107,.12)}
-.cell-add{display:none;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);place-items:center;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;transition:all .15s}
-.cell-add:hover{color:var(--acc);background:rgba(255,196,107,.1)}
+.grid-cell{position:relative;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+.edit .grid-cell{border-radius:calc(var(--icon)*var(--rad)/100 + 4px);background:transparent}
+.edit .grid-cell.cell-over .cell-add{border-color:var(--acc);background:rgba(255,196,107,.15);color:var(--acc)}
+.cell-add{display:none;width:var(--icon);height:var(--icon);aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);place-items:center;color:rgba(255,255,255,.4);font-size:16px;cursor:pointer;border:1.5px dashed rgba(255,255,255,.15);background:rgba(255,255,255,.02);transition:all .15s}
+.cell-add:hover{color:var(--acc);border-color:var(--acc);background:rgba(255,196,107,.1)}
 .edit .grid-cell.empty-slot .cell-add{display:grid}
 .it{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;width:100%;cursor:pointer}
-.it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .18s cubic-bezier(.25,1,.5,1),box-shadow .18s ease;overflow:hidden}
+.it .ic{position:relative;width:var(--icon);height:var(--icon);aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .18s cubic-bezier(.25,1,.5,1),box-shadow .18s ease;overflow:hidden;flex-shrink:0}
 .it .ic .fav-wrap{width:100%;height:100%;display:grid;place-items:center;border-radius:inherit}
 .it .ic .fav-wrap img{width:56%;height:56%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));border-radius:4px;pointer-events:none}
 .it .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
@@ -274,7 +274,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .ring-preview-card{position:relative;display:flex;flex-direction:column;border:none !important;border-radius:var(--pop-rad,26px);background:rgba(10,10,10,var(--glass));backdrop-filter:blur(var(--pop-blur,32px));-webkit-backdrop-filter:blur(var(--pop-blur,32px));box-shadow:0 16px 40px rgba(0,0,0,.85);padding:var(--pad);touch-action:none}
 .ring-preview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);align-items:center;justify-content:center;width:100%}
 .ring-preview-item{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;user-select:none;width:100%}
-.ring-preview-item .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s;overflow:hidden}
+.ring-preview-item .ic{position:relative;width:var(--icon);height:var(--icon);aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s;overflow:hidden;flex-shrink:0}
 .ring-preview-item .ic .fav-wrap{width:100%;height:100%;display:grid;place-items:center;border-radius:inherit}
 .ring-preview-item .ic .fav-wrap img{width:56%;height:56%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));border-radius:4px;pointer-events:none}
 .ring-preview-item .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
@@ -346,7 +346,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
                   </div>
                   <div class="pop-scroll-arrow arr-bot" id="popScrollDown"><i class="fa-solid fa-chevron-down"></i></div>
                   <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
-                  <div class="dlgw" id="confirmDlg" style="position:absolute;inset:0;border-radius:inherit;z-index:92;background:rgba(0,0,0,.78);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)">
+                  <div class="dlgw" id="confirmDlg" style="position:absolute;inset:0;border-radius:inherit;z-index:92;background:rgba(0,0,0,.92);backdrop-filter:none;-webkit-backdrop-filter:none">
                     <div class="dc" style="max-width:210px;padding:12px;border-radius:18px;text-align:center">
                       <p id="confirmMsg" style="font-size:11px;color:var(--dim);line-height:1.3;margin:0 0 10px"></p>
                       <div class="acts" style="margin:0;gap:6px">

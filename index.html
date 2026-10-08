@@ -70,7 +70,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .dt-ring{position:absolute;z-index:999;width:var(--ring-sz,52px);height:var(--ring-sz,52px);border-width:var(--ring-th,2.5px);border-style:solid;border-color:var(--ring-col,rgba(255,255,255,.75));border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:var(--ring-bg,rgba(255,255,255,.14));box-shadow:none}
 .grid-cell:has(.drag-over),.grid-cell:has(:hover){z-index:25}
 .it:hover,.it.drag-over{z-index:30}
-.it:hover .ic,.it.drag-over .ic{transform:scale(1.35);box-shadow:0 0 0 2.5px var(--acc),0 8px 24px rgba(0,0,0,.45),inset 0 1px 1px rgba(255,255,255,.4);z-index:30}
+.it:hover .ic,.it.drag-over .ic{transform:scale(1.35);box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.4);transition:transform 0s,box-shadow 0s !important;z-index:30}
 #scrim{position:absolute;inset:0;z-index:38;display:none}
 #scrim.on{display:block}
 
@@ -111,7 +111,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .cell-add:hover{color:var(--acc);background:rgba(255,196,107,.1)}
 .edit .grid-cell.empty-slot .cell-add{display:grid}
 .it{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;width:100%;cursor:pointer}
-.it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .14s cubic-bezier(.2,0,0,1),box-shadow .2s;overflow:hidden}
+.it .ic{position:relative;width:100%;aspect-ratio:1;border-radius:calc(var(--icon)*var(--rad)/100);display:grid;place-items:center;color:#fff;font-size:calc(var(--icon)*.44);box-shadow:0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.3);transition:transform .18s cubic-bezier(.25,1,.5,1),box-shadow .18s ease;overflow:hidden}
 .it .ic .fav-wrap{width:100%;height:100%;display:grid;place-items:center;border-radius:inherit}
 .it .ic .fav-wrap img{width:56%;height:56%;object-fit:contain;filter:drop-shadow(0 2px 6px rgba(0,0,0,.35));border-radius:4px;pointer-events:none}
 .it .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
@@ -280,7 +280,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .ring-preview-item .ic b{font-weight:700;font-size:calc(var(--icon)*.46)}
 .ring-preview-item .lb{max-width:100%;font-size:var(--lbl);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;font-weight:500;color:rgba(246,239,228,.9)}
 .ring-preview-card.nolbl .ring-preview-item .lb{display:none}
-.ring-preview-item.hovered .ic{transform:scale(1.35);z-index:12;box-shadow:0 0 0 2.5px var(--acc),0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.4)}
+.ring-preview-item.hovered .ic{transform:scale(1.35);z-index:12;box-shadow:0 8px 24px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.4);transition:none !important}
 .ring-sim-pointer{position:absolute;pointer-events:none;z-index:20;transform:translate(-50%,-50%);border-radius:50%;display:block;box-shadow:0 0 12px rgba(255,196,107,.25)}
 .stp-wall{position:absolute;inset:0;z-index:0;background:radial-gradient(circle at 50% 70%,rgba(35,35,35,.8) 0 8%,rgba(18,18,18,.9) 24%,transparent 55%),linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%)}
 .stp-wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%)}
@@ -805,8 +805,7 @@ fab.addEventListener('pointermove',e=>{
   dtRing.style.left=(e.clientX-pr.left)+'px';
   dtRing.style.top=(e.clientY-pr.top)+'px';
   const el=document.elementFromPoint(e.clientX,e.clientY);
-    document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
-    document.querySelectorAll('.fbtn').forEach(b=>{if(!b.classList.contains('drag-over'))return;b.classList.remove('drag-over');b.style.transform=''});
+  document.querySelectorAll('.fbtn').forEach(b=>{if(!b.classList.contains('drag-over'))return;b.classList.remove('drag-over');b.style.transform=''});
     const arrDown=$('#popScrollDown'),arrUp=$('#popScrollUp');
       let hoverDir=0;
       if(arrDown&&arrDown.classList.contains('visible')){
@@ -824,26 +823,30 @@ fab.addEventListener('pointermove',e=>{
       }
 
       let targetItem=null;
-      const rThresh=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+6;
-      let closestDist=rThresh;
-      grid.querySelectorAll('.it').forEach(itemEl=>{
-        const ir=itemEl.getBoundingClientRect();
-        const dist=Math.hypot(e.clientX-(ir.left+ir.width/2), e.clientY-(ir.top+ir.height/2));
-        if(dist<closestDist){
-          closestDist=dist;
-          targetItem=itemEl;
-        }
-      });
+          const rThresh=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+22;
+          let closestDist=rThresh;
+          const allItems=grid.querySelectorAll('.it');
+          for(let i=0;i<allItems.length;i++){
+            const itemEl=allItems[i];
+            const ir=itemEl.getBoundingClientRect();
+            const dist=Math.hypot(e.clientX-(ir.left+ir.width/2), e.clientY-(ir.top+ir.height/2));
+            if(dist<closestDist){
+              closestDist=dist;
+              targetItem=itemEl;
+            }
+          }
 
-      if(targetItem){
-        targetItem.classList.add('drag-over');
-        if(targetItem!==lastHoveredDragItem){
-          lastHoveredDragItem=targetItem;
-          haptic('tick');
-        }
-      }else{
-        lastHoveredDragItem=null;
-      }
+          if(targetItem){
+                if(targetItem!==lastHoveredDragItem){
+                  if(lastHoveredDragItem)lastHoveredDragItem.classList.remove('drag-over');
+                  lastHoveredDragItem=targetItem;
+                  targetItem.classList.add('drag-over');
+                  haptic('tick');
+                }
+              }else if(!lastHoveredDragItem && allItems.length){
+                lastHoveredDragItem=allItems[0];
+                lastHoveredDragItem.classList.add('drag-over');
+              }
 
       if(el){
         const fb=el.closest('.fbtn');
@@ -1196,14 +1199,10 @@ function renderMainOverview(){
         <button class="tg${st.set.triggerEnabled!==false?' on':''}" id="ovTrig"></button>
       </div>
       <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Tick on hover, firm pulse on launch</small></div>
-        <button class="tg${st.set.haptic!==false?' on':''}" id="ovHaptic"></button>
-      </div>
-      <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Auto-close on Launch</b><small style="color:var(--dim)">Close launcher once a shortcut is executed</small></div>
-        <button class="tg${st.set.autoClose!==false?' on':''}" id="ovAutoClose"></button>
-      </div>
-    </div>
+              <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Tick on hover, firm pulse on launch</small></div>
+              <button class="tg${st.set.haptic!==false?' on':''}" id="ovHaptic"></button>
+            </div>
+          </div>
 
     <div class="set-card">
       <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
@@ -1276,8 +1275,7 @@ function buildStBody(){
       };
     }
     bindTg('#ovHaptic','haptic','Haptic vibration');
-    bindTg('#ovAutoClose','autoClose','Auto-close');
-    bindTg('#ovPermOverlay','permOverlay','Overlay permission');
+        bindTg('#ovPermOverlay','permOverlay','Overlay permission');
     bindTg('#ovPermAcc','permAcc','Accessibility service');
     bindTg('#ovPermStorage','permStorage','Storage access');
         bindTg('#ovPermUsage','permUsage','Usage access');
@@ -1696,10 +1694,10 @@ window.addEventListener('pointercancel',endDrag);
 
 /* ───────── launching shortcuts ───────── */
 function launch(it){
-  if(st.set&&st.set.autoClose!==false&&it.t!=='system')closePop();
+  if(it.t!=='system')closePop();
   if(it.t==='system'){const s=SYS[it.v];if(!s)return;
     if(s.tog){st.tog[it.v]=st.tog[it.v]?0:1;save();statusIcons();render();toast(s.n+(st.tog[it.v]?' on':' off'),s.hint);return}
-    if(st.set&&st.set.autoClose!==false)closePop();
+    closePop();
     toast(s.n,s.hint);setTimeout(s.run,s.run===SYS.screenoff.run?350:0);return}
   if(it.t==='app')return openApp(it);
   if(it.t==='call')return openCall(it);

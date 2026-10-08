@@ -427,23 +427,35 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
       </div>
 
       <div class="dlgw" id="cropDlg" style="z-index:90">
-        <div class="dc" style="display:flex;flex-direction:column;align-items:center;text-align:center">
-          <h3><i class="fa-solid fa-crop" style="color:var(--acc)"></i> Crop Icon</h3>
-          <div style="position:relative;width:240px;height:240px;margin:14px 0;background:#0d0918;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.15);touch-action:none" id="cropBox">
-            <canvas id="cropCanvas" width="240" height="240" style="display:block;cursor:grab"></canvas>
-          </div>
-          <div style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px">
-            <i class="fa-solid fa-magnifying-glass-minus" style="font-size:12px;color:var(--dim)"></i>
-            <input type="range" id="cropZoom" min="1" max="4" step="0.05" value="1" style="flex:1">
-            <i class="fa-solid fa-magnifying-glass-plus" style="font-size:12px;color:var(--dim)"></i>
-          </div>
-          <div class="acts" style="width:100%;margin-top:4px">
-            <button id="cropCancel">Cancel</button>
-            <span class="sp"></span>
-            <button class="pri" id="cropApply">Apply Icon</button>
+          <div class="dc" style="display:flex;flex-direction:column;align-items:center;text-align:center">
+            <h3><i class="fa-solid fa-crop" style="color:var(--acc)"></i> Crop Icon</h3>
+            <div style="position:relative;width:240px;height:240px;margin:14px 0;background:#0d0918;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.15);touch-action:none" id="cropBox">
+              <canvas id="cropCanvas" width="240" height="240" style="display:block;cursor:grab"></canvas>
+            </div>
+            <div style="width:100%;display:flex;align-items:center;gap:10px;margin-bottom:12px">
+              <i class="fa-solid fa-magnifying-glass-minus" style="font-size:12px;color:var(--dim)"></i>
+              <input type="range" id="cropZoom" min="1" max="4" step="0.05" value="1" style="flex:1">
+              <i class="fa-solid fa-magnifying-glass-plus" style="font-size:12px;color:var(--dim)"></i>
+            </div>
+            <div class="acts" style="width:100%;margin-top:4px">
+              <button id="cropCancel">Cancel</button>
+              <span class="sp"></span>
+              <button class="pri" id="cropApply">Apply Icon</button>
+            </div>
           </div>
         </div>
-      </div>
+
+        <div class="dlgw" id="confirmDlg" style="z-index:92">
+          <div class="dc" style="max-width:320px;text-align:center">
+            <div style="width:48px;height:48px;border-radius:50%;background:rgba(229,83,75,.15);color:#ff7b72;display:grid;place-items:center;font-size:22px;margin:0 auto 12px"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <h3 style="margin-bottom:8px;justify-content:center">Remove Shortcut?</h3>
+            <p id="confirmMsg" style="font-size:12.5px;color:var(--dim);line-height:1.45;margin-bottom:18px"></p>
+            <div class="acts" style="margin:0;gap:8px">
+              <button id="confirmCancel" style="flex:1">Cancel</button>
+              <button class="del" id="confirmOk" style="flex:1;background:#e5534b;color:#fff">Remove</button>
+            </div>
+          </div>
+        </div>
 </div>
 
 <script>
@@ -1521,11 +1533,24 @@ function openStudio(fromPop=false){
     const r=e.target.closest('.res');if(!r)return;
     const i=st.items.findIndex(x=>x.id===r.dataset.id);if(i<0)return;
     const a=e.target.closest('.pin');
-    if(!a){openDlg(st.items[i]);return}
-    const d=a.dataset.a;
-    if(d==='del')st.items.splice(i,1);
-    else{const j=d==='up'?i-1:i+1;if(j<0||j>=st.items.length)return;const t=st.items[i];st.items[i]=st.items[j];st.items[j]=t}
-    save();render();pvUpdate()};
+        if(!a){openDlg(st.items[i]);return}
+        const d=a.dataset.a;
+        if(d==='del'){
+          const targetItem=st.items[i];
+          confirmRemoval(targetItem.n,()=>{
+            const idx=st.items.findIndex(x=>x.id===targetItem.id);
+            if(idx>=0){
+              st.items.splice(idx,1);
+              save();
+              render();
+              studioRefresh();
+              toast('Shortcut removed');
+            }
+          });
+          return;
+        }
+        else{const j=d==='up'?i-1:i+1;if(j<0||j>=st.items.length)return;const t=st.items[i];st.items[i]=st.items[j];st.items[j]=t}
+        save();render();pvUpdate()};
   buildStBody();
   s.classList.add('on');
   const rCard=$('#ringCard');
@@ -1608,14 +1633,35 @@ grid.addEventListener('click',e=>{
   const item=st.items.find(x=>x.id===it.dataset.id);
   if(!item)return;
   if(e.target.closest('.x')){
-    st.items=st.items.filter(x=>x.id!==item.id);
-    save();
-    render();
-    return;
-  }
+      confirmRemoval(item.n,()=>{
+        st.items=st.items.filter(x=>x.id!==item.id);
+        save();
+        render();
+        toast('Shortcut removed');
+      });
+      return;
+    }
   if(editMode){openDlg(item,item.slot)}else launch(item);
-});
-grid.addEventListener('contextmenu',e=>e.preventDefault());
+  });
+  grid.addEventListener('contextmenu',e=>e.preventDefault());
+
+  let pendingDeleteFn=null;
+  function confirmRemoval(name,onConfirm){
+    pendingDeleteFn=onConfirm;
+    $('#confirmMsg').innerHTML=`Are you sure you want to remove <b style="color:var(--ink)">${esc(name||'this shortcut')}</b>?`;
+    $('#confirmDlg').style.display='flex';
+  }
+  $('#confirmCancel').onclick=()=>{
+    $('#confirmDlg').style.display='none';
+    pendingDeleteFn=null;
+  };
+  $('#confirmOk').onclick=()=>{
+    $('#confirmDlg').style.display='none';
+    if(pendingDeleteFn){
+      pendingDeleteFn();
+      pendingDeleteFn=null;
+    }
+  };
 
 /* ───────── drag & drop spatial positioning (long-press or edit) ───────── */
 let dr=null;
@@ -2182,7 +2228,18 @@ $('#dTarget').addEventListener('change',()=>{
   if(a){$('#dTarget').value=a.v;if(!$('#dName').value)$('#dName').value=a.n;if(!dS.touched){dS.i=a.i;dS.c=a.c;buildPickers()}}
 });
 $('#dCancel').onclick=()=>{$('#dlg').style.display='none'};
-$('#dDel').onclick=()=>{st.items=st.items.filter(x=>x.id!==dS.id);save();$('#dlg').style.display='none';render()};
+$('#dDel').onclick=()=>{
+  const targetItem=st.items.find(x=>x.id===dS.id);
+  const name=targetItem?targetItem.n:$('#dName').value;
+  confirmRemoval(name,()=>{
+    st.items=st.items.filter(x=>x.id!==dS.id);
+    save();
+    $('#dlg').style.display='none';
+    render();
+    if(stOn())studioRefresh();
+    toast('Shortcut removed');
+  });
+};
 $('#dSave').onclick=()=>{
   let name=$('#dName').value.trim();
   let v=dS.t==='system'?$('#dSys').value:(dS.t==='app'?$('#dAppSel').value:$('#dTarget').value.trim());
@@ -2273,7 +2330,7 @@ if(btnResetWall){
   };
 }
 
-document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#confirmDlg').style.display==='flex'){$('#confirmDlg').style.display='none';pendingDeleteFn=null;}else if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';
 statusIcons();applyBright();applySet();placeFab();render();

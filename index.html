@@ -34,6 +34,10 @@ input,select{font:inherit;color:var(--ink);outline:none}
    linear-gradient(180deg,#0a0a0a 0%,#121212 40%,#080808 100%);}
 #wall::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:25%;
   background:linear-gradient(180deg,#161616,#000);clip-path:polygon(0 38%,14% 22%,30% 40%,46% 16%,64% 36%,80% 20%,100% 38%,100% 100%,0 100%);filter:drop-shadow(0 -4px 14px rgba(0,0,0,.85))}
+#phone.has-custom-wall #wall,
+#phone.has-custom-wall .stp-wall{background:var(--user-wall) center/cover no-repeat !important}
+#phone.has-custom-wall #wall::after,
+#phone.has-custom-wall .stp-wall::after{display:none}
 #dim{position:absolute;inset:0;z-index:3;background:#000;opacity:0;pointer-events:none;transition:opacity .15s}
 #status{position:absolute;top:0;left:0;right:0;height:34px;z-index:6;display:flex;align-items:center;justify-content:space-between;padding:0 24px;font-size:12px;font-weight:600;pointer-events:none}
 #status .r{display:flex;gap:8px;align-items:center;font-size:11px}
@@ -506,7 +510,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:32,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:20,triggerEnabled:true,permOverlay:true,permAcc:true,permUsage:false,permStorage:true,customWall:null};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['blur','Backdrop blur',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
@@ -609,6 +613,9 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
   v('--pop-blur',(s.blur!=null?s.blur:32)+'px');
+  phone.classList.toggle('has-custom-wall',Boolean(s.customWall));
+  if(s.customWall)phone.style.setProperty('--user-wall',`url("${s.customWall}")`);
+  else phone.style.removeProperty('--user-wall');
   fab.style.display=s.triggerEnabled===false?'none':'block';
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
@@ -1104,7 +1111,19 @@ function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody inpu
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
-  popup:{keys:['w','h','glass','popRad','blur'],title:'Pop-up Size & Styling'},
+  popup:{
+      keys:['w','h','glass','popRad','blur'],
+      title:'Pop-up Size & Styling',
+      extra:`<div style="margin-top:14px;padding-top:10px;border-top:1px solid rgba(255,255,255,.07)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <span style="font-size:12.5px;font-weight:600">Background Wallpaper</span>
+          <button id="wpResetBtn" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+        </div>
+        <p style="font-size:11.5px;color:var(--dim);margin-bottom:10px">Test your popup glass & transparency against your own photos or wallpapers.</p>
+        <input type="file" id="wpFileInput" accept="image/*" style="display:none">
+        <button id="wpUploadBtn" class="sbtn" style="width:100%;margin:0;padding:10px;justify-content:center;color:var(--acc);font-weight:600"><i class="fa-solid fa-image"></i> Change Custom Wallpaper</button>
+      </div>`
+    },
   trigger:{
     keys:['trigH','trigW','trigY'],
     title:'Trigger Size & Placement',
@@ -1282,25 +1301,56 @@ function buildStBody(){
             `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
           syncSl();
 
-          if(sTab==='trigger'){
-            const edgeSeg=b.querySelector('#trigEdgeSeg');
-            if(edgeSeg){
-              const curEdge=st.set.trigEdge||'right';
-              edgeSeg.querySelectorAll('button').forEach(btn=>{
-                btn.classList.toggle('on',btn.dataset.e===curEdge);
-                btn.onclick=()=>{
-                  st.set.trigEdge=btn.dataset.e;
-                  edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===st.set.trigEdge));
-                  placeFab();
-                  save();
-                  pvUpdate();
-                  toast(`Trigger pinned to ${st.set.trigEdge} edge`);
-                };
-              });
-            }
-          }
-        }
-  b.scrollTop=y}
+          if(sTab==='popup'){
+                      const upBtn=b.querySelector('#wpUploadBtn');
+                      const fileInp=b.querySelector('#wpFileInput');
+                      const rstBtn=b.querySelector('#wpResetBtn');
+                      if(upBtn&&fileInp){
+                        upBtn.onclick=()=>{fileInp.value='';fileInp.click();};
+                        fileInp.onchange=e=>{
+                          const f=e.target.files&&e.target.files[0];
+                          if(!f)return;
+                          const reader=new FileReader();
+                          reader.onload=ev=>{
+                            st.set.customWall=ev.target.result;
+                            applySet();
+                            save();
+                            pvUpdate();
+                            toast('Custom wallpaper applied');
+                          };
+                          reader.readAsDataURL(f);
+                        };
+                      }
+                      if(rstBtn){
+                        rstBtn.onclick=()=>{
+                          st.set.customWall=null;
+                          applySet();
+                          save();
+                          pvUpdate();
+                          toast('Wallpaper reset to default');
+                        };
+                      }
+                    }
+
+                    if(sTab==='trigger'){
+                      const edgeSeg=b.querySelector('#trigEdgeSeg');
+                      if(edgeSeg){
+                        const curEdge=st.set.trigEdge||'right';
+                        edgeSeg.querySelectorAll('button').forEach(btn=>{
+                          btn.classList.toggle('on',btn.dataset.e===curEdge);
+                          btn.onclick=()=>{
+                            st.set.trigEdge=btn.dataset.e;
+                            edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===st.set.trigEdge));
+                            placeFab();
+                            save();
+                            pvUpdate();
+                            toast(`Trigger pinned to ${st.set.trigEdge} edge`);
+                          };
+                        });
+                      }
+                    }
+                  }
+            b.scrollTop=y}
 function studioRefresh(){if(sTab==='items')buildStBody();pvUpdate()}
 function openMgr(){
   closePop();

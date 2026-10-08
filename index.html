@@ -150,7 +150,11 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .trig-rz.top{top:-12px}
 .trig-rz.bottom{bottom:-12px}
 .trig-rz-w{display:none;position:absolute;left:-16px;top:50%;transform:translateY(-50%);width:20px;height:28px;border-radius:8px;background:var(--acc);color:#1b152d;box-shadow:0 4px 12px rgba(0,0,0,.6);cursor:ew-resize;touch-action:none;align-items:center;justify-content:center;font-size:10px;z-index:46;user-select:none}
-.edit #fab .trig-rz, .edit #fab .trig-rz-w{display:flex}
+.trig-move-bar{display:none;position:absolute;right:calc(100% + 7px);top:0;bottom:0;width:14px;border-radius:7px;background:rgba(255,196,107,.25);border:1.5px dashed var(--acc);touch-action:none;cursor:ns-resize;align-items:center;justify-content:center;color:var(--acc);font-size:9px;z-index:46;user-select:none}
+.pop-bottom-bar{display:none;position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:46px;height:14px;align-items:center;justify-content:center;touch-action:none;cursor:ns-resize;z-index:50;user-select:none}
+.pop-bottom-bar::after{content:"";width:32px;height:4.5px;border-radius:3px;background:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.6)}
+.edit #fab .trig-rz, .edit #fab .trig-rz-w, .edit #fab .trig-move-bar{display:flex}
+.edit #pop .pop-bottom-bar{display:flex}
 
 /* ───── simulated app window ───── */
 #sim{position:absolute;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .2s}
@@ -273,18 +277,20 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
     <button id="fabSet" class="fbtn" aria-label="Launcher settings" title="Launcher settings"><i class="fa-solid fa-gear"></i></button>
     <div id="fab" aria-label="Open launcher">
           <i class="fa-solid fa-plus"></i>
+          <div class="trig-move-bar" id="trigMoveBar" title="Drag up or down to move trigger"><i class="fa-solid fa-grip-vertical"></i></div>
           <div class="trig-rz top" id="trigRzTop" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
           <div class="trig-rz-w" id="trigRzW" title="Drag to adjust width"><i class="fa-solid fa-arrows-left-right"></i></div>
           <div class="trig-rz bottom" id="trigRzBottom" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
         </div>
 
     <div id="pop" role="dialog" aria-label="Quick launcher">
-      <div class="grab" id="topBar"></div>
-      <div class="pbody" id="pbody">
-        <div id="grid"></div>
-      </div>
-      <div class="rz" id="rz" title="Drag to resize"></div>
-    </div>
+          <div class="grab" id="topBar"></div>
+          <div class="pbody" id="pbody">
+            <div id="grid"></div>
+          </div>
+          <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
+          <div class="rz" id="rz" title="Drag to resize"></div>
+        </div>
 
   <div id="sim"></div>
     <div id="studio"></div>
@@ -628,6 +634,57 @@ function bindTrigResize(el, mode){
 bindTrigResize($('#trigRzTop'),'top');
 bindTrigResize($('#trigRzBottom'),'bottom');
 bindTrigResize($('#trigRzW'),'width');
+
+/* ───────── moving bar aside handle for trigger positioning ───────── */
+let trgBarDrag=null;
+const trigMoveBar=$('#trigMoveBar');
+trigMoveBar.addEventListener('pointerdown',e=>{
+  e.stopPropagation();
+  trgBarDrag={startY:e.clientY,initY:fab.offsetTop};
+  trigMoveBar.setPointerCapture(e.pointerId);
+});
+trigMoveBar.addEventListener('pointermove',e=>{
+  if(!trgBarDrag)return;
+  const ph=phone.getBoundingClientRect(), th=st.set.trigH||90;
+  const newY=clamp(trgBarDrag.initY+(e.clientY-trgBarDrag.startY),36,ph.height-th-18);
+  st.btn={y:newY};
+  st.set.trigY=Math.round(((newY+th/2)/ph.height)*100);
+  placeFab();
+  if(stOn()){syncSl();pvUpdate();}
+});
+trigMoveBar.addEventListener('pointerup',()=>{
+  if(trgBarDrag){
+    trgBarDrag=null;
+    save();
+    toast('Trigger position saved');
+  }
+});
+trigMoveBar.addEventListener('pointercancel',()=>{trgBarDrag=null});
+
+/* ───────── bottom mini-pill handle for moving popup up and down ───────── */
+let popMoveDrag=null;
+const popBottomBar=$('#popBottomBar');
+popBottomBar.addEventListener('pointerdown',e=>{
+  e.stopPropagation();
+  userMoved=true;
+  popMoveDrag={startY:e.clientY,initTop:pop.offsetTop};
+  popBottomBar.setPointerCapture(e.pointerId);
+});
+popBottomBar.addEventListener('pointermove',e=>{
+  if(!popMoveDrag)return;
+  const ph=phone.getBoundingClientRect();
+  const maxTop=ph.height-pop.offsetHeight-12;
+  const newTop=clamp(popMoveDrag.initTop+(e.clientY-popMoveDrag.startY),36,Math.max(36,maxTop));
+  pop.style.top=newTop+'px';
+  positionFabButtons();
+});
+popBottomBar.addEventListener('pointerup',()=>{
+  if(popMoveDrag){
+    popMoveDrag=null;
+    toast('Popup position set');
+  }
+});
+popBottomBar.addEventListener('pointercancel',()=>{popMoveDrag=null});
 
 /* ───────── views: grid / results / settings ───────── */
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}

@@ -46,17 +46,19 @@ input,select{font:inherit;color:var(--ink);outline:none}
 #dock .ic:active{transform:scale(.9)}
 #navpill{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:120px;height:4.5px;border-radius:4px;background:rgba(255,255,255,.75);box-shadow:0 1px 4px rgba(0,0,0,.3);z-index:6}
 
-/* ───── Zone Launcher side line trigger ───── */
-#fab{position:absolute;z-index:45;width:6px;height:90px;border-radius:4px 0 0 4px;touch-action:none;user-select:none;
+/* ───── side line trigger & external floating controls ───── */
+#fab{position:absolute;z-index:45;width:var(--trig-w,6px);height:var(--trig-h,90px);border-radius:4px 0 0 4px;touch-action:none;user-select:none;
   background:rgba(255,255,255,.32);box-shadow:-2px 0 10px rgba(0,0,0,.45);transition:width .18s,background .2s,box-shadow .2s;color:transparent}
 #fab i{display:none}
-#fab:hover,#fab:active,#fab.open{width:10px;background:var(--acc);box-shadow:-3px 0 14px rgba(255,196,107,.55)}
-#fabEdit{position:absolute;z-index:45;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:12px;color:var(--ink);
+#fab:hover,#fab:active,#fab.open{width:calc(var(--trig-w,6px) + 4px);background:var(--acc);box-shadow:-3px 0 14px rgba(255,196,107,.55)}
+.fbtn{position:absolute;z-index:45;width:32px;height:32px;border-radius:10px;display:grid;place-items:center;font-size:12px;color:var(--ink);
   background:rgba(27,22,41,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 6px 18px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.14);
   opacity:0;pointer-events:none;transform:scale(.7);transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.34,1.56,.64,1),color .15s,box-shadow .15s}
-#fabEdit:active{transform:scale(.9)}
-#fabEdit.open{opacity:1;pointer-events:auto;transform:scale(1)}
-#fabEdit.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc),0 6px 18px rgba(0,0,0,.5)}
+.fbtn:active{transform:scale(.9)}
+.fbtn.open{opacity:1;pointer-events:auto;transform:scale(1)}
+.fbtn.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc),0 6px 18px rgba(0,0,0,.5)}
+#fabAdd{display:none}
+#fabAdd.show{display:grid}
 .dt-ring{position:absolute;z-index:999;width:50px;height:50px;border:2.5px solid var(--acc);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:rgba(255,196,107,.18);box-shadow:0 0 16px rgba(255,196,107,.4),0 8px 20px rgba(0,0,0,.4)}
 .it.drag-over .ic{transform:scale(.92);box-shadow:0 0 0 3px var(--acc),0 0 20px rgba(255,196,107,.6),inset 0 1px 1px rgba(255,255,255,.4)}
 #scrim{position:absolute;inset:0;z-index:38;display:none}
@@ -254,7 +256,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
   <div id="navpill"></div>
 
   <div id="scrim"></div>
-    <button id="fabEdit" aria-label="Edit launcher"><i class="fa-solid fa-pen"></i></button>
+    <button id="fabAdd" class="fbtn" aria-label="Add shortcut" title="Add shortcut"><i class="fa-solid fa-plus"></i></button>
+    <button id="fabEdit" class="fbtn" aria-label="Edit launcher" title="Edit launcher"><i class="fa-solid fa-pen"></i></button>
+    <button id="fabSet" class="fbtn" aria-label="Launcher settings" title="Launcher settings"><i class="fa-solid fa-gear"></i></button>
     <button id="fab" aria-label="Open launcher"><i class="fa-solid fa-plus"></i></button>
 
     <div id="pop" role="dialog" aria-label="Quick launcher">
@@ -297,7 +301,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&','<':'<','>':'>','"':'"'}[c]));
 const clamp=(v,a,b)=>Math.max(a,Math.min(v,b));
-const phone=$('#phone'),pop=$('#pop'),fab=$('#fab'),fabEdit=$('#fabEdit'),grid=$('#grid'),pbody=$('#pbody'),sim=$('#sim');
+const phone=$('#phone'),pop=$('#pop'),fab=$('#fab'),fabEdit=$('#fabEdit'),fabSet=$('#fabSet'),fabAdd=$('#fabAdd'),grid=$('#grid'),pbody=$('#pbody'),sim=$('#sim');
 const KEY='quick_launcher_demo_v1';
 
 /* ───────── data ───────── */
@@ -352,8 +356,8 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:58,radius:30,cols:4,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%']];
+const S_DEF={icon:58,radius:30,cols:4,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50};
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%']];
 
 const DEF=[
  ['app','Camera'],['app','Gallery'],['app','Maps'],['app','Music'],['app','Settings'],['app','Chrome'],['app','YouTube'],['app','Calculator'],
@@ -393,6 +397,8 @@ function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].fo
 function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   const v=(k,x)=>pop.style.setProperty(k,x);
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
+  phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
+  phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   pop.classList.toggle('nolbl',!s.showLbl);
   pop.style.width=Math.min(s.w,ph.width-12)+'px';
   pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
@@ -402,26 +408,33 @@ let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
 function placePop(){if(userMoved)return;
   const ph=phone.getBoundingClientRect(),b=fab.getBoundingClientRect(),w=pop.offsetWidth,h=pop.offsetHeight;
-  let l=ph.width-w-10;
-  let t=b.top-ph.top+b.height/2-h/2;
+  let l=ph.width-w-12;
+  let t=b.top-ph.top+(b.height/2)-(h/2);
   l=clamp(l,6,ph.width-w-6);
   t=clamp(t,36,ph.height-h-12);
   pop.style.left=l+'px';
   pop.style.top=t+'px'}
-function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');$('#scrim').classList.add('on');placePop()}
-function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';if(document.activeElement)document.activeElement.blur()}
+function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop()}
+function closePop(){pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
-function positionFabEdit(){
-  const ph=phone.getBoundingClientRect(),fy=fab.offsetTop;
-  fabEdit.style.left=(ph.width-44)+'px';
-  fabEdit.style.top=clamp(fy-40,36,ph.height-48)+'px'}
-function placeFab(){const ph=phone.getBoundingClientRect();let y;
-  if(st.btn&&typeof st.btn.y==='number'){y=st.btn.y}else{y=ph.height/2-45}
+function positionFabButtons(){
+  const ph=phone.getBoundingClientRect(),fy=fab.offsetTop,rightX=ph.width-44;
+  fabSet.style.left=rightX+'px';
+  fabSet.style.top=clamp(fy-40,36,ph.height-44)+'px';
+  fabEdit.style.left=rightX+'px';
+  fabEdit.style.top=clamp(fy-78,36,ph.height-44)+'px';
+  fabAdd.style.left=rightX+'px';
+  fabAdd.style.top=clamp(fy-116,36,ph.height-44)+'px'}
+function placeFab(){const ph=phone.getBoundingClientRect();
+  const th=st.set.trigH||90;
+  let y;
+  if(st.btn&&typeof st.btn.y==='number'){y=st.btn.y}
+  else{const pct=(st.set.trigY!=null?st.set.trigY:50)/100;y=ph.height*pct-th/2}
   fab.style.left=(ph.width-fab.offsetWidth)+'px';
-  fab.style.top=clamp(y,36,ph.height-fab.offsetHeight-18)+'px';
-  positionFabEdit()}
+  fab.style.top=clamp(y,36,ph.height-th-18)+'px';
+  positionFabButtons()}
 const dtRing = document.createElement('div');
 dtRing.className = 'dt-ring';
 phone.appendChild(dtRing);
@@ -562,7 +575,15 @@ fabEdit.onclick=()=>{
   pop.classList.toggle('edit',editMode);
   fabEdit.classList.toggle('on',editMode);
   fabEdit.innerHTML=editMode?'<i class="fa-solid fa-check"></i>':'<i class="fa-solid fa-pen"></i>';
-  toast(editMode?'Tap (X) to delete · drag to reorder':'Order saved')};
+  if(editMode){
+    fabAdd.classList.add('open','show');
+  }else{
+    fabAdd.classList.remove('open','show');
+  }
+  toast(editMode?'Tap (X) to delete · Tap + to add':'Order saved')};
+
+fabAdd.onclick=()=>{openDlg(null)};
+fabSet.onclick=()=>{openStudio()};
 
 let suppress=false;
 grid.addEventListener('click',e=>{if(suppress)return;const it=e.target.closest('.it');if(!it)return;const item=st.items.find(x=>x.id===it.dataset.id);if(!item)return;

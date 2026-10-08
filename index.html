@@ -59,7 +59,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .fbtn.on{color:var(--acc);box-shadow:0 0 0 1.5px var(--acc),0 6px 18px rgba(0,0,0,.5)}
 #fabAdd{display:none}
 #fabAdd.show{display:grid}
-.dt-ring{position:absolute;z-index:999;width:50px;height:50px;border:2.5px solid var(--acc);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:rgba(255,196,107,.18);box-shadow:0 0 16px rgba(255,196,107,.4),0 8px 20px rgba(0,0,0,.4)}
+.dt-ring{position:absolute;z-index:999;width:var(--ring-sz,52px);height:var(--ring-sz,52px);border-width:var(--ring-th,2.5px);border-style:solid;border-color:var(--ring-col,#ffc46b);border-radius:50%;pointer-events:none;transform:translate(-50%,-50%);display:none;background:var(--ring-bg,rgba(255,196,107,.18));box-shadow:0 0 16px rgba(255,196,107,.4),0 8px 20px rgba(0,0,0,.4)}
 .it.drag-over .ic{transform:scale(.92);box-shadow:0 0 0 3px var(--acc),0 0 20px rgba(255,196,107,.6),inset 0 1px 1px rgba(255,255,255,.4)}
 #scrim{position:absolute;inset:0;z-index:38;display:none}
 #scrim.on{display:block}
@@ -153,7 +153,9 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .trig-move-bar{display:none;position:absolute;right:calc(100% + 7px);top:0;bottom:0;width:14px;border-radius:7px;background:rgba(255,196,107,.25);border:1.5px dashed var(--acc);touch-action:none;cursor:ns-resize;align-items:center;justify-content:center;color:var(--acc);font-size:9px;z-index:46;user-select:none}
 .pop-bottom-bar{display:none;position:absolute;left:50%;bottom:5px;transform:translateX(-50%);width:46px;height:14px;align-items:center;justify-content:center;touch-action:none;cursor:ns-resize;z-index:50;user-select:none}
 .pop-bottom-bar::after{content:"";width:32px;height:4.5px;border-radius:3px;background:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.6)}
-.edit #fab .trig-rz, .edit #fab .trig-rz-w, .edit #fab .trig-move-bar{display:flex}
+.trig-puller{display:none;position:absolute;left:-24px;top:50%;transform:translateY(-50%);width:24px;height:38px;border-radius:12px 0 0 12px;background:var(--acc);box-shadow:-3px 0 12px rgba(255,196,107,.5);touch-action:none;align-items:center;justify-content:center;color:#1b152d;font-size:11px;z-index:47;cursor:grab}
+.trig-puller:active{cursor:grabbing}
+.edit #fab .trig-rz, .edit #fab .trig-rz-w, .edit #fab .trig-move-bar, .edit #fab .trig-puller{display:flex}
 .edit #pop .pop-bottom-bar{display:flex}
 
 /* ───── simulated app window ───── */
@@ -277,6 +279,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
     <button id="fabSet" class="fbtn" aria-label="Launcher settings" title="Launcher settings"><i class="fa-solid fa-gear"></i></button>
     <div id="fab" aria-label="Open launcher">
           <i class="fa-solid fa-plus"></i>
+          <div class="trig-puller" id="trigPuller" title="Pull to move & position trigger"><i class="fa-solid fa-arrows-up-down-left-right"></i></div>
           <div class="trig-move-bar" id="trigMoveBar" title="Drag up or down to move trigger"><i class="fa-solid fa-grip-vertical"></i></div>
           <div class="trig-rz top" id="trigRzTop" title="Drag to adjust height"><i class="fa-solid fa-arrows-up-down"></i></div>
           <div class="trig-rz-w" id="trigRzW" title="Drag to adjust width"><i class="fa-solid fa-arrows-left-right"></i></div>
@@ -385,8 +388,8 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',chat:'Intent ACTION_VIEW https://wa.me/<number> · or sms:<number>',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',search:'Intent ACTION_WEB_SEARCH with query',deep:'Intent ACTION_VIEW Uri.parse(customUri)',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:58,radius:30,cols:4,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%']];
+const S_DEF={icon:58,radius:30,cols:4,cgap:10,rgap:14,pad:12,lbl:11,showLbl:true,showChips:true,w:340,h:520,glass:74,trigH:90,trigW:6,trigY:50,ringSize:52,ringThick:3,ringOpacity:20};
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,98,1,'%'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring fill opacity',0,80,2,'%']];
 
 const DEF=[
  ['app','Camera'],['app','Gallery'],['app','Maps'],['app','Music'],['app','Settings'],['app','Chrome'],['app','YouTube'],['app','Calculator'],
@@ -441,6 +444,9 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
+  phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
+  phone.style.setProperty('--ring-th',(s.ringThick||2.5)+'px');
+  phone.style.setProperty('--ring-bg',`rgba(255,196,107,${(s.ringOpacity!=null?s.ringOpacity:20)/100})`);
   pop.classList.toggle('nolbl',!s.showLbl);
   pop.style.width=Math.min(s.w,ph.width-12)+'px';
   pop.style.maxHeight=Math.min(s.h,ph.height-70)+'px';}
@@ -635,6 +641,32 @@ bindTrigResize($('#trigRzTop'),'top');
 bindTrigResize($('#trigRzBottom'),'bottom');
 bindTrigResize($('#trigRzW'),'width');
 
+/* ───────── trigger puller handle for moving ───────── */
+let pullerDrag=null;
+const trigPuller=$('#trigPuller');
+trigPuller.addEventListener('pointerdown',e=>{
+  e.stopPropagation();
+  pullerDrag={startY:e.clientY,initY:fab.offsetTop};
+  trigPuller.setPointerCapture(e.pointerId);
+});
+trigPuller.addEventListener('pointermove',e=>{
+  if(!pullerDrag)return;
+  const ph=phone.getBoundingClientRect(), th=st.set.trigH||90;
+  const newY=clamp(pullerDrag.initY+(e.clientY-pullerDrag.startY),36,ph.height-th-18);
+  st.btn={y:newY};
+  st.set.trigY=Math.round(((newY+th/2)/ph.height)*100);
+  placeFab();
+  if(stOn()){syncSl();pvUpdate();}
+});
+trigPuller.addEventListener('pointerup',()=>{
+  if(pullerDrag){
+    pullerDrag=null;
+    save();
+    toast('Trigger position saved');
+  }
+});
+trigPuller.addEventListener('pointercancel',()=>{pullerDrag=null});
+
 /* ───────── moving bar aside handle for trigger positioning ───────── */
 let trgBarDrag=null;
 const trigMoveBar=$('#trigMoveBar');
@@ -743,7 +775,8 @@ const SET_GROUPS={
   grid:{keys:['cols','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
   popup:{keys:['w','h','glass'],title:'Pop-up Size & Glass'},
-  trigger:{keys:['trigH','trigW','trigY'],title:'Trigger Size & Placement',extra:'<div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Drag & Set:</b> You can also directly touch and drag the side trigger in Edit mode to set its location on screen.</div>'}
+  trigger:{keys:['trigH','trigW','trigY'],title:'Trigger Size & Placement',extra:'<div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>'},
+  ring:{keys:['ringSize','ringThick','ringOpacity'],title:'Selection Ring (Zone Pointer)'}
 };
 function buildStBody(){
   const b=$('#stBody');if(!b)return;const y=b.scrollTop;
@@ -765,7 +798,7 @@ function studioRefresh(){pvUpdate();if(sTab==='items')buildStBody()}
 function openStudio(){
   closePop();sTab='grid';
   const s=$('#studio');
-  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`<div class="sh"><button class="sb" id="stBack" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><span class="si" style="background:#7c5cff"><i class="fa-solid fa-sliders"></i></span><div class="st"><b>Launcher Settings</b><small>Grid, Sizes & Shortcuts</small></div><button class="sbtn" id="stTry" style="margin:0 0 0 auto;padding:8px 14px">Done</button></div><div class="stp" id="stPrev"><span class="tag" id="stTag">Live preview</span><div class="pvpop" id="pvpop"><div class="grab"></div><div class="pbody"><div id="pvgrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button><button data-t="items">Shortcuts</button></div><div class="stbody" id="stBody"></div>`;
   $('#stBack').onclick=closeStudio;
   $('#stTry').onclick=()=>{closeStudio();openPop()};
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();$('#stBody').scrollTop=0};

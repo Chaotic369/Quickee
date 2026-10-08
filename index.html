@@ -100,7 +100,7 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .nolbl .it .lb{display:none}
 .it.on .ic{box-shadow:0 0 0 2.5px var(--acc),0 6px 16px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.4)}
 .it.lift{opacity:.25}
-.it .x{display:none;position:absolute;top:-5px;right:calc(50% - var(--icon)/2 - 6px);width:20px;height:20px;border-radius:50%;background:#e5534b;color:#fff;font-size:10px;place-items:center;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.5);border:1.5px solid #1b1629}
+.it .x{display:none;position:absolute;top:-6px;right:calc(50% - var(--icon)/2 - 6px);width:20px;height:20px;border-radius:50%;background:#e5534b;color:#fff;font-size:11px;place-items:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.5);border:1.5px solid #1b1629;cursor:pointer}
 .edit .it .x{display:grid}
 .edit .it .ic{animation:wig .26s infinite alternate ease-in-out}
 .edit .it:nth-child(2n) .ic{animation-delay:-.13s}
@@ -458,10 +458,18 @@ function renderPager(){
   if(!st.set.usePages||view==='settings'||$('#q').value.trim()){p.style.display='none';return}
   p.style.display='flex';const total=pageCount();if(curPage>=total)curPage=total-1;
   let dots='';for(let i=0;i<total;i++)dots+=`<button class="pg-dot${i===curPage?' on':''}" data-pg="${i}" aria-label="Page ${i+1}"></button>`;
-  p.innerHTML=`${dots}<button class="pg-btn" id="pgAdd" title="Add page"><i class="fa-solid fa-plus"></i></button>${total>1?`<button class="pg-btn" id="pgDel" title="Remove current page"><i class="fa-solid fa-trash-can"></i></button>`:''}`}
-function removeCurPage(){const total=pageCount();if(total<=1)return;const p=curPage;
+  p.innerHTML=`${dots}${editMode&&total>1?`<button class="pg-btn" id="pgDel" title="Remove page" aria-label="Remove page"><i class="fa-solid fa-xmark"></i></button>`:''}`}
+function removeCurPage(){
+  const total=pageCount();
+  if(total<=1){toast('Cannot remove the only page');return}
+  const count=st.items.filter(it=>(it.page||0)===curPage).length;
+  const msg=count>0?`Delete Page ${curPage+1}? (${count} shortcut${count>1?'s':''} will merge into Page ${curPage||1})`:`Delete Page ${curPage+1}?`;
+  if(!window.confirm(msg))return;
+  const p=curPage;
   st.items.forEach(it=>{const ip=it.page||0;if(ip===p)it.page=Math.max(0,p-1);else if(ip>p)it.page=ip-1});
-  if(curPage>=total-1)curPage=Math.max(0,total-2);save();render();toast('Page removed')}
+  if(curPage>=total-1)curPage=Math.max(0,total-2);
+  save();render();toast('Page removed');
+}
 function addPage(){curPage=pageCount();save();render();toast('Page '+(curPage+1)+' added')}
 $('#pager').onclick=e=>{
   const d=e.target.closest('.pg-dot');if(d){curPage=+d.dataset.pg;render();return}
@@ -528,7 +536,7 @@ $('#settings').addEventListener('input',e=>{const el=e.target.closest('input[typ
 $('#bSet').onclick=()=>{closeMenu();view=view==='settings'?'grid':'settings';render()};
 
 /* ───────── edit mode + click handling ───────── */
-$('#bEdit').onclick=()=>{closeMenu();editMode=!editMode;pop.classList.toggle('edit',editMode);const et=$('#bEditTxt');if(et){et.textContent=editMode?'Done editing':'Reorder / edit';$('#bEdit i').className=editMode?'fa-solid fa-check':'fa-solid fa-pen'}if(editMode&&view!=='grid'){view='grid';render()}toast(editMode?'Drag to reorder · tap to edit':'Saved order')};
+$('#bEdit').onclick=()=>{closeMenu();editMode=!editMode;pop.classList.toggle('edit',editMode);const et=$('#bEditTxt');if(et){et.textContent=editMode?'Done editing':'Reorder / edit';$('#bEdit i').className=editMode?'fa-solid fa-check':'fa-solid fa-pen'}if(view!=='grid')view='grid';render();toast(editMode?'Tap (X) to delete · drag to reorder':'Order saved')};
 let suppress=false;
 grid.addEventListener('click',e=>{if(suppress)return;const it=e.target.closest('.it');if(!it)return;const item=st.items.find(x=>x.id===it.dataset.id);if(!item)return;
   if(e.target.closest('.x')){st.items=st.items.filter(x=>x.id!==item.id);save();render();return}

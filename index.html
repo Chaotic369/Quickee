@@ -182,6 +182,21 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 .pop-scroll-arrow.arr-top.active{color:var(--acc);transform:translateX(-50%) translateY(-2px) scale(1.25)}
 .pop-scroll-arrow.arr-bot.active{color:var(--acc);transform:translateX(-50%) translateY(2px) scale(1.25)}
 
+/* ───── corner fast slider for folders (Zone style) ───── */
+.corner-fast-slider{position:absolute;z-index:98;display:none;flex-direction:column;align-items:center;padding:6px 4px;background:rgba(18,18,22,.92);border:1px solid rgba(255,255,255,.14);border-radius:24px;box-shadow:0 12px 32px rgba(0,0,0,.85);touch-action:none;user-select:none;-webkit-user-select:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .15s ease,transform .15s ease}
+.corner-fast-slider.active{display:flex}
+.corner-fast-slider.corner-tl{top:46px;left:10px}
+.corner-fast-slider.corner-tr{top:46px;right:10px}
+.corner-fast-slider.corner-bl{bottom:56px;left:10px}
+.corner-fast-slider.corner-br{bottom:56px;right:10px}
+.cfs-title{font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;pointer-events:none}
+.cfs-track{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;width:34px;padding:4px 0}
+.cfs-node{position:relative;width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.06);color:rgba(246,239,228,.8);font-size:12px;cursor:pointer;transition:transform .12s cubic-bezier(.2,0,0,1),background .12s,color .12s}
+.cfs-node i{color:#f0a93b}
+.cfs-node.hovered{background:rgba(240,169,59,.3);color:#fff;transform:scale(1.35);z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+.cfs-bubble{position:absolute;z-index:100;padding:4px 10px;border-radius:8px;background:rgba(15,15,18,.96);border:1px solid rgba(255,255,255,.16);color:#fff;font-size:11.5px;font-weight:600;white-space:nowrap;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.7);display:none;align-items:center;gap:6px}
+.cfs-bubble i{color:#f0a93b;font-size:11px}
+
 /* ───── simulated app window ───── */
 #sim{position:absolute;inset:0;z-index:60;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);opacity:0;pointer-events:none;transition:transform .24s cubic-bezier(.2,.8,.2,1),opacity .2s}
 #sim.on{transform:none;opacity:1;pointer-events:auto}
@@ -359,7 +374,12 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
                     <div id="grid"></div>
                   </div>
                   <div class="pop-scroll-arrow arr-bot" id="popScrollDown"><i class="fa-solid fa-chevron-down"></i></div>
-                  <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
+                                    <div class="corner-fast-slider" id="cornerFastSlider">
+                                      <div class="cfs-title">Folders</div>
+                                      <div class="cfs-track" id="cfsTrack"></div>
+                                    </div>
+                                    <div class="cfs-bubble" id="cfsBubble"></div>
+                                    <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
                   <div class="dlgw" id="confirmDlg" style="position:absolute;inset:0;border-radius:inherit;z-index:92;background:rgba(0,0,0,.92);backdrop-filter:none;-webkit-backdrop-filter:none">
                     <div class="dc" style="max-width:210px;padding:12px;border-radius:18px;text-align:center">
                       <p id="confirmMsg" style="font-size:11px;color:var(--dim);line-height:1.3;margin:0 0 10px"></p>
@@ -557,7 +577,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,permWriteSettings:true,permDnd:false,permPhone:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default'};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,permWriteSettings:true,permDnd:false,permPhone:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default',cornerSlider:true,cornerSliderPos:'tr'};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,50,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
@@ -696,6 +716,106 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
     pop.style.left='auto';
   }}
 
+/* ───────── corner fast slider (folder quick jumper) ───────── */
+let cfsActiveFolderId=null;
+function updateCornerSlider(){
+  const cfs=$('#cornerFastSlider'), track=$('#cfsTrack'), bubble=$('#cfsBubble');
+  if(!cfs||!track)return;
+  if(!isOpen()||editMode||tree||st.set.cornerSlider===false){
+    cfs.classList.remove('active');
+    if(bubble)bubble.style.display='none';
+    return;
+  }
+  const folderItems=st.items.filter(x=>x.t==='folder');
+  if(folderItems.length<2){
+    cfs.classList.remove('active');
+    if(bubble)bubble.style.display='none';
+    return;
+  }
+  const pos=st.set.cornerSliderPos||(st.set.trigEdge==='left'?'tr':'tl');
+  cfs.className=`corner-fast-slider corner-${pos} active`;
+  track.innerHTML=folderItems.map(f=>`
+    <div class="cfs-node" data-fid="${f.id}" title="${esc(f.n)}">
+      <i class="fa-solid fa-folder"></i>
+    </div>
+  `).join('');
+}
+
+function initCornerSliderEvents(){
+  const cfs=$('#cornerFastSlider'), track=$('#cfsTrack'), bubble=$('#cfsBubble');
+  if(!cfs||!track||!bubble)return;
+  let cfsDragging=false;
+  
+  function highlightNodeAt(clientX, clientY){
+    const nodes=Array.from(track.querySelectorAll('.cfs-node'));
+    let matched=null, minD=999;
+    nodes.forEach(nd=>{
+      const r=nd.getBoundingClientRect();
+      const cy=r.top+r.height/2;
+      const d=Math.abs(clientY-cy);
+      if(d<minD&&clientY>=r.top-6&&clientY<=r.bottom+6){
+        minD=d;
+        matched=nd;
+      }
+    });
+    nodes.forEach(nd=>nd.classList.toggle('hovered',nd===matched));
+    if(matched){
+      const fid=matched.dataset.fid;
+      const fItem=st.items.find(x=>x.id===fid);
+      if(fItem){
+        if(cfsActiveFolderId!==fid){
+          cfsActiveFolderId=fid;
+          haptic('tick');
+        }
+        bubble.innerHTML=`<i class="fa-solid fa-folder-open"></i> ${esc(fItem.n)}`;
+        bubble.style.display='flex';
+        const br=matched.getBoundingClientRect();
+        const pr=pop.getBoundingClientRect();
+        const isLeft=(st.set.cornerSliderPos||'').includes('l');
+        bubble.style.top=(br.top-pr.top+(br.height-bubble.offsetHeight)/2)+'px';
+        if(isLeft){
+          bubble.style.left=(cfs.offsetLeft+cfs.offsetWidth+8)+'px';
+          bubble.style.right='auto';
+        }else{
+          bubble.style.right=(pop.offsetWidth-cfs.offsetLeft+8)+'px';
+          bubble.style.left='auto';
+        }
+      }
+    }else{
+      cfsActiveFolderId=null;
+      bubble.style.display='none';
+    }
+  }
+
+  cfs.addEventListener('pointerdown',e=>{
+    e.stopPropagation();
+    cfsDragging=true;
+    cfs.setPointerCapture(e.pointerId);
+    highlightNodeAt(e.clientX,e.clientY);
+  });
+  cfs.addEventListener('pointermove',e=>{
+    if(!cfsDragging)return;
+    e.stopPropagation();
+    highlightNodeAt(e.clientX,e.clientY);
+  });
+  const finishSlide=e=>{
+    if(!cfsDragging)return;
+    cfsDragging=false;
+    bubble.style.display='none';
+    track.querySelectorAll('.cfs-node').forEach(nd=>nd.classList.remove('hovered'));
+    if(cfsActiveFolderId){
+      const target=st.items.find(x=>x.id===cfsActiveFolderId);
+      cfsActiveFolderId=null;
+      if(target){
+        haptic('confirm');
+        enterTree(target);
+      }
+    }
+  };
+  cfs.addEventListener('pointerup',finishSlide);
+  cfs.addEventListener('pointercancel',finishSlide);
+}
+
 /* ───────── popup: open/close/place ───────── */
 let userMoved=false;
 const isOpen=()=>pop.classList.contains('open');
@@ -792,8 +912,8 @@ function updateScrollArrow(){
   arrDown.classList.toggle('visible', canDown);
   arrUp.classList.toggle('visible', canUp);
 }
-function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz();updateScrollArrow()}
-function closePop(){stopAutoScroll();resetTree();const cd=$('#confirmDlg');if(cd)cd.style.display='none';pendingDeleteFn=null;pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();if(document.activeElement)document.activeElement.blur()}
+function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz();updateScrollArrow();updateCornerSlider()}
+function closePop(){stopAutoScroll();resetTree();const cd=$('#confirmDlg');if(cd)cd.style.display='none';pendingDeleteFn=null;pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();updateCornerSlider();if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
@@ -1290,10 +1410,10 @@ const SET_GROUPS={
         extra:`<div class="sw" style="margin-top:12px"><span>Hide trigger indicator</span><button class="tg" id="ovHideTrig"></button></div><div class="sw" style="margin-top:12px"><span>Screen Edge Placement</span><div class="seg" id="trigEdgeSeg" style="max-width:140px"><button data-e="left">Left</button><button data-e="right">Right</button></div></div><div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>`
       },
       folder:{
-        keys:['dwellDelay'],
-        title:'Folder Hover & Dwell',
-        extra:`<div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Backdrop Hover</b><small style="color:var(--dim)">Return to shortcuts when hovering outside popup</small></div></div>`
-      },
+              keys:['dwellDelay'],
+              title:'Folder Hover & Dwell',
+              extra:`<div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Backdrop Hover</b><small style="color:var(--dim)">Return to shortcuts when hovering outside popup</small></div></div><div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Corner Fast Slider</b><small style="color:var(--dim)">Slide along the popup corner to quick-jump folders</small></div><button class="tg" id="ovCornerSlider"></button></div>`
+            },
   ring:{keys:['ringSize','ringThick','ringOpacity'],title:'Selection Ring (Zone Pointer)'}
 };
 
@@ -1450,14 +1570,25 @@ function renderMainOverview(){
                           };
                         }
             const dwellSl=b.querySelector('#ovDwell');
-            if(dwellSl){
-              dwellSl.oninput=e=>{
-                st.set.dwellDelay=parseInt(e.target.value,10);
-                const vEl=b.querySelector('#v_ovDwell');
-                if(vEl)vEl.textContent=st.set.dwellDelay+'ms';
-                save();
-              };
-            }
+                        if(dwellSl){
+                          dwellSl.oninput=e=>{
+                            st.set.dwellDelay=parseInt(e.target.value,10);
+                            const vEl=b.querySelector('#v_ovDwell');
+                            if(vEl)vEl.textContent=st.set.dwellDelay+'ms';
+                            save();
+                          };
+                        }
+                        const cfsTg=b.querySelector('#ovCornerSlider');
+                        if(cfsTg){
+                          cfsTg.classList.toggle('on',st.set.cornerSlider!==false);
+                          cfsTg.onclick=()=>{
+                            st.set.cornerSlider=st.set.cornerSlider===false?true:false;
+                            cfsTg.classList.toggle('on',st.set.cornerSlider);
+                            save();
+                            updateCornerSlider();
+                            toast(`Corner folder slider ${st.set.cornerSlider?'enabled':'disabled'}`);
+                          };
+                        }
             const swUpSel=b.querySelector('#ovSwipeUp');
             if(swUpSel){
               swUpSel.onchange=()=>{
@@ -2040,6 +2171,7 @@ function treeApplyHl(){
 }
 function renderTree(){
   if(!tree)return;
+  updateCornerSlider();
   const rows=treeRows(tree.root,0,[]);
   let html='<div class="tv-hdr"><button type="button" class="tv-btn" data-tv="back" title="Back to grid" aria-label="Back to grid"><i class="fa-solid fa-chevron-left"></i></button><div class="tv-title"><b>'+esc(tree.name||'Folder')+'</b><small>'+esc(tree.root.replace(ROOT.slice(0,-1),'Internal storage'))+'</small></div><button type="button" class="tv-btn" data-tv="ext" title="Open in file manager" aria-label="Open in file manager"><i class="fa-solid fa-arrow-up-right-from-square"></i></button></div>';
   html+=rows.map(r=>{
@@ -2070,11 +2202,12 @@ function resetTree(){
   if(!tree)return;
   tree=null;
   treeView.style.display='';
-  treeView.innerHTML='';
-  grid.style.display='';
-  pbody.scrollTop=0;
-  updateScrollArrow();
-}
+    treeView.innerHTML='';
+    grid.style.display='';
+    pbody.scrollTop=0;
+    updateScrollArrow();
+    updateCornerSlider();
+  }
 function treeAction(a){
   if(!tree)return;
   if(a==='back'){haptic('tick');resetTree();return}
@@ -2827,7 +2960,7 @@ $('#nbRecents').onclick=()=>{
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if($('#confirmDlg').style.display==='flex'){$('#confirmDlg').style.display='none';pendingDeleteFn=null;}else if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none'}else if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none'}else if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none'}else if($('#dlg').style.display==='flex'){$('#dlg').style.display='none'}else if(sim.classList.contains('on'))closeSim();else if(stOn())closeStudio();else if(isOpen())closePop()});
 window.addEventListener('resize',()=>{placeFab();applySet();placePop();if(stOn())pvUpdate()});
 $('#dlg').style.display='none';
-statusIcons();applyBright();applySet();placeFab();render();
+statusIcons();applyBright();applySet();placeFab();render();initCornerSliderEvents();
 })();
 </script>
 </body>

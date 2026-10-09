@@ -299,11 +299,8 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 <body>
 <div id="phone">
   <div id="home">
-    <div id="clock">9:41</div>
-    <div id="date"></div>
-    <div id="homeGrid"></div>
-  </div>
-  <div id="dock"></div>
+      <div id="homeGrid"></div>
+    </div>
   <div id="dim"></div>
   <div id="status"><span id="stTime">9:41</span><span class="r" id="stIcons"></span></div>
     <div id="navpill"></div>
@@ -555,20 +552,13 @@ let st=load();
 
 /* ───────── home screen ───────── */
 function tick(){const d=new Date();const h=d.getHours()%12||12,m=String(d.getMinutes()).padStart(2,'0');
-  const t=h+':'+m;$('#clock').textContent=t;$('#stTime').textContent=t;$('#lkT').textContent=t;
-  const ds=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});$('#date').textContent=ds;$('#lkD').textContent=ds}
+  const t=h+':'+m;$('#stTime').textContent=t;$('#lkT').textContent=t;
+  const ds=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});$('#lkD').textContent=ds}
 tick();setInterval(tick,15000);
 function icHTML(a){return`<div class="ic" style="background:${a.c}"><i class="${a.i}"></i></div>`}
 const HOME_ITEMS=[
- {n:'Launcher',i:'fa-solid fa-sliders',c:'#7c5cff',app:'studio'},
- INSTALLED.find(x=>x.n==='Camera'),
- INSTALLED.find(x=>x.n==='Gallery'),
- INSTALLED.find(x=>x.n==='Maps'),
- INSTALLED.find(x=>x.n==='Music'),
- {n:'Quick Access',i:'fa-solid fa-shield-halved',c:'#388bfd',app:'mgr'},
- INSTALLED.find(x=>x.n==='YouTube'),
- INSTALLED.find(x=>x.n==='Notes')
-].filter(Boolean);
+ {n:'Launcher Settings',i:'fa-solid fa-sliders',c:'#7c5cff',app:'studio'}
+];
 
 function renderHomeGrid(){
   const hg=$('#homeGrid');
@@ -597,7 +587,7 @@ $('#homeGrid').addEventListener('click',e=>{
     if(inst)launch({t:'app',n:inst.n,v:inst.v,i:inst.i,c:inst.c});
   }
 });
-$('#dock').innerHTML=['Messages','Chrome','Files','Settings'].map(n=>icHTML(INSTALLED.find(x=>x.n===n))).join('');
+
 function statusIcons(){const t=st.tog;$('#stIcons').innerHTML=(t.flash?'<i class="fa-solid fa-lightbulb" style="color:var(--acc)"></i>':'')+(t.dnd?'<i class="fa-solid fa-bell-slash"></i>':'')+(t.air?'<i class="fa-solid fa-plane"></i>':(t.bt?'<i class="fa-brands fa-bluetooth-b"></i>':'')+(t.wifi?'<i class="fa-solid fa-wifi"></i>':''))+'<i class="fa-solid fa-signal"></i><i class="fa-solid fa-battery-three-quarters"></i>'}
 function applyBright(){$('#dim').style.opacity=((100-st.lv.br)/100*.7).toFixed(2)}
 

@@ -113,7 +113,9 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .it.on .ic{box-shadow:0 0 0 2.5px var(--acc),0 6px 16px rgba(0,0,0,.35)}
 .it.lift{opacity:.25}
 .it .x{display:none;position:absolute;top:-6px;right:calc(50% - var(--icon)/2 - 6px);width:20px;height:20px;border-radius:50%;background:#e5534b;color:#fff;font-size:11px;place-items:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.5);border:1.5px solid #1b1629;cursor:pointer}
-.edit .it .x{display:grid}
+.it .ed{display:none;position:absolute;top:-6px;left:calc(50% - var(--icon)/2 - 6px);width:20px;height:20px;border-radius:50%;background:#1e1a2b;color:var(--acc);font-size:10px;place-items:center;z-index:10;box-shadow:0 2px 8px rgba(0,0,0,.5);border:1.5px solid #2d2642;cursor:pointer;transition:transform .12s}
+.it .ed:active{transform:scale(.9)}
+.edit .it .x,.edit .it .ed{display:grid}
 .edit .it .ic{animation:none}
 @media (prefers-reduced-motion:reduce){.edit .it .ic{animation:none}#pop,#fab i{transition:none}}
 .ghost{position:fixed;z-index:200;pointer-events:none;transform:scale(1.15);filter:drop-shadow(0 16px 24px rgba(0,0,0,.6))}
@@ -397,24 +399,29 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
                 </div>
               </div>
               <div id="dTargetBox" style="display:flex;gap:8px;align-items:center">
-                <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
-                <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
-              </div>
-              <select id="dSys"></select>
-              <datalist id="dl"></datalist>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
-          <label style="margin:0">Icon</label>
-          <div style="display:flex;gap:6px">
-            <input type="file" id="dImgFileInput" accept="image/*" style="display:none">
-            <button id="dUploadIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-image"></i> Custom Image</button>
-            <button id="dChangeIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-pen"></i> Presets</button>
-          </div>
-        </div>
-        <div id="dIconPreview" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)">
-          <div id="dCurrentIcon" class="ic" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"></div>
-          <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
-        </div>
-        <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(255,255,255,.06)"></div>
+                              <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
+                              <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
+                            </div>
+                            <div id="dQuickShortcutsBox" style="display:none;flex-direction:column;gap:4px">
+                              <label style="margin:2px 0 2px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Shortcut Presets</label>
+                              <div id="dQuickShortcutsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+                            </div>
+                            <select id="dSys"></select>
+                            <datalist id="dl"></datalist>
+                      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
+                        <label style="margin:0">Icon & Color</label>
+                        <div style="display:flex;gap:6px">
+                          <input type="file" id="dImgFileInput" accept="image/*" style="display:none">
+                          <button id="dUploadIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-image"></i> Custom Image</button>
+                          <button id="dChangeIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-pen"></i> Presets</button>
+                        </div>
+                      </div>
+                      <div id="dIconPreview" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)">
+                        <div id="dCurrentIcon" class="ic" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"></div>
+                        <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
+                      </div>
+                      <div class="pick cols" id="dColors" style="margin-top:8px;gap:6px"></div>
+                      <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(255,255,255,.06)"></div>
               <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
       </div>
     </div>
@@ -492,8 +499,10 @@ const INSTALLED=[
  {n:'Telegram',v:'org.telegram.messenger',i:'fa-brands fa-telegram',c:'#2f9bd9',sc:[{n:'Saved Messages',a:'tg:saved',i:'fa-solid fa-bookmark'},{n:'Direct Chat: Dev group',a:'tg:dev',i:'fa-solid fa-user-group'}]},
  {n:'Files',v:'com.google.android.documentsui',i:'fa-solid fa-folder-open',c:'#4f86d9',sc:[{n:'Downloads',a:'files:downloads',i:'fa-solid fa-download'}]},
  {n:'Messages',v:'com.google.android.apps.messaging',i:'fa-solid fa-message',c:'#3f7be0',sc:[{n:'Start Chat',a:'msg:new',i:'fa-solid fa-comment-dots'}]},
- {n:'Play Store',v:'com.android.vending',i:'fa-solid fa-bag-shopping',c:'#2f9e6a',sc:[{n:'My Apps',a:'play:myapps',i:'fa-solid fa-cubes'}]}
-];
+  {n:'Play Store',v:'com.android.vending',i:'fa-solid fa-bag-shopping',c:'#2f9e6a',sc:[{n:'My Apps',a:'play:myapps',i:'fa-solid fa-cubes'}]},
+  {n:'Gmail',v:'com.google.android.gm',i:'fa-solid fa-envelope',c:'#ea4335',sc:[{n:'Compose',a:'gmail:compose',i:'fa-solid fa-pen-to-square'},{n:'Inbox',a:'gmail:inbox',i:'fa-solid fa-inbox'},{n:'Starred',a:'gmail:starred',i:'fa-solid fa-star'},{n:'Work Mail',a:'gmail:work',i:'fa-solid fa-briefcase'}]},
+  {n:'Phone',v:'com.google.android.dialer',i:'fa-solid fa-phone',c:'#3cc47c',sc:[{n:'Dialpad',a:'phone:dialpad',i:'fa-solid fa-hashtag'},{n:'Speed Dial',a:'phone:speeddial',i:'fa-solid fa-star'},{n:'Voicemail',a:'phone:voicemail',i:'fa-solid fa-voicemail'},{n:'Call History',a:'phone:recents',i:'fa-solid fa-clock-rotate-left'}]}
+ ];
 const FILES=['Download/invoice-oct.pdf','Download/apk/app-debug.apk','Download/apk/launcher-release.apk','DCIM/Camera/IMG_2041.jpg','DCIM/Camera/IMG_2042.jpg','DCIM/Camera/VID_0192.mp4','Documents/Resume.pdf','Documents/notes/ideas.txt','Documents/notes/budget.xlsx','Documents/Projects/index.html','Documents/Projects/app.js','Music/Playlists/focus.mp3','Music/Playlists/drive.mp3','Pictures/Screenshots/Screenshot_1008.png','Movies/trip-2026.mp4','WhatsApp/Media/voice-note.opus'].map(p=>ROOT+p);
 const DIRS=(()=>{const s=new Set();FILES.forEach(f=>{const p=f.split('/');for(let i=4;i<p.length;i++)s.add(p.slice(0,i).join('/'))});return [...s].sort()})();
 const ICONS=[
@@ -1048,7 +1057,7 @@ function iconInner(it){
   }
   return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`;
 }
-function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c||'#5b8def'}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
+function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c||'#5b8def'}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="ed" aria-label="Edit ${esc(it.n)}" title="Edit shortcut"><i class="fa-solid fa-pen"></i></button><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
 
 function render(){
@@ -1533,22 +1542,26 @@ function openStudio(fromPop=false){
         return;
       }
       const it=e.target.closest('.it');
-      if(it){
-        const item=st.items.find(x=>x.id===it.dataset.id);
-        if(!item)return;
-        if(e.target.closest('.x')){
-          confirmRemoval(item.n,()=>{
-            st.items=st.items.filter(x=>x.id!==item.id);
-            save();
-            render();
-            studioRefresh();
-            toast('Shortcut removed');
-          });
-          return;
-        }
-        openDlg(item,item.slot);
-        return;
-      }
+            if(it){
+              const item=st.items.find(x=>x.id===it.dataset.id);
+              if(!item)return;
+              if(e.target.closest('.x')){
+                confirmRemoval(item.n,()=>{
+                  st.items=st.items.filter(x=>x.id!==item.id);
+                  save();
+                  render();
+                  studioRefresh();
+                  toast('Shortcut removed');
+                });
+                return;
+              }
+              if(e.target.closest('.ed')){
+                openDlg(item,item.slot);
+                return;
+              }
+              openDlg(item,item.slot);
+              return;
+            }
       const r=e.target.closest('.res');if(!r)return;
       const i=st.items.findIndex(x=>x.id===r.dataset.id);if(i<0)return;
       const a=e.target.closest('.pin');
@@ -1661,6 +1674,10 @@ grid.addEventListener('click',e=>{
       });
       return;
     }
+  if(e.target.closest('.ed')){
+    openDlg(item,item.slot);
+    return;
+  }
   if(editMode){openDlg(item,item.slot)}else if(item.t==='folder')enterTree(item);else launch(item);
   });
   grid.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1687,7 +1704,7 @@ grid.addEventListener('click',e=>{
 let dr=null;
 document.addEventListener('pointerdown',e=>{
   const it=e.target.closest('.it');
-  if(!it||e.target.closest('.x')||(e.button!==0&&e.pointerType==='mouse'))return;
+  if(!it||e.target.closest('.x,.ed')||(e.button!==0&&e.pointerType==='mouse'))return;
   const inGrid=it.closest('#grid');
   const inStudio=it.closest('#stBody');
   if(!inGrid&&!inStudio)return;
@@ -1958,6 +1975,35 @@ function closeSim(){sim.classList.remove('on');clearInterval(callTimer)}
 let callTimer;
 
 function openApp(it){
+  if(it.v==='com.google.android.gm'||(it.appAction&&it.appAction.startsWith('gmail:'))){
+    const isCompose=it.appAction==='gmail:compose'||it.n.toLowerCase().includes('compose');
+    return openSim({n:it.n,i:it.i==='letter'?'fa-solid fa-envelope':it.i,c:it.c,sub:it.appAction||it.v,hint:'com.google.android.gm · Gmail Shortcut'},
+      `<div class="card" style="padding:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08)">
+          <i class="fa-solid fa-envelope" style="color:#ea4335"></i>
+          <span style="font-size:12px;font-weight:700">Gmail · ${esc(isCompose?'Compose Message':'Inbox')}</span>
+          <span style="margin-left:auto;font-size:10.5px;color:var(--acc);font-weight:700">Shortcut</span>
+        </div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:6px">From: <b style="color:var(--ink)">me@gmail.com</b></div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:10px">Shortcut Target: <span style="color:var(--acc)">${esc(it.n)}</span></div>
+        <div class="skel" style="width:80%"></div>
+        <div class="skel"></div>
+        <div class="skel" style="width:55%"></div>
+        <button class="bigbtn" style="margin-top:14px;padding:9px 16px;font-size:12px" onclick="toast('Gmail shortcut launched');setTimeout(closeSim,400)"><i class="fa-solid fa-paper-plane"></i> Open in Gmail</button>
+      </div>`);
+  }
+  if(it.v==='com.google.android.dialer'||(it.appAction&&it.appAction.startsWith('phone:'))){
+    const actLabel=it.actionName||(it.appAction?it.appAction.replace('phone:',''):'Dialer');
+    return openSim({n:'Phone · '+actLabel,i:it.i==='letter'?'fa-solid fa-phone':it.i,c:it.c,sub:it.v,hint:'com.google.android.dialer · Phone Shortcut'},
+      `<div class="card" style="text-align:center;padding:16px">
+        <div style="font-size:11px;font-weight:700;color:var(--acc);margin-bottom:8px;text-transform:uppercase"><i class="fa-solid fa-bolt"></i> Phone Shortcut: ${esc(actLabel)}</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:3px;margin:8px 0 14px;color:var(--ink)">${esc(it.v.includes('+')?it.v:'*#06#')}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:210px;margin:0 auto">
+          ${[1,2,3,4,5,6,7,8,9,'*',0,'#'].map(k=>`<button type="button" class="sbtn" style="margin:0;height:40px;border-radius:12px;font-size:15px;font-weight:700;display:grid;place-items:center" onclick="toast('Dialed ${k}')">${k}</button>`).join('')}
+        </div>
+        <button class="bigbtn" style="margin-top:14px;background:#3cc47c;color:#04210f;padding:10px 20px" onclick="toast('Calling…');setTimeout(closeSim,500)"><i class="fa-solid fa-phone"></i> Call</button>
+      </div>`);
+  }
   const subText=it.appAction?`Action: ${it.appAction} · ${it.v}`:it.v;
   const hintText=it.appAction?`ShortcutManager.startShortcut(pkg, id) · Direct Action`:HINTS.app;
   openSim({n:it.n,i:it.i==='letter'?'fa-solid fa-cube':it.i,c:it.c,sub:subText,hint:hintText},
@@ -2133,6 +2179,13 @@ function populateAppShortcuts(app, selAction){
   });
 }
 
+const QUICK_SC={
+  call:[{n:'Mom',v:'+15550198877',i:'fa-solid fa-heart',c:'#3cc47c'},{n:'Office',v:'+15550134400',i:'fa-solid fa-briefcase',c:'#4c5fd1'},{n:'Voicemail',v:'*86',i:'fa-solid fa-voicemail',c:'#3f8f87'},{n:'Emergency',v:'911',i:'fa-solid fa-truck-medical',c:'#e5534b'}],
+  directDial:[{n:'Direct: Mom',v:'+15550198877',i:'fa-solid fa-phone-flip',c:'#2fb872'},{n:'Direct: Office',v:'+15550134400',i:'fa-solid fa-phone-flip',c:'#4c5fd1'},{n:'Doctor',v:'+15550182233',i:'fa-solid fa-user-doctor',c:'#2fb872'}],
+  sms:[{n:'SMS: Sam',v:'+15550192837',i:'fa-solid fa-comment-sms',c:'#26a69a'},{n:'SMS: Office',v:'+15550134400',i:'fa-solid fa-comment-dots',c:'#3f7be0'}],
+  email:[{n:'Gmail Compose',v:'user@gmail.com',i:'fa-solid fa-pen-to-square',c:'#ea4335',a:'gmail:compose'},{n:'Primary Inbox',v:'mail.google.com',i:'fa-solid fa-inbox',c:'#ea4335',a:'gmail:inbox'},{n:'Work Email',v:'office@company.com',i:'fa-solid fa-briefcase',c:'#4aa3ff'},{n:'Starred Mail',v:'starred',i:'fa-solid fa-star',c:'#f0a93b',a:'gmail:starred'}]
+};
+
 function setDType(t,keep){dS.t=t;
   document.querySelectorAll('#dType button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   const isApp=t==='app';
@@ -2146,6 +2199,31 @@ function setDType(t,keep){dS.t=t;
   $('#dTarget').placeholder=(TYPES[t]||TYPES.app).ph;
   const opts=t==='folder'?DIRS:t==='file'?FILES:[];
   $('#dl').innerHTML=opts.map(o=>`<option value="${esc(o)}">`).join('');
+  const qsBox=$('#dQuickShortcutsBox');
+  const qsList=$('#dQuickShortcutsList');
+  const presets=QUICK_SC[t];
+  if(qsBox&&qsList){
+    if(presets&&presets.length){
+      qsBox.style.display='flex';
+      qsList.innerHTML=presets.map(p=>`<button type="button" class="sbtn" data-qs="${esc(p.n)}" style="margin:0;padding:4px 9px;font-size:11px;display:flex;align-items:center;gap:6px"><i class="${esc(p.i)}" style="color:${p.c}"></i> ${esc(p.n)}</button>`).join('');
+      qsList.onclick=e=>{
+        const btn=e.target.closest('[data-qs]');
+        if(!btn)return;
+        const p=presets.find(x=>x.n===btn.dataset.qs);
+        if(!p)return;
+        $('#dName').value=p.n;
+        $('#dTarget').value=p.v;
+        dS.i=p.i;
+        dS.c=p.c;
+        dS.touched=true;
+        if(p.a){dS.appAction=p.a;dS.actionName=p.n;}
+        buildPickers();
+      };
+    }else{
+      qsBox.style.display='none';
+      qsList.innerHTML='';
+    }
+  }
   if(isApp){
     const app=$('#dAppSel').value?INSTALLED.find(x=>x.v===$('#dAppSel').value)||INSTALLED[0]:INSTALLED[0];
     if(!keep){
@@ -2281,15 +2359,30 @@ function updateIconPreview(){
 
 function buildPickers(){
   updateIconPreview();
+  const colBox=$('#dColors');
+  if(colBox){
+    colBox.innerHTML=COLORS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" class="${c===dS.c?'on':''}" aria-label="Color ${c}"></button>`).join('');
+  }
   $('#dIcons').innerHTML=ICONS.map(i=>`<button data-i="${i}" class="${i===dS.i?'on':''}">${i==='letter'?'<b>Aa</b>':`<i class="${i}"></i>`}</button>`).join('');
 }
 $('#dChangeIconBtn').onclick=()=>{
   const icBox=$('#dIcons');
   const isOpen=icBox.style.display==='flex';
   icBox.style.display=isOpen?'none':'flex';
-  $('#dChangeIconBtn').innerHTML=isOpen?'<i class="fa-solid fa-pen"></i> Change':'<i class="fa-solid fa-chevron-up"></i> Hide';
+  $('#dChangeIconBtn').innerHTML=isOpen?'<i class="fa-solid fa-pen"></i> Presets':'<i class="fa-solid fa-chevron-up"></i> Hide';
 };
 $('#dType').onclick=e=>{const b=e.target.closest('button');if(b)setDType(b.dataset.t)};
+const dColEl=$('#dColors');
+if(dColEl){
+  dColEl.onclick=e=>{
+    const b=e.target.closest('button');
+    if(b&&b.dataset.c){
+      dS.c=b.dataset.c;
+      dS.touched=true;
+      buildPickers();
+    }
+  };
+}
 $('#dIcons').onclick=e=>{
   const b=e.target.closest('button');
   if(b){

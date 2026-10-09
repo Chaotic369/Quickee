@@ -542,7 +542,7 @@ const INSTALLED=[
   {n:'Gmail',v:'com.google.android.gm',i:'fa-solid fa-envelope',c:'#ea4335',sc:[{n:'Compose',a:'gmail:compose',i:'fa-solid fa-pen-to-square'},{n:'Inbox',a:'gmail:inbox',i:'fa-solid fa-inbox'},{n:'Starred',a:'gmail:starred',i:'fa-solid fa-star'},{n:'Work Mail',a:'gmail:work',i:'fa-solid fa-briefcase'}]},
   {n:'Phone',v:'com.google.android.dialer',i:'fa-solid fa-phone',c:'#3cc47c',sc:[{n:'Dialpad',a:'phone:dialpad',i:'fa-solid fa-hashtag'},{n:'Speed Dial',a:'phone:speeddial',i:'fa-solid fa-star'},{n:'Voicemail',a:'phone:voicemail',i:'fa-solid fa-voicemail'},{n:'Call History',a:'phone:recents',i:'fa-solid fa-clock-rotate-left'}]}
  ];
-const FILES=['Download/invoice-oct.pdf','Download/apk/app-debug.apk','Download/apk/launcher-release.apk','DCIM/Camera/IMG_2041.jpg','DCIM/Camera/IMG_2042.jpg','DCIM/Camera/VID_0192.mp4','Documents/Resume.pdf','Documents/notes/ideas.txt','Documents/notes/budget.xlsx','Documents/Projects/index.html','Documents/Projects/app.js','Music/Playlists/focus.mp3','Music/Playlists/drive.mp3','Pictures/Screenshots/Screenshot_1008.png','Movies/trip-2026.mp4','WhatsApp/Media/voice-note.opus'].map(p=>ROOT+p);
+const FILES=['Download/invoice-oct.pdf','Download/apk/app-debug.apk','Download/apk/launcher-release.apk','Download/ebooks/guide.epub','DCIM/Camera/IMG_2041.jpg','DCIM/Camera/IMG_2042.jpg','DCIM/Camera/VID_0192.mp4','Documents/Resume.pdf','Documents/notes/ideas.txt','Documents/notes/budget.xlsx','Documents/Projects/index.html','Documents/Projects/app.js','Music/Playlists/focus.mp3','Music/Playlists/drive.mp3','Music/Recordings/audio_memo.wav','Pictures/Screenshots/Screenshot_1008.png','Pictures/Wallpapers/sunset.webp','Movies/trip-2026.mp4','Movies/Clips/intro.mkv','WhatsApp/Media/voice-note.opus','Android/data/com.launcher/cache.bin','Android/obb/game.obb','System/build.prop','System/etc/hosts'].map(p=>ROOT+p);
 const DIRS=(()=>{const s=new Set();FILES.forEach(f=>{const p=f.split('/');for(let i=4;i<p.length;i++)s.add(p.slice(0,i).join('/'))});return [...s].sort()})();
 const ICONS=[
   'fa-solid fa-cube','fa-solid fa-camera','fa-solid fa-images','fa-solid fa-location-dot','fa-solid fa-music','fa-solid fa-gear',
@@ -2555,10 +2555,12 @@ function populateAppShortcuts(app, selAction){
 
 const QUICK_SC={
   call:[{n:'Mom',v:'+15550198877',i:'fa-solid fa-heart',c:'#3cc47c'},{n:'Office',v:'+15550134400',i:'fa-solid fa-briefcase',c:'#4c5fd1'},{n:'Voicemail',v:'*86',i:'fa-solid fa-voicemail',c:'#3f8f87'},{n:'Emergency',v:'911',i:'fa-solid fa-truck-medical',c:'#e5534b'}],
-  directDial:[{n:'Direct: Mom',v:'+15550198877',i:'fa-solid fa-phone-flip',c:'#2fb872'},{n:'Direct: Office',v:'+15550134400',i:'fa-solid fa-phone-flip',c:'#4c5fd1'},{n:'Doctor',v:'+15550182233',i:'fa-solid fa-user-doctor',c:'#2fb872'}],
-  sms:[{n:'SMS: Sam',v:'+15550192837',i:'fa-solid fa-comment-sms',c:'#26a69a'},{n:'SMS: Office',v:'+15550134400',i:'fa-solid fa-comment-dots',c:'#3f7be0'}],
-  email:[{n:'Gmail Compose',v:'user@gmail.com',i:'fa-solid fa-pen-to-square',c:'#ea4335',a:'gmail:compose'},{n:'Primary Inbox',v:'mail.google.com',i:'fa-solid fa-inbox',c:'#ea4335',a:'gmail:inbox'},{n:'Work Email',v:'office@company.com',i:'fa-solid fa-briefcase',c:'#4aa3ff'},{n:'Starred Mail',v:'starred',i:'fa-solid fa-star',c:'#f0a93b',a:'gmail:starred'}]
-};
+    directDial:[{n:'Direct: Mom',v:'+15550198877',i:'fa-solid fa-phone-flip',c:'#2fb872'},{n:'Direct: Office',v:'+15550134400',i:'fa-solid fa-phone-flip',c:'#4c5fd1'},{n:'Doctor',v:'+15550182233',i:'fa-solid fa-user-doctor',c:'#2fb872'}],
+    sms:[{n:'SMS: Sam',v:'+15550192837',i:'fa-solid fa-comment-sms',c:'#26a69a'},{n:'SMS: Office',v:'+15550134400',i:'fa-solid fa-comment-dots',c:'#3f7be0'}],
+    email:[{n:'Gmail Compose',v:'user@gmail.com',i:'fa-solid fa-pen-to-square',c:'#ea4335',a:'gmail:compose'},{n:'Primary Inbox',v:'mail.google.com',i:'fa-solid fa-inbox',c:'#ea4335',a:'gmail:inbox'},{n:'Work Email',v:'office@company.com',i:'fa-solid fa-briefcase',c:'#4aa3ff'},{n:'Starred Mail',v:'starred',i:'fa-solid fa-star',c:'#f0a93b',a:'gmail:starred'}],
+    folder:[{n:'Downloads',v:ROOT+'Download',i:'fa-solid fa-folder-open',c:'#f0a93b'},{n:'Camera Roll',v:ROOT+'DCIM/Camera',i:'fa-solid fa-camera',c:'#f2685b'},{n:'Documents',v:ROOT+'Documents',i:'fa-solid fa-folder-open',c:'#4f86d9'},{n:'Music',v:ROOT+'Music',i:'fa-solid fa-music',c:'#e24d9b'},{n:'Pictures',v:ROOT+'Pictures',i:'fa-solid fa-images',c:'#a06bf0'},{n:'Movies',v:ROOT+'Movies',i:'fa-solid fa-film',c:'#3f8f87'},{n:'Android Data',v:ROOT+'Android',i:'fa-solid fa-gear',c:'#7a8699'},{n:'Root Storage',v:ROOT.slice(0,-1),i:'fa-solid fa-hard-drive',c:'#6c63ff'}],
+    file:[{n:'Invoice PDF',v:ROOT+'Download/invoice-oct.pdf',i:'fa-solid fa-file-pdf',c:'#ea4335'},{n:'Resume',v:ROOT+'Documents/Resume.pdf',i:'fa-solid fa-file-pdf',c:'#e5534b'},{n:'Ideas Note',v:ROOT+'Documents/notes/ideas.txt',i:'fa-solid fa-file-lines',c:'#8f9bb3'},{n:'Budget Sheet',v:ROOT+'Documents/notes/budget.xlsx',i:'fa-solid fa-file-excel',c:'#2fb872'},{n:'App Code',v:ROOT+'Documents/Projects/app.js',i:'fa-solid fa-code',c:'#e8a63a'},{n:'Release APK',v:ROOT+'Download/apk/launcher-release.apk',i:'fa-brands fa-android',c:'#2fb872'},{n:'Trip Video',v:ROOT+'Movies/trip-2026.mp4',i:'fa-solid fa-film',c:'#3d8f9e'},{n:'Focus Track',v:ROOT+'Music/Playlists/focus.mp3',i:'fa-solid fa-music',c:'#a06bf0'}]
+  };
 
 function setDType(t,keep){dS.t=t;
   document.querySelectorAll('#dType button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
@@ -2659,19 +2661,19 @@ function renderPickerList(mode){
       $('#pickerDlg').style.display='none';
     };
   const k=kids(dir);
-  const parent=dir.length>ROOT.length-1&&dir!==ROOT.slice(0,-1)?dir.split('/').slice(0,-1).join('/'):null;
-  let html='';
-  if(parent){
-    html+=`<div class="res" data-nav="${esc(parent)}"><div class="ic" style="background:#3a3552"><i class="fa-solid fa-turn-up"></i></div><div class="tx"><b>..</b></div></div>`;
-  }
-  k.dirs.forEach(d=>{
-      html+=`<div class="res" data-nav="${esc(d)}"><div class="ic" style="background:#f0a93b"><i class="fa-solid fa-folder"></i></div><div class="tx"><b>${esc(d.split('/').pop())}</b><small>Folder</small></div><button class="pin" data-pick-dir="${esc(d)}" title="Select this folder" aria-label="Select folder" style="margin-left:auto"><i class="fa-solid fa-check"></i></button></div>`;
-    });
-  if(!isFolderMode){
-    k.files.forEach(f=>{
-      html+=`<div class="res" data-file="${esc(f)}"><div class="ic" style="background:#8f9bb3"><i class="${fileIcon(f)}"></i></div><div class="tx"><b>${esc(f.split('/').pop())}</b><small>${fsize(f)}</small></div></div>`;
-    });
-  }
+    const parent=dir.length>ROOT.length-1&&dir!==ROOT.slice(0,-1)?dir.split('/').slice(0,-1).join('/'):(dir!==ROOT.slice(0,-1)?ROOT.slice(0,-1):null);
+    let html='';
+    if(parent){
+      html+=`<div class="res" data-nav="${esc(parent)}"><div class="ic" style="background:#3a3552"><i class="fa-solid fa-turn-up"></i></div><div class="tx"><b>..</b><small>Up one level</small></div></div>`;
+    }
+    k.dirs.forEach(d=>{
+        html+=`<div class="res" data-nav="${esc(d)}"><div class="ic" style="background:#f0a93b"><i class="fa-solid fa-folder"></i></div><div class="tx"><b>${esc(d.split('/').pop())}</b><small>Unrestricted Access</small></div><button class="pin" data-pick-dir="${esc(d)}" title="Select this folder" aria-label="Select folder" style="margin-left:auto"><i class="fa-solid fa-check"></i></button></div>`;
+      });
+    if(!isFolderMode){
+      k.files.forEach(f=>{
+        html+=`<div class="res" data-file="${esc(f)}"><div class="ic" style="background:#8f9bb3"><i class="${fileIcon(f)}"></i></div><div class="tx"><b>${esc(f.split('/').pop())}</b><small>${fsize(f)}</small></div></div>`;
+      });
+    }
   if(!html)html='<div class="empty">Folder is empty</div>';
   const list=$('#pickerList');
   list.innerHTML=html;

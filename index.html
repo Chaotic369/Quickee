@@ -121,8 +121,8 @@ input,select{font:inherit;color:var(--ink);outline:none}
 .nolbl .it .lb{display:none}
 .it.on .ic{box-shadow:0 0 0 2.5px var(--acc),0 6px 16px rgba(0,0,0,.35)}
 .it.lift{opacity:.25}
-.it .x{display:none;position:absolute;top:-4px;right:calc(50% - var(--icon)/2 - 4px);width:16px;height:16px;border-radius:50%;background:#e5534b;color:#fff;font-size:9px;place-items:center;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.5);border:1px solid #1b1629;cursor:pointer}
-.it .ed{display:none;position:absolute;top:calc(var(--icon) - 12px);right:calc(50% - var(--icon)/2 - 4px);width:16px;height:16px;border-radius:50%;background:#1e1a2b;color:#fff;font-size:8.5px;place-items:center;z-index:10;box-shadow:0 2px 6px rgba(0,0,0,.5);border:1px solid #2d2642;cursor:pointer;transition:transform .12s}
+.it .x{display:none;position:absolute;top:-4px;right:calc(50% - var(--icon)/2 - 4px);width:16px;height:16px;border-radius:50%;background:#e5534b;color:#fff;font-size:9px;place-items:center;z-index:10;box-shadow:none;border:none;cursor:pointer}
+.it .ed{display:none;position:absolute;top:calc(var(--icon) - 12px);right:calc(50% - var(--icon)/2 - 4px);width:16px;height:16px;border-radius:50%;background:#3a3842;color:#fff;font-size:8.5px;place-items:center;z-index:10;box-shadow:none;border:none;cursor:pointer;transition:transform .12s}
 .it .ed:active{transform:scale(.9)}
 .edit .it .x,.edit .it .ed{display:grid}
 .edit .it .ic{animation:none}
@@ -198,6 +198,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:2px solid rgba
 .card{border-radius:20px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.06);padding:18px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .bigbtn{display:inline-block;margin-top:14px;padding:12px 18px;border-radius:14px;background:var(--acc);color:#fff;font-weight:700;font-size:13.5px;box-shadow:0 4px 14px rgba(0,0,0,.25);transition:transform .12s}
 .bigbtn:active{transform:scale(.96)}
+#stAdd{background:#ffbf00;color:#1c1304}
 .bub{max-width:78%;padding:10px 14px;border-radius:18px;margin:6px 0;font-size:13.5px;line-height:1.35}
 .bub.me{margin-left:auto;background:#2fb872;color:#04210f;border-bottom-right-radius:4px}
 .bub.th{background:rgba(255,255,255,.1);border-bottom-left-radius:4px}

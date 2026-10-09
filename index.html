@@ -538,7 +538,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
@@ -637,7 +637,13 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
   v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
   pop.classList.toggle('solid-black',isFullBlack);
-    fab.style.display=s.triggerEnabled===false?'none':'block';
+  fab.style.display=s.triggerEnabled===false?'none':'block';
+  fab.style.opacity=s.hideTrigger?'0':'1';
+  fab.style.background=s.trigColor||'rgba(255,255,255,.32)';
+  fabEdit.style.display=s.hideEditBtn?'none':'';
+  const nb=$('#navBar');
+  if(nb)nb.style.display=s.disableImmersive?'flex':'none';
+  s.trigEdge=s.leftHand?'left':(s.trigEdge||'right');
   phone.classList.toggle('edge-left', s.trigEdge==='left');
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
@@ -647,6 +653,9 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   phone.style.setProperty('--ring-col',`rgba(255,255,255,${ro})`);
   phone.style.setProperty('--ring-bg',`transparent`);
   pop.classList.toggle('nolbl',!s.showLbl);
+  if(grid){
+    grid.style.alignContent=s.gridPos==='top'?'start':(s.gridPos==='center'?'center':'end');
+  }
   const isLeft=s.trigEdge==='left';
   const targetW=clamp(s.w,180,ph.width-12);
   const targetH=clamp(s.h,180,ph.height-70);
@@ -1274,46 +1283,142 @@ function renderMainOverview(){
             </div>
           </div>
 
-    <div class="set-card" style="padding-bottom:14px">
-      <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
-        <i class="fa-solid fa-pen-ruler" style="color:var(--acc)"></i> Customization & Layout
-      </div>
-      <p style="font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.4">Configure shortcuts, grid density, icon roundness, popup dimensions, and trigger gesture ring.</p>
-      <button class="bigbtn" id="ovGoGrid" style="width:100%;text-align:center;margin-top:0"><i class="fa-solid fa-sliders"></i> Edit Launcher Settings</button>
-    </div>
-  `;
-}
-function buildStBody(){
-  const b=$('#stBody');if(!b)return;const y=b.scrollTop;
-  document.querySelectorAll('#stTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===sTab));
-  if(sTab==='general'){
-    b.innerHTML=renderMainOverview();
-    const bindTg=(id,prop,lbl)=>{
-      const btn=b.querySelector(id);
-      if(!btn)return;
-      btn.onclick=()=>{
-        st.set[prop]=!st.set[prop];
-        btn.classList.toggle('on',!!st.set[prop]);
-        applySet();
-        save();
-        toast(`${lbl} ${st.set[prop]?'enabled':'disabled'}`);
-      };
-    };
-    const trigBtn=b.querySelector('#ovTrig');
-    if(trigBtn){
-      trigBtn.onclick=()=>{
-        st.set.triggerEnabled=st.set.triggerEnabled===false?true:false;
-        trigBtn.classList.toggle('on',st.set.triggerEnabled);
-        applySet();
-        placeFab();
-        save();
-        toast(`Trigger ${st.set.triggerEnabled?'enabled':'disabled'}`);
-      };
+    <div class="set-card">
+          <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px;color:#4ade80">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Trigger Appearance
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Hide trigger indicator</b><small style="color:var(--dim)">Hides the visible line of touch triggers</small></div>
+            <button class="tg${st.set.hideTrigger?' on':''}" id="ovHideTrig"></button>
+          </div>
+          <div class="sg" style="margin:10px 0 6px">
+            <div class="row"><span>Line thickness</span><span id="v_ovTrigW">${st.set.trigW||5}px</span></div>
+            <input type="range" id="ovTrigThick" min="2" max="18" step="1" value="${st.set.trigW||5}">
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px">
+            <div><b style="display:block;font-size:13px">Trigger indicator color</b><small style="color:var(--dim)">Line touch color</small></div>
+            <div class="pick cols" id="ovTrigCols" style="margin:0;gap:6px">
+              ${['#ffffff','#4ade80','#ffc46b','#60a5fa','#f43f5e','#a855f7'].map(c=>`<button type="button" data-tc="${c}" style="background:${c};width:24px;height:24px;border-radius:50\%;border:2px solid${st.set.trigColor===c?'#fff':'transparent'}"></button>`).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="set-card">
+          <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px;color:#4ade80">
+            <i class="fa-solid fa-palette"></i> General Appearance
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Grid icons position</b><small style="color:var(--dim)">Vertical alignment inside popup</small></div>
+            <div class="seg" id="ovGridPosSeg" style="max-width:170px">
+              <button data-pos="top"${st.set.gridPos==='top'?' class="on"':''}>Top</button>
+              <button data-pos="center"${st.set.gridPos==='center'?' class="on"':''}>Center</button>
+              <button data-pos="bottom"${(st.set.gridPos==='bottom'||!st.set.gridPos)?' class="on"':''}>Bottom</button>
+            </div>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Hide edit icon</b><small style="color:var(--dim)">Hide the pen/gear floating icons</small></div>
+            <button class="tg${st.set.hideEditBtn?' on':''}" id="ovHideEdit"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Left hand mode</b><small style="color:var(--dim)">Position launcher trigger on left edge</small></div>
+            <button class="tg${st.set.leftHand?' on':''}" id="ovLeftHand"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Disable immersive mode</b><small style="color:var(--dim)">Keep bottom system navigation bar visible</small></div>
+            <button class="tg${st.set.disableImmersive?' on':''}" id="ovNoImmersive"></button>
+          </div>
+        </div>
+
+        <div class="set-card" style="padding-bottom:14px">
+          <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
+            <i class="fa-solid fa-pen-ruler" style="color:var(--acc)"></i> Customization & Layout
+          </div>
+          <p style="font-size:12px;color:var(--dim);margin-bottom:12px;line-height:1.4">Configure shortcuts, grid density, icon roundness, popup dimensions, and trigger gesture ring.</p>
+          <button class="bigbtn" id="ovGoGrid" style="width:100%;text-align:center;margin-top:0"><i class="fa-solid fa-sliders"></i> Edit Launcher Settings</button>
+        </div>
+      `;
     }
-    bindTg('#ovHaptic','haptic','Haptic vibration');
+    function buildStBody(){
+      const b=$('#stBody');if(!b)return;const y=b.scrollTop;
+      document.querySelectorAll('#stTabs button').forEach(x=>x.classList.toggle('on',x.dataset.t===sTab));
+      if(sTab==='general'){
+        b.innerHTML=renderMainOverview();
+        const bindTg=(id,prop,lbl)=>{
+          const btn=b.querySelector(id);
+          if(!btn)return;
+          btn.onclick=()=>{
+            st.set[prop]=!st.set[prop];
+            btn.classList.toggle('on',!!st.set[prop]);
+            applySet();
+            save();
+            toast(`${lbl} ${st.set[prop]?'enabled':'disabled'}`);
+          };
+        };
+        const trigBtn=b.querySelector('#ovTrig');
+        if(trigBtn){
+          trigBtn.onclick=()=>{
+            st.set.triggerEnabled=st.set.triggerEnabled===false?true:false;
+            trigBtn.classList.toggle('on',st.set.triggerEnabled);
+            applySet();
+            placeFab();
+            save();
+            toast(`Trigger ${st.set.triggerEnabled?'enabled':'disabled'}`);
+          };
+        }
+        bindTg('#ovHaptic','haptic','Haptic vibration');
+        bindTg('#ovHideTrig','hideTrigger','Hide trigger indicator');
+        bindTg('#ovHideEdit','hideEditBtn','Hide edit icon');
+        bindTg('#ovNoImmersive','disableImmersive','Disable immersive mode');
+        const lhBtn=b.querySelector('#ovLeftHand');
+        if(lhBtn){
+          lhBtn.onclick=()=>{
+            st.set.leftHand=!st.set.leftHand;
+            st.set.trigEdge=st.set.leftHand?'left':'right';
+            lhBtn.classList.toggle('on',st.set.leftHand);
+            applySet();
+            placeFab();
+            save();
+            toast(st.set.leftHand?'Left hand mode enabled':'Right hand mode enabled');
+          };
+        }
+        const thickSl=b.querySelector('#ovTrigThick');
+        if(thickSl){
+          thickSl.oninput=e=>{
+            st.set.trigW=parseInt(e.target.value,10);
+            const vEl=b.querySelector('#v_ovTrigW');
+            if(vEl)vEl.textContent=st.set.trigW+'px';
+            applySet();
+            placeFab();
+            save();
+          };
+        }
+        const trigCols=b.querySelector('#ovTrigCols');
+        if(trigCols){
+          trigCols.onclick=e=>{
+            const btn=e.target.closest('[data-tc]');
+            if(!btn)return;
+            st.set.trigColor=btn.dataset.tc;
+            trigCols.querySelectorAll('button').forEach(x=>x.style.borderColor=x.dataset.tc===st.set.trigColor?'#fff':'transparent');
+            applySet();
+            save();
+            toast('Trigger color updated');
+          };
+        }
+        const gridPosSeg=b.querySelector('#ovGridPosSeg');
+        if(gridPosSeg){
+          gridPosSeg.onclick=e=>{
+            const btn=e.target.closest('[data-pos]');
+            if(!btn)return;
+            st.set.gridPos=btn.dataset.pos;
+            gridPosSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pos===st.set.gridPos));
+            applySet();
+            save();
+            toast(`Grid icons aligned to ${st.set.gridPos}`);
+          };
+        }
         bindTg('#ovPermOverlay','permOverlay','Overlay permission');
-    bindTg('#ovPermAcc','permAcc','Accessibility service');
-    bindTg('#ovPermStorage','permStorage','Storage access');
+        bindTg('#ovPermAcc','permAcc','Accessibility service');
+        bindTg('#ovPermStorage','permStorage','Storage access');
 
         const bkpBtn=b.querySelector('#ovBackupBtn');
         if(bkpBtn){

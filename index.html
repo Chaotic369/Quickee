@@ -557,7 +557,7 @@ const SYS={
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
 const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default'};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,50,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
 const DEF=[
@@ -1160,18 +1160,18 @@ function pvUpdate(){
   p.style.maxHeight=Math.min(s.h,ph.height-70)+'px';
 
   const cols=Math.max(1,parseInt(s.cols)||4);
-  const rows=Math.max(1,parseInt(s.rows)||5);
-  const bySlot=new Map();
-  st.items.forEach(it=>{if(typeof it.slot==='number')bySlot.set(it.slot,it)});
-  let maxSlot=-1;
-  st.items.forEach(it=>{if(typeof it.slot==='number'&&it.slot>maxSlot)maxSlot=it.slot});
-  const totalCount=Math.max(cols*rows,Math.ceil((maxSlot+1)/cols)*cols);
-  let html='';
-    for(let slot=0;slot<totalCount;slot++){
-      const it=bySlot.get(slot);
-      html+=`<div class="grid-cell" style="min-height:calc(var(--icon) + 20px)">${it?itemHTML(it):''}</div>`;
-    }
-    $('#pvgrid').innerHTML=html;
+    const userRows=Math.max(1,parseInt(s.rows)||5);
+    const bySlot=new Map();
+    st.items.forEach(it=>{if(typeof it.slot==='number')bySlot.set(it.slot,it)});
+    let maxSlot=-1;
+    st.items.forEach(it=>{if(typeof it.slot==='number'&&it.slot>maxSlot)maxSlot=it.slot});
+    const totalCount=Math.max(cols*userRows,Math.ceil((maxSlot+cols+1)/cols)*cols);
+    let html='';
+      for(let slot=0;slot<totalCount;slot++){
+        const it=bySlot.get(slot);
+        html+=`<div class="grid-cell" style="min-height:calc(var(--icon) + 20px)">${it?itemHTML(it):''}</div>`;
+      }
+      $('#pvgrid').innerHTML=html;
 
   const th=Math.max(8,(s.trigH||90));
   let trigTop;
@@ -1534,22 +1534,22 @@ function renderMainOverview(){
         }
       }else if(sTab==='items'){
           const s=st.set||S_DEF;
-          const cols=Math.max(1,parseInt(s.cols)||4);
-          const rows=Math.max(1,parseInt(s.rows)||5);
-          const bySlot=new Map();
-          st.items.forEach((it,idx)=>{const sl=(typeof it.slot==='number')?it.slot:idx;bySlot.set(sl,it)});
-          let maxSlot=-1;
-          st.items.forEach((it,idx)=>{const sl=(typeof it.slot==='number')?it.slot:idx;if(sl>maxSlot)maxSlot=sl});
-          const totalCount=Math.max(cols*rows,Math.ceil((maxSlot+2)/cols)*cols);
-          let cellsHtml='';
-          for(let slot=0;slot<totalCount;slot++){
-            const it=bySlot.get(slot);
-            if(it){
-              cellsHtml+=`<div class="grid-cell" data-slot="${slot}">${itemHTML(it)}</div>`;
-            }else{
-                  cellsHtml+=`<div class="grid-cell empty-slot" data-slot="${slot}"><div class="cell-add" title="Add shortcut here"><i class="fa-solid fa-plus"></i></div></div>`;
-                              }
-                            }
+                    const cols=Math.max(1,parseInt(s.cols)||4);
+                    const userRows=Math.max(1,parseInt(s.rows)||5);
+                    const bySlot=new Map();
+                    st.items.forEach((it,idx)=>{const sl=(typeof it.slot==='number')?it.slot:idx;bySlot.set(sl,it)});
+                    let maxSlot=-1;
+                    st.items.forEach((it,idx)=>{const sl=(typeof it.slot==='number')?it.slot:idx;if(sl>maxSlot)maxSlot=sl});
+                    const totalCount=Math.max(cols*userRows,Math.ceil((maxSlot+cols+1)/cols)*cols);
+                    let cellsHtml='';
+                    for(let slot=0;slot<totalCount;slot++){
+                      const it=bySlot.get(slot);
+                      if(it){
+                        cellsHtml+=`<div class="grid-cell" data-slot="${slot}">${itemHTML(it)}</div>`;
+                      }else{
+                            cellsHtml+=`<div class="grid-cell empty-slot" data-slot="${slot}"><div class="cell-add" title="Add shortcut here"><i class="fa-solid fa-plus"></i></div></div>`;
+                                        }
+                                      }
                             b.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:12px"><button class="bigbtn" id="stAdd" style="margin:0;flex:1;justify-content:center;font-size:12.5px"><i class="fa-solid fa-plus"></i> Add Shortcut</button><button class="sbtn" id="stBatchBtn" type="button" style="margin:0;padding:10px 14px;font-size:12.5px;color:#ffbf00;border:none;outline:none;font-weight:700"><i class="fa-solid fa-layer-group" style="color:#ffbf00"></i> Add Multiple</button></div>`+
                               `<div class="set-card edit${st.set.showLbl?'':' nolbl'}" style="padding:${s.pad||10}px;--icon:${s.icon||46}px;--rad:${s.radius!=null?s.radius:28};--cols:${cols};--cgap:${s.cgap||8}px;--rgap:${s.rgap||10}px;--lbl:${s.lbl||9.5}px">`+
                               `<div style="display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%;align-items:start">${cellsHtml}</div>`+

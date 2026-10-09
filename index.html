@@ -1266,8 +1266,7 @@ function pvUpdate(){
 function syncSl(){
   CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+(c[5]||'')});
   const tLbl=$('#tgLbl');if(tLbl)tLbl.classList.toggle('on',!!st.set.showLbl);
-  const tEdit=$('#ovHideEdit');if(tEdit)tEdit.classList.toggle('on',!!st.set.hideEditBtn);
-  const tTrig=$('#ovHideTrig');if(tTrig)tTrig.classList.toggle('on',!!st.set.hideTrigger);
+    const tTrig=$('#ovHideTrig');if(tTrig)tTrig.classList.toggle('on',!!st.set.hideTrigger);
     const ovOp=$('#ovTrigOpacity');if(ovOp){ovOp.value=st.set.trigOpacity!=null?st.set.trigOpacity:80;const vEl=$('#v_ovTrigOp');if(vEl)vEl.textContent=ovOp.value+'%';}
     const mskSeg=$('#ovShapeMaskSeg');if(mskSeg)mskSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.msk===(st.set.shapeMask||'default')));
   const posSeg=$('#ovGridPosSeg');if(posSeg)posSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pos===(st.set.gridPos||'bottom')));
@@ -1280,10 +1279,9 @@ const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
   popup:{
-    keys:['w','h','glass','popRad'],
-    title:'Pop-up Size & Styling',
-    extra:'<div class="sw" style="margin-top:12px"><span>Hide edit icon</span><button class="tg" id="ovHideEdit"></button></div>'
-  },
+      keys:['w','h','glass','popRad'],
+      title:'Pop-up Size & Styling'
+    },
   trigger:{
     keys:['trigH','trigW','trigY','trigOpacity','dwellDelay'],
     title:'Trigger Settings',
@@ -1405,9 +1403,8 @@ function renderMainOverview(){
           };
         }
         bindTg('#ovHaptic','haptic','Haptic vibration');
-            bindTg('#ovHideTrig','hideTrigger','Hide trigger indicator');
-            bindTg('#ovHideEdit','hideEditBtn','Hide edit icon');
-            bindTg('#ovNoImmersive','disableImmersive','Disable immersive mode');
+                    bindTg('#ovHideTrig','hideTrigger','Hide trigger indicator');
+                    bindTg('#ovNoImmersive','disableImmersive','Disable immersive mode');
             bindTg('#ovAutoClose','autoClose','Auto-close on launch');
             bindTg('#ovNoLandscape','disableInLandscape','Disable in landscape');
             const lhBtn=b.querySelector('#ovLeftHand');
@@ -1708,8 +1705,7 @@ function openStudio(fromPop=false){
   $('#stBody').onclick=e=>{
         if(suppress)return;
         if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
-        if(e.target.closest('#ovHideEdit')){st.set.hideEditBtn=!st.set.hideEditBtn;applySet();syncSl();save();return}
-        if(e.target.closest('#ovHideTrig')){st.set.hideTrigger=!st.set.hideTrigger;applySet();syncSl();save();return}
+                if(e.target.closest('#ovHideTrig')){st.set.hideTrigger=!st.set.hideTrigger;applySet();syncSl();save();return}
         const mskBtn=e.target.closest('#ovShapeMaskSeg button');
         if(mskBtn){st.set.shapeMask=mskBtn.dataset.msk;applySet();syncSl();save();return;}
         const posBtn=e.target.closest('#ovGridPosSeg button');

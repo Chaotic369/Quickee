@@ -1400,21 +1400,80 @@ function renderMainOverview(){
           };
         }
         bindTg('#ovHaptic','haptic','Haptic vibration');
-        bindTg('#ovHideTrig','hideTrigger','Hide trigger indicator');
-        bindTg('#ovHideEdit','hideEditBtn','Hide edit icon');
-        bindTg('#ovNoImmersive','disableImmersive','Disable immersive mode');
-        const lhBtn=b.querySelector('#ovLeftHand');
-        if(lhBtn){
-          lhBtn.onclick=()=>{
-            st.set.leftHand=!st.set.leftHand;
-            st.set.trigEdge=st.set.leftHand?'left':'right';
-            lhBtn.classList.toggle('on',st.set.leftHand);
-            applySet();
-            placeFab();
-            save();
-            toast(st.set.leftHand?'Left hand mode enabled':'Right hand mode enabled');
-          };
-        }
+            bindTg('#ovHideTrig','hideTrigger','Hide trigger indicator');
+            bindTg('#ovHideEdit','hideEditBtn','Hide edit icon');
+            bindTg('#ovNoImmersive','disableImmersive','Disable immersive mode');
+            bindTg('#ovAutoClose','autoClose','Auto-close on launch');
+            bindTg('#ovNoLandscape','disableInLandscape','Disable in landscape');
+            const lhBtn=b.querySelector('#ovLeftHand');
+            if(lhBtn){
+              lhBtn.onclick=()=>{
+                st.set.leftHand=!st.set.leftHand;
+                st.set.trigEdge=st.set.leftHand?'left':'right';
+                lhBtn.classList.toggle('on',st.set.leftHand);
+                applySet();
+                placeFab();
+                save();
+                toast(st.set.leftHand?'Left hand mode enabled':'Right hand mode enabled');
+              };
+            }
+            const shapeSeg=b.querySelector('#ovShapeMaskSeg');
+            if(shapeSeg){
+              shapeSeg.onclick=e=>{
+                const btn=e.target.closest('[data-msk]');
+                if(!btn)return;
+                st.set.shapeMask=btn.dataset.msk;
+                shapeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.msk===st.set.shapeMask));
+                applySet();
+                save();
+                toast(`Icon mask set to ${st.set.shapeMask}`);
+              };
+            }
+            const opSl=b.querySelector('#ovTrigOpacity');
+            if(opSl){
+              opSl.oninput=e=>{
+                st.set.trigOpacity=parseInt(e.target.value,10);
+                const vEl=b.querySelector('#v_ovTrigOp');
+                if(vEl)vEl.textContent=st.set.trigOpacity+'%';
+                applySet();
+                save();
+              };
+            }
+            const dwellSl=b.querySelector('#ovDwell');
+            if(dwellSl){
+              dwellSl.oninput=e=>{
+                st.set.dwellDelay=parseInt(e.target.value,10);
+                const vEl=b.querySelector('#v_ovDwell');
+                if(vEl)vEl.textContent=st.set.dwellDelay+'ms';
+                save();
+              };
+            }
+            const swUpSel=b.querySelector('#ovSwipeUp');
+            if(swUpSel){
+              swUpSel.onchange=()=>{
+                st.set.swipeUpAct=swUpSel.value;
+                save();
+                toast('Swipe up action set');
+              };
+            }
+            const swDnSel=b.querySelector('#ovSwipeDown');
+            if(swDnSel){
+              swDnSel.onchange=()=>{
+                st.set.swipeDownAct=swDnSel.value;
+                save();
+                toast('Swipe down action set');
+              };
+            }
+            const rotBtn=b.querySelector('#ovToggleRotate');
+            if(rotBtn){
+              rotBtn.onclick=()=>{
+                phone.classList.toggle('landscape');
+                applySet();
+                placeFab();
+                placePop();
+                toast(phone.classList.contains('landscape')?'Orientation: Landscape':'Orientation: Portrait');
+              };
+            }
         const thickSl=b.querySelector('#ovTrigThick');
         if(thickSl){
           thickSl.oninput=e=>{
@@ -1840,13 +1899,29 @@ grid.addEventListener('click',e=>{
   };
 
 /* ───────── drag & drop spatial positioning (long-press or edit) ───────── */
-let dr=null;
+let dr=null, lpCtxTimer=null, activeCtxId=null;
+const ctxMenu=$('#ctxMenu');
+function hideCtx(){if(ctxMenu)ctxMenu.classList.remove('open');activeCtxId=null}
 document.addEventListener('pointerdown',e=>{
+  if(ctxMenu&&!e.target.closest('#ctxMenu'))hideCtx();
   const it=e.target.closest('.it');
   if(!it||e.target.closest('.x,.ed')||(e.button!==0&&e.pointerType==='mouse'))return;
   const inGrid=it.closest('#grid');
   const inStudio=it.closest('#stBody');
   if(!inGrid&&!inStudio)return;
+  activeCtxId=it.dataset.id;
+  if(!editMode&&inGrid){
+    clearTimeout(lpCtxTimer);
+    lpCtxTimer=setTimeout(()=>{
+      if(dr&&dr.on)return;
+      const r=it.getBoundingClientRect();
+      const pr=phone.getBoundingClientRect();
+      ctxMenu.style.left=clamp(r.left-pr.left,8,pr.width-155)+'px';
+      ctxMenu.style.top=clamp(r.bottom-pr.top+4,36,pr.height-120)+'px';
+      ctxMenu.classList.add('open');
+      haptic('pop');
+    },550);
+  }
   dr={it,x:e.clientX,y:e.clientY,ready:false,on:false,ghost:null,targetSlot:null,isStudio:Boolean(inStudio)};
   const delay=(editMode||inStudio)?60:280;
   dr.t=setTimeout(()=>{
@@ -1855,9 +1930,32 @@ document.addEventListener('pointerdown',e=>{
     if(navigator.vibrate)navigator.vibrate(30);
   },delay);
 });
+$('#ctxEdit').onclick=()=>{
+  const item=st.items.find(x=>x.id===activeCtxId);
+  hideCtx();
+  if(item)openDlg(item,item.slot);
+};
+$('#ctxInfo').onclick=()=>{
+  const item=st.items.find(x=>x.id===activeCtxId);
+  hideCtx();
+  if(item)toast(`${item.n} (${TYPES[item.t]?.label||item.t})`,item.v);
+};
+$('#ctxDel').onclick=()=>{
+  const item=st.items.find(x=>x.id===activeCtxId);
+  hideCtx();
+  if(item){
+    confirmRemoval(item.n,()=>{
+      st.items=st.items.filter(x=>x.id!==item.id);
+      save();
+      render();
+      toast('Shortcut removed');
+    });
+  }
+};
 window.addEventListener('touchmove',e=>{if(dr&&dr.ready&&e.cancelable)e.preventDefault()},{passive:false});
 window.addEventListener('pointermove',e=>{
   if(!dr)return;
+  if(Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>6){clearTimeout(lpCtxTimer);lpCtxTimer=null}
   if(!dr.ready){
     if(Math.hypot(e.clientX-dr.x,e.clientY-dr.y)>8){clearTimeout(dr.t);dr=null}
     return;
@@ -1898,6 +1996,7 @@ window.addEventListener('pointermove',e=>{
   }
 },{passive:false});
 function endDrag(){
+  clearTimeout(lpCtxTimer);lpCtxTimer=null;
   if(!dr)return;
   clearTimeout(dr.t);
   document.querySelectorAll('.grid-cell.cell-over').forEach(c=>c.classList.remove('cell-over'));

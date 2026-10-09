@@ -244,31 +244,30 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 
 /* ───── add / edit dialog ───── */
 .dlgw{z-index:75;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:16px}
-.dc{width:100%;max-height:92%;overflow-y:auto;border-radius:26px;background:rgba(12,12,12,.98);border:1px solid rgba(255,255,255,.08);padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.92),inset 0 1px 0 rgba(255,255,255,.06);scrollbar-width:none}
+.dc{width:100%;max-height:92%;overflow-y:auto;border-radius:26px;background:rgba(12,12,12,.98);border:none;outline:none;padding:20px;box-shadow:0 30px 80px rgba(0,0,0,.92);scrollbar-width:none}
 .dc::-webkit-scrollbar{display:none}
 .dc h3{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .dc label{display:block;font-size:11.5px;color:var(--dim);margin:14px 0 6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
-.dc input[type=text],.dc select{width:100%;height:44px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);padding:0 14px;font-size:14px;transition:border-color .15s}
-.dc input[type=text]:focus,.dc select:focus{border-color:var(--acc)}
+.dc input[type=text],.dc select{width:100%;height:44px;border-radius:14px;background:rgba(255,255,255,.08);border:none;outline:none;padding:0 14px;font-size:14px}
+.dc input[type=text]:focus,.dc select:focus{border:none;outline:none}
 .dc select option{background:#1b1629}
 .seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);font-size:12px;font-weight:600;color:var(--dim);transition:all .15s}
-#dType button.on{background:#ffbf00;color:#1c1304;border-color:transparent}
-.seg button.on{background:#ffbf00;color:#1c1304;border-color:transparent}
-.stbody .seg button{background:transparent !important;border:none !important;box-shadow:none !important}
+.seg button{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.07);border:none;outline:none;font-size:12px;font-weight:600;color:var(--dim);transition:all .15s}
+#dType button.on{background:#ffbf00;color:#1c1304;border:none;outline:none}
+.seg button.on{background:#ffbf00;color:#1c1304;border:none;outline:none}
+.stbody .seg button{background:transparent !important;border:none !important;outline:none !important;box-shadow:none !important}
 .stbody .seg button.on{color:#ffbf00 !important}
-.stbody select{background:transparent !important;border:none !important;box-shadow:none !important}
+.stbody select{background:transparent !important;border:none !important;outline:none !important;box-shadow:none !important}
 .pick{display:flex;flex-wrap:wrap;gap:7px}
-.pick button{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.06);display:grid;place-items:center;font-size:15px;transition:all .15s}
+.pick button{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.07);border:none;outline:none;display:grid;place-items:center;font-size:15px;transition:all .15s}
 :focus-visible{outline:none}
-.pick.cols button{border-radius:50%;width:32px;height:32px;border:2px solid transparent}
-.pick button{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.07);border:none;display:grid;place-items:center;font-size:15px;transition:all .15s}
+.pick.cols button{border-radius:50%;width:32px;height:32px;border:none;outline:none}
 .acts{display:flex;gap:10px;margin-top:22px;align-items:center}
 .acts .sp{flex:1}
-.acts button{padding:12px 18px;border-radius:14px;font-weight:700;font-size:13px;background:rgba(255,255,255,.09);border:1px solid rgba(255,255,255,.08);transition:all .15s}
+.acts button{padding:12px 18px;border-radius:14px;font-weight:700;font-size:13px;background:rgba(255,255,255,.09);border:none;outline:none;transition:all .15s}
 .acts button:active{transform:scale(.95)}
-.acts .pri{background:var(--acc);color:#fff;border-color:transparent}
-.acts .del{color:#ff7b72;background:rgba(229,83,75,.14);border-color:rgba(229,83,75,.2)}
+.acts .pri{background:var(--acc);color:#fff;border:none;outline:none}
+.acts .del{color:#ff7b72;background:rgba(229,83,75,.14);border:none;outline:none}
 :focus-visible{outline:none}
 .grab{display:none}
 
@@ -402,48 +401,48 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
         </div>
 
         <div class="dlgw" id="dlg">
-      <div class="dc">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-          <h3 id="dT" style="margin:0">New shortcut</h3>
-          <button id="dBatchBtn" type="button" class="sbtn" style="margin:0;padding:5px 12px;font-size:11.5px;color:var(--acc);border-color:rgba(179,32,43,.5)"><i class="fa-solid fa-layer-group"></i> Add Multiple</button>
-        </div>
-        <label>Type</label><div class="seg" id="dType"></div>
-        <label>Name</label><input type="text" id="dName" placeholder="Shown under the icon">
-              <label id="dTL">Target</label>
-              <div id="dAppBox" style="display:none;flex-direction:column;gap:8px">
-                <select id="dAppSel" style="width:100%;height:44px;border-radius:14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);padding:0 14px;font-size:14px;color:var(--ink)"></select>
-                <div id="dAppShortcutsBox" style="display:none;flex-direction:column;gap:4px">
-                  <label style="margin:2px 0 4px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">App Shortcuts</label>
-                  <div id="dAppShortcutsList" style="display:flex;flex-direction:column;gap:4px;max-height:130px;overflow-y:auto"></div>
+              <div class="dc">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                  <h3 id="dT" style="margin:0">New shortcut</h3>
+                  <button id="dBatchBtn" type="button" class="sbtn" style="margin:0;padding:5px 12px;font-size:11.5px;color:var(--acc);border:none;outline:none"><i class="fa-solid fa-layer-group"></i> Add Multiple</button>
                 </div>
-              </div>
-              <div id="dTargetBox" style="display:flex;gap:8px;align-items:center">
-                              <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
-                              <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
-                            </div>
-                            <div id="dQuickShortcutsBox" style="display:none;flex-direction:column;gap:4px">
-                              <label style="margin:2px 0 2px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Shortcut Presets</label>
-                              <div id="dQuickShortcutsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-                            </div>
-                            <select id="dSys"></select>
-                            <datalist id="dl"></datalist>
-                      <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
-                        <label style="margin:0">Icon & Color</label>
-                        <div style="display:flex;gap:6px">
-                          <input type="file" id="dImgFileInput" accept="image/*" style="display:none">
-                          <button id="dUploadIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-image"></i> Custom Image</button>
-                          <button id="dChangeIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px"><i class="fa-solid fa-pen"></i> Presets</button>
+                <label>Type</label><div class="seg" id="dType"></div>
+                <label>Name</label><input type="text" id="dName" placeholder="Shown under the icon">
+                      <label id="dTL">Target</label>
+                      <div id="dAppBox" style="display:none;flex-direction:column;gap:8px">
+                        <select id="dAppSel" style="width:100%;height:44px;border-radius:14px;background:rgba(255,255,255,.08);border:none;outline:none;padding:0 14px;font-size:14px;color:var(--ink)"></select>
+                        <div id="dAppShortcutsBox" style="display:none;flex-direction:column;gap:4px">
+                          <label style="margin:2px 0 4px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">App Shortcuts</label>
+                          <div id="dAppShortcutsList" style="display:flex;flex-direction:column;gap:4px;max-height:130px;overflow-y:auto"></div>
                         </div>
                       </div>
-                      <div id="dIconPreview" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07)">
-                        <div id="dCurrentIcon" class="ic" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"></div>
-                        <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
-                      </div>
-                      <div class="pick cols" id="dColors" style="margin-top:8px;gap:6px"></div>
-                      <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:1px solid rgba(255,255,255,.06)"></div>
-              <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
-      </div>
-    </div>
+                      <div id="dTargetBox" style="display:flex;gap:8px;align-items:center">
+                                      <input type="text" id="dTarget" list="dl" autocomplete="off" autocapitalize="off" spellcheck="false" style="flex:1">
+                                      <button id="dPickBtn" class="sbtn" style="display:none;margin:0;height:44px;padding:0 14px;white-space:nowrap;flex-shrink:0"><i class="fa-solid fa-folder-open"></i> Browse</button>
+                                    </div>
+                                    <div id="dQuickShortcutsBox" style="display:none;flex-direction:column;gap:4px">
+                                      <label style="margin:2px 0 2px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Shortcut Presets</label>
+                                      <div id="dQuickShortcutsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+                                    </div>
+                                    <select id="dSys"></select>
+                                    <datalist id="dl"></datalist>
+                              <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
+                                <label style="margin:0">Icon & Color</label>
+                                <div style="display:flex;gap:6px">
+                                  <input type="file" id="dImgFileInput" accept="image/*" style="display:none">
+                                  <button id="dUploadIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px;border:none;outline:none"><i class="fa-solid fa-image"></i> Custom Image</button>
+                                  <button id="dChangeIconBtn" type="button" class="sbtn" style="margin:0;padding:4px 10px;font-size:11px;border:none;outline:none"><i class="fa-solid fa-pen"></i> Presets</button>
+                                </div>
+                              </div>
+                              <div id="dIconPreview" style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(255,255,255,.05);border:none;outline:none">
+                                <div id="dCurrentIcon" class="ic" style="width:36px;height:36px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"></div>
+                                <span id="dIconLabel" style="font-size:12px;color:var(--dim)">Default icon</span>
+                              </div>
+                              <div class="pick cols" id="dColors" style="margin-top:8px;gap:6px"></div>
+                              <div class="pick" id="dIcons" style="display:none;margin-top:8px;max-height:160px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px;border:none;outline:none"></div>
+                      <div class="acts"><button class="del" id="dDel">Delete</button><span class="sp"></span><button id="dCancel">Cancel</button><button class="pri" id="dSave">Save</button></div>
+              </div>
+            </div>
 
     <div class="dlgw" id="pickerDlg" style="z-index:85">
         <div class="dc">
@@ -1260,7 +1259,7 @@ function syncSl(){
   const tTrig=$('#ovHideTrig');if(tTrig)tTrig.classList.toggle('on',!!st.set.hideTrigger);
   const mskSeg=$('#ovShapeMaskSeg');if(mskSeg)mskSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.msk===(st.set.shapeMask||'default')));
   const posSeg=$('#ovGridPosSeg');if(posSeg)posSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pos===(st.set.gridPos||'bottom')));
-  const tcSeg=$('#ovTrigCols');if(tcSeg)tcSeg.querySelectorAll('button').forEach(x=>x.style.borderColor=x.dataset.tc===(st.set.trigColor||'#ffffff')?'#fff':'transparent');
+  const tcSeg=$('#ovTrigCols');if(tcSeg)tcSeg.querySelectorAll('button').forEach(x=>{x.style.border='none';x.style.outline='none';});
   const edgeSeg=$('#trigEdgeSeg');if(edgeSeg)edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===(st.set.trigEdge||'right')));
   const swUp=$('#ovSwipeUp');if(swUp)swUp.value=st.set.swipeUpAct||'notif';
   const swDn=$('#ovSwipeDown');if(swDn)swDn.value=st.set.swipeDownAct||'recents';
@@ -2368,7 +2367,7 @@ function populateAppShortcuts(app, selAction){
   }
   box.style.display='flex';
   list.innerHTML=app.sc.map(sc=>`
-    <div class="res shortcut-item-btn" data-act="${esc(sc.a)}" data-name="${esc(sc.n)}" data-icon="${esc(sc.i)}" style="padding:6px 10px;border-radius:10px;background:${selAction===sc.a?'rgba(179,32,43,.3)':'rgba(255,255,255,.05)'};border:${selAction===sc.a?'1px solid var(--acc)':'1px solid transparent'}">
+    <div class="res shortcut-item-btn" data-act="${esc(sc.a)}" data-name="${esc(sc.n)}" data-icon="${esc(sc.i)}" style="padding:6px 10px;border-radius:10px;background:${selAction===sc.a?'rgba(179,32,43,.3)':'rgba(255,255,255,.05)'};border:none;outline:none">
       <div class="ic" style="background:${app.c};width:26px;height:26px;border-radius:8px;font-size:12px"><i class="${esc(sc.i)}"></i></div>
       <div class="tx"><b style="font-size:12px">${esc(sc.n)}</b><small style="color:var(--dim)">Direct Shortcut</small></div>
       <i class="fa-solid fa-arrow-turn-down" style="font-size:11px;color:var(--dim);margin-left:auto"></i>
@@ -2376,9 +2375,10 @@ function populateAppShortcuts(app, selAction){
   `).join('');
   list.querySelectorAll('.shortcut-item-btn').forEach(btn=>{
     btn.onclick=()=>{
-      list.querySelectorAll('.shortcut-item-btn').forEach(b=>{b.style.background='rgba(255,255,255,.05)';b.style.border='1px solid transparent'});
+      list.querySelectorAll('.shortcut-item-btn').forEach(b=>{b.style.background='rgba(255,255,255,.05)';b.style.border='none';b.style.outline='none'});
       btn.style.background='rgba(179,32,43,.3)';
-      btn.style.border='1px solid var(--acc)';
+      btn.style.border='none';
+      btn.style.outline='none';
       dS.appAction=btn.dataset.act;
       dS.actionName=btn.dataset.name;
       $('#dName').value=btn.dataset.name;

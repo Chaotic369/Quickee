@@ -1500,6 +1500,7 @@ function openStudio(fromPop=false){
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();pvUpdate();$('#stBody').scrollTop=0};
   $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL_MAP.get(k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;const vEl=$('#v_'+k);if(vEl)vEl.textContent=st.set[k]+((c&&c[5])||'');applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
+      if(suppress)return;
       if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
       if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
       if(e.target.closest('#stAdd')){openDlg(null,firstFreeSlot());return}
@@ -1662,18 +1663,21 @@ grid.addEventListener('click',e=>{
 
 /* ───────── drag & drop spatial positioning (long-press or edit) ───────── */
 let dr=null;
-grid.addEventListener('pointerdown',e=>{
+document.addEventListener('pointerdown',e=>{
   const it=e.target.closest('.it');
   if(!it||e.target.closest('.x')||(e.button!==0&&e.pointerType==='mouse'))return;
-  dr={it,x:e.clientX,y:e.clientY,ready:false,on:false,ghost:null,targetSlot:null};
-  const delay=editMode?60:280;
+  const inGrid=it.closest('#grid');
+  const inStudio=it.closest('#stBody');
+  if(!inGrid&&!inStudio)return;
+  dr={it,x:e.clientX,y:e.clientY,ready:false,on:false,ghost:null,targetSlot:null,isStudio:Boolean(inStudio)};
+  const delay=(editMode||inStudio)?60:280;
   dr.t=setTimeout(()=>{
     if(!dr)return;
     dr.ready=true;
     if(navigator.vibrate)navigator.vibrate(30);
   },delay);
 });
-grid.addEventListener('touchmove',e=>{if(dr&&dr.ready&&e.cancelable)e.preventDefault()},{passive:false});
+window.addEventListener('touchmove',e=>{if(dr&&dr.ready&&e.cancelable)e.preventDefault()},{passive:false});
 window.addEventListener('pointermove',e=>{
   if(!dr)return;
   if(!dr.ready){
@@ -1689,9 +1693,10 @@ window.addEventListener('pointermove',e=>{
     g.style.width=r.width+'px';
     g.style.left=r.left+'px';
     g.style.top=r.top+'px';
-    g.style.setProperty('--icon',getComputedStyle(pop).getPropertyValue('--icon'));
-    g.style.setProperty('--rad',getComputedStyle(pop).getPropertyValue('--rad'));
-    g.style.setProperty('--lbl',getComputedStyle(pop).getPropertyValue('--lbl'));
+    const srcScope=dr.isStudio?(dr.it.closest('.set-card')||pop):pop;
+    g.style.setProperty('--icon',getComputedStyle(srcScope).getPropertyValue('--icon'));
+    g.style.setProperty('--rad',getComputedStyle(srcScope).getPropertyValue('--rad'));
+    g.style.setProperty('--lbl',getComputedStyle(srcScope).getPropertyValue('--lbl'));
     document.body.appendChild(g);
     dr.ghost=g;
     dr.it.classList.add('lift');
@@ -1701,14 +1706,18 @@ window.addEventListener('pointermove',e=>{
   g.style.top=(e.clientY-g.offsetHeight/2)+'px';
   const tgt=document.elementFromPoint(e.clientX,e.clientY);
   document.querySelectorAll('.grid-cell.cell-over').forEach(c=>c.classList.remove('cell-over'));
-  const cell=tgt&&tgt.closest('#grid .grid-cell');
+  const cellSelector=dr.isStudio?'#stBody .grid-cell':'#grid .grid-cell';
+  const cell=tgt&&tgt.closest(cellSelector);
   if(cell){
     cell.classList.add('cell-over');
     dr.targetSlot=parseInt(cell.dataset.slot,10);
   }
-  const pr=pbody.getBoundingClientRect();
-  if(e.clientY<pr.top+36)pbody.scrollTop-=9;
-  else if(e.clientY>pr.bottom-36)pbody.scrollTop+=9;
+  const scrollBox=dr.isStudio?$('#stBody'):pbody;
+  if(scrollBox){
+    const pr=scrollBox.getBoundingClientRect();
+    if(e.clientY<pr.top+36)scrollBox.scrollTop-=9;
+    else if(e.clientY>pr.bottom-36)scrollBox.scrollTop+=9;
+  }
 },{passive:false});
 function endDrag(){
   if(!dr)return;
@@ -1729,6 +1738,7 @@ function endDrag(){
     suppress=true;
     setTimeout(()=>suppress=false,250);
     render();
+    if(stOn())studioRefresh();
     toast('Position updated');
   }
   dr=null;

@@ -1339,9 +1339,28 @@ function buildStBody(){
           };
         }
       }else if(sTab==='items'){
-    b.innerHTML=`<button class="bigbtn" id="stAdd" style="margin:0 0 10px;width:100%;justify-content:center"><i class="fa-solid fa-plus"></i> Add Shortcut</button><div class="set-card">`+
-    (st.items.length?st.items.map(it=>`<div class="res" data-id="${it.id}"><div class="ic" style="background:${it.c}">${iconInner(it)}</div><div class="tx"><b>${esc(it.n)}</b><small>${esc((TYPES[it.t]||TYPES.app).label)} · ${esc(it.t==='system'&&SYS[it.v]?SYS[it.v].n:it.v)}</small></div><button class="pin" data-a="up" aria-label="Move up"><i class="fa-solid fa-arrow-up"></i></button><button class="pin" data-a="down" aria-label="Move down"><i class="fa-solid fa-arrow-down"></i></button><button class="pin dl" data-a="del" aria-label="Delete"><i class="fa-solid fa-trash"></i></button></div>`).join(''):'<div class="empty">No shortcuts configured</div>')+`</div>`;
-  }else{
+          const s=st.set||S_DEF;
+          const cols=Math.max(1,parseInt(s.cols)||4);
+          const rows=Math.max(1,parseInt(s.rows)||5);
+          const bySlot=new Map();
+          st.items.forEach((it,idx)=>{const sl=(typeof it.slot==='number')?it.slot:idx;bySlot.set(sl,it)});
+          let maxSlot=-1;
+          st.items.forEach((it,idx)=>{const sl=(typeof it.slot==='number')?it.slot:idx;if(sl>maxSlot)maxSlot=sl});
+          const totalCount=Math.max(cols*rows,Math.ceil((maxSlot+2)/cols)*cols);
+          let cellsHtml='';
+          for(let slot=0;slot<totalCount;slot++){
+            const it=bySlot.get(slot);
+            if(it){
+              cellsHtml+=`<div class="grid-cell" data-slot="${slot}">${itemHTML(it)}</div>`;
+            }else{
+              cellsHtml+=`<div class="grid-cell empty-slot" data-slot="${slot}"><div class="cell-add" title="Add shortcut here"><i class="fa-solid fa-plus"></i></div></div>`;
+            }
+          }
+          b.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:12px"><button class="bigbtn" id="stAdd" style="margin:0;flex:1;justify-content:center;font-size:12.5px"><i class="fa-solid fa-plus"></i> Add Shortcut</button><button class="sbtn" id="stBatchBtn" type="button" style="margin:0;padding:10px 14px;font-size:12.5px;color:var(--acc);border-color:rgba(255,196,107,.3);font-weight:700"><i class="fa-solid fa-layer-group"></i> Add Multiple</button></div>`+
+            `<div class="set-card edit${st.set.showLbl?'':' nolbl'}" style="padding:${s.pad||10}px;--icon:${s.icon||46}px;--rad:${s.radius!=null?s.radius:28};--cols:${cols};--cgap:${s.cgap||8}px;--rgap:${s.rgap||10}px;--lbl:${s.lbl||9.5}px">`+
+            `<div style="display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%;align-items:start">${cellsHtml}</div>`+
+            `</div>`;
+        }else{
     const grp=SET_GROUPS[sTab]||SET_GROUPS.grid;
     const subset=CTRL.filter(c=>grp.keys.includes(c[0]));
     b.innerHTML=`<div class="set-card"><div class="set-hdr" style="margin-bottom:12px;padding-bottom:10px"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
@@ -1481,30 +1500,54 @@ function openStudio(fromPop=false){
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();pvUpdate();$('#stBody').scrollTop=0};
   $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL_MAP.get(k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;const vEl=$('#v_'+k);if(vEl)vEl.textContent=st.set[k]+((c&&c[5])||'');applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
-    if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
-    if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
-    if(e.target.closest('#stAdd')){openDlg(null);return}
-    const r=e.target.closest('.res');if(!r)return;
-    const i=st.items.findIndex(x=>x.id===r.dataset.id);if(i<0)return;
-    const a=e.target.closest('.pin');
-        if(!a){openDlg(st.items[i]);return}
-        const d=a.dataset.a;
-        if(d==='del'){
-          const targetItem=st.items[i];
-          confirmRemoval(targetItem.n,()=>{
-            const idx=st.items.findIndex(x=>x.id===targetItem.id);
-            if(idx>=0){
-              st.items.splice(idx,1);
-              save();
-              render();
-              studioRefresh();
-              toast('Shortcut removed');
-            }
+      if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
+      if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
+      if(e.target.closest('#stAdd')){openDlg(null,firstFreeSlot());return}
+      if(e.target.closest('#stBatchBtn')){openBatchDlg();return}
+      const addCell=e.target.closest('.grid-cell.empty-slot');
+      if(addCell){
+        const s=parseInt(addCell.dataset.slot,10);
+        openDlg(null,isNaN(s)?firstFreeSlot():s);
+        return;
+      }
+      const it=e.target.closest('.it');
+      if(it){
+        const item=st.items.find(x=>x.id===it.dataset.id);
+        if(!item)return;
+        if(e.target.closest('.x')){
+          confirmRemoval(item.n,()=>{
+            st.items=st.items.filter(x=>x.id!==item.id);
+            save();
+            render();
+            studioRefresh();
+            toast('Shortcut removed');
           });
           return;
         }
-        else{const j=d==='up'?i-1:i+1;if(j<0||j>=st.items.length)return;const t=st.items[i];st.items[i]=st.items[j];st.items[j]=t}
-        save();render();pvUpdate()};
+        openDlg(item,item.slot);
+        return;
+      }
+      const r=e.target.closest('.res');if(!r)return;
+      const i=st.items.findIndex(x=>x.id===r.dataset.id);if(i<0)return;
+      const a=e.target.closest('.pin');
+          if(!a){openDlg(st.items[i]);return}
+          const d=a.dataset.a;
+          if(d==='del'){
+            const targetItem=st.items[i];
+            confirmRemoval(targetItem.n,()=>{
+              const idx=st.items.findIndex(x=>x.id===targetItem.id);
+              if(idx>=0){
+                st.items.splice(idx,1);
+                save();
+                render();
+                studioRefresh();
+                toast('Shortcut removed');
+              }
+            });
+            return;
+          }
+          else{const j=d==='up'?i-1:i+1;if(j<0||j>=st.items.length)return;const t=st.items[i];st.items[i]=st.items[j];st.items[j]=t}
+          save();render();pvUpdate()};
   buildStBody();
   s.classList.add('on');
   const rCard=$('#ringCard');

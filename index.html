@@ -556,7 +556,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default'};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,permWriteSettings:true,permDnd:false,permPhone:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default'};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,50,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
@@ -1321,26 +1321,38 @@ function renderMainOverview(){
     </div>
 
     <div class="set-card">
-      <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
-        <i class="fa-solid fa-shield-halved" style="color:var(--acc)"></i> System Permissions
-      </div>
-      <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Display Over Other Apps</b><small style="color:var(--dim)">Required for floating trigger & popup</small></div>
-        <button class="tg${st.set.permOverlay?' on':''}" id="ovPermOverlay"></button>
-      </div>
-      <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Accessibility Service</b><small style="color:var(--dim)">Lock screen, recents & quick toggles</small></div>
-        <button class="tg${st.set.permAcc?' on':''}" id="ovPermAcc"></button>
-      </div>
-      <div class="sw" style="margin:8px 0">
-              <div><b style="display:block;font-size:13px">All Files Access</b><small style="color:var(--dim)">Read storage, pick folders & files</small></div>
-              <button class="tg${st.set.permStorage?' on':''}" id="ovPermStorage"></button>
-                          </div>
-                          <div class="sw" style="margin:8px 0">
-                            <div><b style="display:block;font-size:13px">Disable immersive mode</b><small style="color:var(--dim)">Keep bottom system navigation bar visible</small></div>
-                            <button class="tg${st.set.disableImmersive?' on':''}" id="ovNoImmersive"></button>
-            </div>
+          <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
+            <i class="fa-solid fa-shield-halved" style="color:var(--acc)"></i> System Permissions
           </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Display Over Other Apps</b><small style="color:var(--dim)">Floating trigger & popup (when accessibility is off)</small></div>
+            <button class="tg${st.set.permOverlay?' on':''}" id="ovPermOverlay"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Accessibility Service</b><small style="color:var(--dim)">Overlay without extra permission · lock, recents, screenshot, power</small></div>
+            <button class="tg${st.set.permAcc?' on':''}" id="ovPermAcc"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Modify System Settings</b><small style="color:var(--dim)">Brightness slider and auto-rotate</small></div>
+            <button class="tg${st.set.permWriteSettings?' on':''}" id="ovPermWriteSettings"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Do Not Disturb Access</b><small style="color:var(--dim)">Do-not-disturb and silent toggles</small></div>
+            <button class="tg${st.set.permDnd?' on':''}" id="ovPermDnd"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Files & Wallpaper Access</b><small style="color:var(--dim)">Browse folders in the tree and show your home wallpaper in the preview</small></div>
+            <button class="tg${st.set.permStorage?' on':''}" id="ovPermStorage"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Phone</b><small style="color:var(--dim)">Required for Direct Dial shortcuts</small></div>
+            <button class="tg${st.set.permPhone?' on':''}" id="ovPermPhone"></button>
+          </div>
+          <div class="sw" style="margin:8px 0">
+            <div><b style="display:block;font-size:13px">Disable immersive mode</b><small style="color:var(--dim)">Keep bottom system navigation bar visible</small></div>
+            <button class="tg${st.set.disableImmersive?' on':''}" id="ovNoImmersive"></button>
+          </div>
+        </div>
 
     
 
@@ -1475,9 +1487,12 @@ function renderMainOverview(){
             toast(`Grid icons aligned to ${st.set.gridPos}`);
           };
         }
-        bindTg('#ovPermOverlay','permOverlay','Overlay permission');
-        bindTg('#ovPermAcc','permAcc','Accessibility service');
-        bindTg('#ovPermStorage','permStorage','Storage access');
+        bindTg('#ovPermOverlay','permOverlay','Display over other apps');
+                bindTg('#ovPermAcc','permAcc','Accessibility service');
+                bindTg('#ovPermWriteSettings','permWriteSettings','Modify system settings');
+                bindTg('#ovPermDnd','permDnd','Do Not Disturb access');
+                bindTg('#ovPermStorage','permStorage','Files & wallpaper access');
+                bindTg('#ovPermPhone','permPhone','Phone permission');
 
         const bkpBtn=b.querySelector('#ovBackupBtn');
         if(bkpBtn){

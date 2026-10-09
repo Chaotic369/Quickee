@@ -493,6 +493,7 @@ const KEY='quick_launcher_demo_v1';
 /* ───────── data ───────── */
 const TYPES={
   app:{label:'App',color:'#5b8def',icon:'fa-solid fa-cube',ph:''},
+  call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number'},
   directDial:{label:'Direct Dial',color:'#2fb872',icon:'fa-solid fa-phone-flip',ph:'Directly calls number'},
   sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
   email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
@@ -572,7 +573,7 @@ let uidN=0;const uid=()=>'s'+Date.now().toString(36)+(uidN++);
 function mk(r){const[t,n,v,i,c]=r;
   if(t==='app'){const a=INSTALLED.find(x=>x.n===n);return{id:uid(),t,n,v:a.v,i:a.i,c:a.c}}
   if(t==='system'){const s=SYS[v];return{id:uid(),t,n:s.n,v,i:s.i,c:s.c}}
-  return{id:uid(),t,n,v,i:i||TYPES[t].icon,c:c||TYPES[t].color}}
+  return{id:uid(),t,n,v,i:i||TYPES[t]?.icon||'fa-solid fa-cube',c:c||TYPES[t]?.color||'#5b8def'}}
 function fresh(){
   const items=DEF.map(mk).map((it,idx)=>({...it,slot:idx}));
   return{items,set:{...S_DEF},tog:{wifi:1,bt:1,flash:0,air:0,rot:1,dnd:0},lv:{vol:60,br:80},btn:null};

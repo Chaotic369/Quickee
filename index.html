@@ -25,7 +25,16 @@ input,select{font:inherit;color:var(--ink);outline:none}
 
 #phone{position:relative;width:100vw;height:100dvh;max-width:430px;overflow:hidden;background:#000;isolation:isolate}
 #phone::before{content:"";position:absolute;top:8px;left:50%;transform:translateX(-50%);width:92px;height:24px;border-radius:20px;background:#000;z-index:8;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+#phone.landscape{max-width:92dvh;height:min(420px,94dvh)}
 @media (min-width:500px){#phone{height:min(900px,96dvh);border-radius:44px;box-shadow:0 0 0 10px #1a1628,0 0 0 12px #2d2642,0 35px 85px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.1)}}
+#phone.mask-circle .ic{border-radius:50% !important}
+#phone.mask-squircle .ic{border-radius:32% !important}
+#phone.mask-square .ic{border-radius:18% !important}
+#ctxMenu{position:absolute;z-index:96;display:none;flex-direction:column;min-width:145px;background:rgba(18,18,22,.96);border:1px solid rgba(255,255,255,.12);border-radius:14px;box-shadow:0 12px 30px rgba(0,0,0,.8);padding:5px;gap:2px}
+#ctxMenu.open{display:flex}
+.ctx-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;font-size:12px;font-weight:600;color:var(--ink);cursor:pointer;transition:background .12s}
+.ctx-item:hover{background:rgba(255,255,255,.08)}
+.ctx-item i{font-size:12px;width:15px;color:var(--acc)}
 
 /* ───── home ───── */
 #dim{position:absolute;inset:0;z-index:3;background:#000;opacity:0;pointer-events:none;transition:opacity .15s}
@@ -364,8 +373,13 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
   <div class="ov" id="recents"></div>
   <div class="ov" id="notif"></div>
   <div class="sheet" id="sheet"><div class="sc" id="sheetC"></div></div>
-  <div id="flash"></div>
-  <div id="toast"></div>
+  <div id="ctxMenu">
+        <div class="ctx-item" id="ctxEdit"><i class="fa-solid fa-pen"></i> Edit Shortcut</div>
+        <div class="ctx-item" id="ctxInfo"><i class="fa-solid fa-circle-info"></i> Shortcut Info</div>
+        <div class="ctx-item" id="ctxDel" style="color:#ff7b72"><i class="fa-solid fa-trash-can" style="color:#ff7b72"></i> Remove</div>
+      </div>
+      <div id="flash"></div>
+      <div id="toast"></div>
 
   <div class="dlgw" id="batchDlg" style="z-index:82">
           <div class="dc">
@@ -538,7 +552,7 @@ const SYS={
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true};
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default'};
 const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
@@ -637,14 +651,21 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
   v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
   pop.classList.toggle('solid-black',isFullBlack);
-  fab.style.display=s.triggerEnabled===false?'none':'block';
-  fab.style.opacity=s.hideTrigger?'0':'1';
-  fab.style.background=s.trigColor||'rgba(255,255,255,.32)';
+  const isLandscape=phone.classList.contains('landscape');
+  if(s.disableInLandscape&&isLandscape){
+    fab.style.display='none';
+  }else{
+    fab.style.display=s.triggerEnabled===false?'none':'block';
+  }
+  fab.style.opacity=s.hideTrigger?'0':((s.trigOpacity!=null?s.trigOpacity:80)/100);
+  fab.style.background=s.trigColor||'#ffffff';
   fabEdit.style.display=s.hideEditBtn?'none':'';
   const nb=$('#navBar');
   if(nb)nb.style.display=s.disableImmersive?'flex':'none';
   s.trigEdge=s.leftHand?'left':(s.trigEdge||'right');
   phone.classList.toggle('edge-left', s.trigEdge==='left');
+  phone.classList.remove('mask-circle','mask-squircle','mask-square');
+  if(s.shapeMask&&s.shapeMask!=='default')phone.classList.add('mask-'+s.shapeMask);
   phone.style.setProperty('--trig-w',(s.trigW||6)+'px');
   phone.style.setProperty('--trig-h',(s.trigH||90)+'px');
   phone.style.setProperty('--ring-sz',(s.ringSize||52)+'px');
@@ -818,6 +839,7 @@ function stopAutoScroll(){
   $('#popScrollUp')?.classList.remove('active');
 }
 pbody.addEventListener('scroll',updateScrollArrow);
+let fbSwipeTriggered=false;
 fab.addEventListener('pointerdown',e=>{
   if(editMode){
     fbEdgeDrag=true;
@@ -825,6 +847,7 @@ fab.addEventListener('pointerdown',e=>{
     e.stopPropagation();
     return;
   }
+  fbSwipeTriggered=false;
   fbDrag=true; fbStart={x:e.clientX,y:e.clientY}; fbWasOpen=isOpen();
   fab.setPointerCapture(e.pointerId);
   if(!fbWasOpen)openPop();
@@ -914,6 +937,17 @@ fab.addEventListener('pointerup',e=>{
     document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
     document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('drag-over');b.style.transform=''});
     const el=document.elementFromPoint(e.clientX,e.clientY);
+    const dy=e.clientY-fbStart.y;
+    const dx=Math.abs(e.clientX-fbStart.x);
+    if(dx<18&&Math.abs(dy)>44){
+      const act=dy<0?st.set.swipeUpAct:st.set.swipeDownAct;
+      if(act&&SYS[act]){
+        haptic('confirm');
+        SYS[act].run();
+        closePop();
+        return;
+      }
+    }
   if(tree){treeSlideRelease(e);return}
     let handled=false;
   if(el){
@@ -2034,24 +2068,25 @@ function treeSlideRelease(e){
 fab.addEventListener('pointermove',e=>{
   if(!fbDrag||tree||editMode)return;
   let fid=null;
-  const h=lastHoveredDragItem;
-  if(h&&h.isConnected){
-    const ir=h.getBoundingClientRect();
-    const lim=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+22;
-    if(Math.hypot(e.clientX-(ir.left+ir.width/2),e.clientY-(ir.top+ir.height/2))<=lim){
-      const it=st.items.find(x=>x.id===h.dataset.id);
-      if(it&&it.t==='folder')fid=it.id;
+    const h=lastHoveredDragItem;
+    if(h&&h.isConnected){
+      const ir=h.getBoundingClientRect();
+      const lim=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+22;
+      if(Math.hypot(e.clientX-(ir.left+ir.width/2),e.clientY-(ir.top+ir.height/2))<=lim){
+        const it=st.items.find(x=>x.id===h.dataset.id);
+        if(it&&it.t==='folder')fid=it.id;
+      }
     }
-  }
-  if(fid===treeDwellId)return;
-  clearTimeout(treeDwell);treeDwell=null;treeDwellId=fid;
-  if(!fid)return;
-  treeDwell=setTimeout(()=>{
-    treeDwell=null;
-    if(!fbDrag||tree||treeDwellId!==fid)return;
-    const it=st.items.find(x=>x.id===fid);
-    if(it)enterTree(it);
-  },300);
+    if(fid===treeDwellId)return;
+    clearTimeout(treeDwell);treeDwell=null;treeDwellId=fid;
+    if(!fid)return;
+    const dwellTime=st.set.dwellDelay!=null?st.set.dwellDelay:300;
+    treeDwell=setTimeout(()=>{
+      treeDwell=null;
+      if(!fbDrag||tree||treeDwellId!==fid)return;
+      const it=st.items.find(x=>x.id===fid);
+      if(it)enterTree(it);
+    },dwellTime);
 });
 fab.addEventListener('pointerup',()=>{clearTimeout(treeDwell);treeDwell=null;treeDwellId=null});
 fab.addEventListener('pointercancel',()=>{clearTimeout(treeDwell);treeDwell=null;treeDwellId=null;clearTimeout(treeHoverT);treeHoverT=null;treeAutoScroll(0)});

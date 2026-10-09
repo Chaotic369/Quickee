@@ -2249,6 +2249,15 @@ function treeHoverAt(x,y){
   tree.hl=key;
   treeApplyHl();
   if(key)haptic('tick');
+  if(key==='back'){
+    treeHoverT=setTimeout(()=>{
+      treeHoverT=null;
+      if(!tree||tree.hl!=='back')return;
+      haptic('tick');
+      resetTree();
+    },220);
+    return;
+  }
   if(row&&row.dataset.tt==='d'&&!tree.open.has(key)){
     treeHoverT=setTimeout(()=>{
       treeHoverT=null;

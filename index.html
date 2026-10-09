@@ -295,6 +295,19 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .sg .row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:500;margin-bottom:2px}
 .sg .row span:last-child{color:var(--acc);font-variant-numeric:tabular-nums;font-weight:700;font-size:12px;background:rgba(255,196,107,.1);padding:2px 8px;border-radius:6px}
 .res .pin.dl{color:#ff7b72}
+#treeView{display:none;flex-direction:column;gap:2px}
+.tv-hdr{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;margin:calc(var(--pad) * -1) calc(var(--pad) * -1) 6px;padding:8px var(--pad);background:rgba(8,8,8,.97);border-bottom:1px solid rgba(255,255,255,.07)}
+.tv-btn{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-size:12px;color:var(--ink);background:rgba(255,255,255,.08);flex-shrink:0;transition:background .1s,color .1s}
+.tv-btn.hl{background:rgba(255,196,107,.25);color:var(--acc)}
+.tv-title{flex:1;min-width:0}
+.tv-title b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-title small{display:block;font-size:9.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tv-row{display:flex;align-items:center;gap:8px;height:34px;padding-right:10px;border-radius:10px;font-size:12.5px;font-weight:500;color:rgba(246,239,228,.9);cursor:pointer;user-select:none;-webkit-user-select:none;touch-action:pan-y;transition:background .1s}
+.tv-row.hl{background:rgba(255,196,107,.2);color:var(--acc)}
+.tv-row .tv-car{width:12px;font-size:9px;color:var(--dim);text-align:center;flex-shrink:0}
+.tv-row .tv-ic{width:20px;text-align:center;font-size:14px;color:#8f9bb3;flex-shrink:0}
+.tv-row.dir .tv-ic{color:#f0a93b}
+.tv-row .tv-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 </style>
 </head>
 <body>
@@ -718,6 +731,11 @@ function maxFilledBottom(){
 function updateScrollArrow(){
   const arrDown=$('#popScrollDown'),arrUp=$('#popScrollUp');
   if(!arrDown||!arrUp)return;
+    if(tree){
+      arrDown.classList.remove('visible');
+      arrUp.classList.remove('visible');
+      return;
+    }
   if(editMode){
     arrDown.classList.remove('visible');
     arrUp.classList.remove('visible');
@@ -731,7 +749,7 @@ function updateScrollArrow(){
   arrUp.classList.toggle('visible', canUp);
 }
 function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz();updateScrollArrow()}
-function closePop(){stopAutoScroll();const cd=$('#confirmDlg');if(cd)cd.style.display='none';pendingDeleteFn=null;pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();if(document.activeElement)document.activeElement.blur()}
+function closePop(){stopAutoScroll();resetTree();const cd=$('#confirmDlg');if(cd)cd.style.display='none';pendingDeleteFn=null;pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
@@ -813,6 +831,7 @@ fab.addEventListener('pointermove',e=>{
   dtRing.style.top=(e.clientY-pr.top)+'px';
   const el=document.elementFromPoint(e.clientX,e.clientY);
   document.querySelectorAll('.fbtn').forEach(b=>{if(!b.classList.contains('drag-over'))return;b.classList.remove('drag-over');b.style.transform=''});
+    if(tree){treeSlideMove(e);return}
     const arrDown=$('#popScrollDown'),arrUp=$('#popScrollUp');
       let hoverDir=0;
       if(arrDown&&arrDown.classList.contains('visible')){
@@ -877,7 +896,8 @@ fab.addEventListener('pointerup',e=>{
     document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
     document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('drag-over');b.style.transform=''});
     const el=document.elementFromPoint(e.clientX,e.clientY);
-  let handled=false;
+  if(tree){treeSlideRelease(e);return}
+    let handled=false;
   if(el){
     const targetSet=el.closest('#fabSet');
         const targetEdit=el.closest('#fabEdit');
@@ -916,7 +936,7 @@ fab.addEventListener('pointercancel',()=>{
 
 /* ───────── popup: drag ───────── */
 let pdg=null;
-$('#pop').addEventListener('pointerdown',e=>{if(e.target.closest('.it,button,input,select,.rz'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};pop.setPointerCapture(e.pointerId)});
+$('#pop').addEventListener('pointerdown',e=>{if(e.target.closest('.it,button,input,select,.rz,.tv-row'))return;pdg={x:e.clientX,y:e.clientY,l:pop.offsetLeft,t:pop.offsetTop};pop.setPointerCapture(e.pointerId)});
 $('#pop').addEventListener('pointermove',e=>{if(!pdg)return;userMoved=true;const ph=phone.getBoundingClientRect();
   pop.style.left=clamp(pdg.l+e.clientX-pdg.x,0,ph.width-pop.offsetWidth)+'px';pop.style.top=clamp(pdg.t+e.clientY-pdg.y,82,ph.height-60)+'px';positionFabButtons();placeRz()});
 $('#pop').addEventListener('pointerup',()=>{pdg=null});
@@ -1596,7 +1616,8 @@ function openStudio(fromPop=false){
 /* ───────── edit mode + click handling ───────── */
 let editMode=false;
 fabEdit.onclick=()=>{
-  editMode=!editMode;
+  resetTree();
+    editMode=!editMode;
   pop.classList.toggle('edit',editMode);
   fabEdit.classList.toggle('on',editMode);
   fabEdit.innerHTML=editMode?'<i class="fa-solid fa-check"></i>':'<i class="fa-solid fa-pen"></i>';
@@ -1640,7 +1661,7 @@ grid.addEventListener('click',e=>{
       });
       return;
     }
-  if(editMode){openDlg(item,item.slot)}else launch(item);
+  if(editMode){openDlg(item,item.slot)}else if(item.t==='folder')enterTree(item);else launch(item);
   });
   grid.addEventListener('contextmenu',e=>e.preventDefault());
 
@@ -1746,6 +1767,172 @@ function endDrag(){
 }
 window.addEventListener('pointerup',endDrag);
 window.addEventListener('pointercancel',endDrag);
+
+/* ───────── folder tree: hover or tap a folder shortcut to browse its contents ───────── */
+let tree=null,treeDwell=null,treeDwellId=null,treeHoverT=null,treeScrollT=null,treeScrollDir=0,treeLast={x:0,y:0};
+const treeView=document.createElement('div');
+treeView.id='treeView';
+pbody.appendChild(treeView);
+
+function treeRows(dir,depth,out){
+  const k=kids(dir);
+  k.dirs.forEach(d=>{
+    const o=tree.open.has(d);
+    out.push({t:'d',p:d,depth:depth,open:o});
+    if(o)treeRows(d,depth+1,out);
+  });
+  k.files.forEach(f=>out.push({t:'f',p:f,depth:depth}));
+  return out;
+}
+function treeApplyHl(){
+  if(!tree)return;
+  treeView.querySelectorAll('.tv-row,.tv-btn').forEach(n=>n.classList.toggle('hl',(n.dataset.tp||n.dataset.tv)===tree.hl));
+}
+function renderTree(){
+  if(!tree)return;
+  const rows=treeRows(tree.root,0,[]);
+  let html='<div class="tv-hdr"><button type="button" class="tv-btn" data-tv="back" title="Back to grid" aria-label="Back to grid"><i class="fa-solid fa-chevron-left"></i></button><div class="tv-title"><b>'+esc(tree.name||'Folder')+'</b><small>'+esc(tree.root.replace(ROOT.slice(0,-1),'Internal storage'))+'</small></div><button type="button" class="tv-btn" data-tv="ext" title="Open in file manager" aria-label="Open in file manager"><i class="fa-solid fa-arrow-up-right-from-square"></i></button></div>';
+  html+=rows.map(r=>{
+    const isD=r.t==='d';
+    return '<div class="tv-row'+(isD?' dir':'')+'" data-tp="'+esc(r.p)+'" data-tt="'+r.t+'" style="padding-left:'+(8+r.depth*16)+'px"><i class="tv-car'+(isD?' fa-solid '+(r.open?'fa-chevron-down':'fa-chevron-right'):'')+'"></i><span class="tv-ic"><i class="'+(isD?(r.open?'fa-solid fa-folder-open':'fa-solid fa-folder'):fileIcon(r.p))+'"></i></span><span class="tv-nm">'+esc(r.p.split('/').pop())+'</span></div>';
+  }).join('');
+  if(!rows.length)html+='<div class="empty">Empty folder</div>';
+  treeView.innerHTML=html;
+  treeApplyHl();
+}
+function enterTree(item){
+  if(!item||editMode)return;
+  clearTimeout(treeDwell);treeDwell=null;treeDwellId=null;
+  document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
+  lastHoveredDragItem=null;
+  tree={root:String(item.v||'').replace(/\/+$/,''),name:item.n,open:new Set(),hl:null};
+  grid.style.display='none';
+  treeView.style.display='flex';
+  pbody.scrollTop=0;
+  renderTree();
+  updateScrollArrow();
+  haptic('pop');
+}
+function resetTree(){
+  clearTimeout(treeDwell);treeDwell=null;treeDwellId=null;
+  clearTimeout(treeHoverT);treeHoverT=null;
+  clearInterval(treeScrollT);treeScrollT=null;treeScrollDir=0;
+  if(!tree)return;
+  tree=null;
+  treeView.style.display='';
+  treeView.innerHTML='';
+  grid.style.display='';
+  pbody.scrollTop=0;
+  updateScrollArrow();
+}
+function treeAction(a){
+  if(!tree)return;
+  if(a==='back'){haptic('tick');resetTree();return}
+  if(a==='ext'){const d=tree.root;haptic('confirm');openFolder(d)}
+}
+function treeRowAct(row,how){
+  if(!tree)return;
+  const p=row.dataset.tp;
+  if(row.dataset.tt==='d'){
+    if(how==='tap'){
+      if(tree.open.has(p))tree.open.delete(p);else tree.open.add(p);
+      haptic('tick');
+      renderTree();
+    }else{
+      haptic('confirm');
+      openFolder(p);
+    }
+  }else{
+    haptic('confirm');
+    openFile(p);
+  }
+}
+treeView.addEventListener('click',e=>{
+  if(!tree)return;
+  const b=e.target.closest('[data-tv]');
+  if(b){treeAction(b.dataset.tv);return}
+  const r=e.target.closest('.tv-row');
+  if(r)treeRowAct(r,'tap');
+});
+
+function treeHoverAt(x,y){
+  if(!tree)return;
+  const el=document.elementFromPoint(x,y);
+  const btn=el&&el.closest('#treeView [data-tv]');
+  const row=btn?null:(el&&el.closest('#treeView .tv-row'));
+  const key=btn?btn.dataset.tv:(row?row.dataset.tp:null);
+  if(key===tree.hl)return;
+  clearTimeout(treeHoverT);treeHoverT=null;
+  tree.hl=key;
+  treeApplyHl();
+  if(key)haptic('tick');
+  if(row&&row.dataset.tt==='d'&&!tree.open.has(key)){
+    treeHoverT=setTimeout(()=>{
+      treeHoverT=null;
+      if(!tree||tree.hl!==key)return;
+      tree.open.add(key);
+      renderTree();
+    },280);
+  }
+}
+function treeAutoScroll(d){
+  treeScrollDir=d;
+  if(!d){clearInterval(treeScrollT);treeScrollT=null;return}
+  if(treeScrollT)return;
+  treeScrollT=setInterval(()=>{
+    if(!tree||!treeScrollDir){treeAutoScroll(0);return}
+    pbody.scrollTop+=treeScrollDir*7;
+    treeHoverAt(treeLast.x,treeLast.y);
+  },20);
+}
+function treeSlideMove(e){
+  treeLast={x:e.clientX,y:e.clientY};
+  const pr=pbody.getBoundingClientRect();
+  const hdr=treeView.querySelector('.tv-hdr');
+  const topEdge=hdr?hdr.getBoundingClientRect().bottom:pr.top;
+  let d=0;
+  if(e.clientY>=topEdge&&e.clientY<topEdge+34)d=-1;
+  else if(e.clientY>pr.bottom-44&&e.clientY<=pr.bottom)d=1;
+  treeAutoScroll(d);
+  treeHoverAt(e.clientX,e.clientY);
+}
+function treeSlideRelease(e){
+  treeAutoScroll(0);
+  clearTimeout(treeHoverT);treeHoverT=null;
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  const btn=el&&el.closest('#treeView [data-tv]');
+  const row=el&&el.closest('#treeView .tv-row');
+  tree.hl=null;
+  treeApplyHl();
+  lastHoveredDragItem=null;
+  if(btn){treeAction(btn.dataset.tv);return}
+  if(row){treeRowAct(row,'release');return}
+  if(!(el&&el.closest('#pop')))closePop();
+}
+fab.addEventListener('pointermove',e=>{
+  if(!fbDrag||tree||editMode)return;
+  let fid=null;
+  const h=lastHoveredDragItem;
+  if(h&&h.isConnected){
+    const ir=h.getBoundingClientRect();
+    const lim=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+22;
+    if(Math.hypot(e.clientX-(ir.left+ir.width/2),e.clientY-(ir.top+ir.height/2))<=lim){
+      const it=st.items.find(x=>x.id===h.dataset.id);
+      if(it&&it.t==='folder')fid=it.id;
+    }
+  }
+  if(fid===treeDwellId)return;
+  clearTimeout(treeDwell);treeDwell=null;treeDwellId=fid;
+  if(!fid)return;
+  treeDwell=setTimeout(()=>{
+    treeDwell=null;
+    if(!fbDrag||tree||treeDwellId!==fid)return;
+    const it=st.items.find(x=>x.id===fid);
+    if(it)enterTree(it);
+  },300);
+});
+fab.addEventListener('pointerup',()=>{clearTimeout(treeDwell);treeDwell=null;treeDwellId=null});
+fab.addEventListener('pointercancel',()=>{clearTimeout(treeDwell);treeDwell=null;treeDwellId=null;clearTimeout(treeHoverT);treeHoverT=null;treeAutoScroll(0)});
 
 /* ───────── launching shortcuts ───────── */
 function launch(it){
@@ -2285,7 +2472,8 @@ $('#nbBack').onclick=()=>{
     if(stOpenedFromPop)openPop();
     return;
   }
-  if(isOpen()){closePop();return}
+  if(tree){resetTree();return}
+    if(isOpen()){closePop();return}
   toast('Back');
 };
 

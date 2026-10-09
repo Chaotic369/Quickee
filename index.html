@@ -1259,7 +1259,8 @@ function syncSl(){
   const tLbl=$('#tgLbl');if(tLbl)tLbl.classList.toggle('on',!!st.set.showLbl);
   const tEdit=$('#ovHideEdit');if(tEdit)tEdit.classList.toggle('on',!!st.set.hideEditBtn);
   const tTrig=$('#ovHideTrig');if(tTrig)tTrig.classList.toggle('on',!!st.set.hideTrigger);
-  const mskSeg=$('#ovShapeMaskSeg');if(mskSeg)mskSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.msk===(st.set.shapeMask||'default')));
+    const ovOp=$('#ovTrigOpacity');if(ovOp){ovOp.value=st.set.trigOpacity!=null?st.set.trigOpacity:80;const vEl=$('#v_ovTrigOp');if(vEl)vEl.textContent=ovOp.value+'%';}
+    const mskSeg=$('#ovShapeMaskSeg');if(mskSeg)mskSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.msk===(st.set.shapeMask||'default')));
   const posSeg=$('#ovGridPosSeg');if(posSeg)posSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pos===(st.set.gridPos||'bottom')));
   const tcSeg=$('#ovTrigCols');if(tcSeg)tcSeg.querySelectorAll('button').forEach(x=>{x.style.border='none';x.style.outline='none';});
   const edgeSeg=$('#trigEdgeSeg');if(edgeSeg)edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===(st.set.trigEdge||'right')));
@@ -1289,13 +1290,17 @@ function renderMainOverview(){
         <i class="fa-solid fa-toggle-on" style="color:var(--acc)"></i> Master Trigger & Behavior
       </div>
       <div class="sw" style="margin:8px 0">
-        <div><b style="display:block;font-size:13px">Floating Trigger Handle</b><small style="color:var(--dim)">Show side trigger on screen edge</small></div>
-        <button class="tg${st.set.triggerEnabled!==false?' on':''}" id="ovTrig"></button>
-      </div>
-      <div class="sw" style="margin:8px 0">
-              <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Tick on hover, firm pulse on launch</small></div>
-              <button class="tg${st.set.haptic!==false?' on':''}" id="ovHaptic"></button>
-                          </div>
+              <div><b style="display:block;font-size:13px">Floating Trigger Handle</b><small style="color:var(--dim)">Show side trigger on screen edge</small></div>
+              <button class="tg${st.set.triggerEnabled!==false?' on':''}" id="ovTrig"></button>
+            </div>
+            <div class="sg" style="margin:8px 0">
+              <div class="row"><span>Trigger Opacity</span><span id="v_ovTrigOp">${st.set.trigOpacity!=null?st.set.trigOpacity:80}%</span></div>
+              <input type="range" id="ovTrigOpacity" min="0" max="100" step="5" value="${st.set.trigOpacity!=null?st.set.trigOpacity:80}">
+            </div>
+            <div class="sw" style="margin:8px 0">
+                    <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Tick on hover, firm pulse on launch</small></div>
+                    <button class="tg${st.set.haptic!==false?' on':''}" id="ovHaptic"></button>
+                                </div>
                           <div class="sw" style="margin:8px 0">
                             <div><b style="display:block;font-size:13px">Auto-close on launch</b><small style="color:var(--dim)">Dismiss launcher when opening an item</small></div>
                             <button class="tg${st.set.autoClose!==false?' on':''}" id="ovAutoClose"></button>
@@ -1421,15 +1426,16 @@ function renderMainOverview(){
               };
             }
             const opSl=b.querySelector('#ovTrigOpacity');
-            if(opSl){
-              opSl.oninput=e=>{
-                st.set.trigOpacity=parseInt(e.target.value,10);
-                const vEl=b.querySelector('#v_ovTrigOp');
-                if(vEl)vEl.textContent=st.set.trigOpacity+'%';
-                applySet();
-                save();
-              };
-            }
+                        if(opSl){
+                          opSl.oninput=e=>{
+                            st.set.trigOpacity=parseInt(e.target.value,10);
+                            const vEl=b.querySelector('#v_ovTrigOp');
+                            if(vEl)vEl.textContent=st.set.trigOpacity+'%';
+                            applySet();
+                            pvUpdate();
+                            save();
+                          };
+                        }
             const dwellSl=b.querySelector('#ovDwell');
             if(dwellSl){
               dwellSl.oninput=e=>{

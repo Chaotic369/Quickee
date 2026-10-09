@@ -1222,11 +1222,15 @@ function bindPopShiftDrag(el){
     placeRz();
   });
   el.addEventListener('pointerup',()=>{
-    if(popMoveDrag){
-      popMoveDrag=null;
-      toast('Popup position shifted');
-    }
-  });
+      if(popMoveDrag){
+        popMoveDrag=null;
+        const ph=phone.getBoundingClientRect();
+        const pct=Math.round((pop.offsetTop/ph.height)*100);
+        st.set.popTopPct=pct;
+        save();
+        toast('Popup position shifted');
+      }
+    });
   el.addEventListener('pointercancel',()=>{popMoveDrag=null});
 }
 bindPopShiftDrag($('#popShiftHandle'));

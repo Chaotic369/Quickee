@@ -188,10 +188,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;heigh
 /* ───── corner fast slider for folders (Zone style) ───── */
 .corner-fast-slider{position:absolute;z-index:98;display:none;flex-direction:column;align-items:center;padding:6px 4px;background:rgba(18,18,22,.92);border:1px solid rgba(255,255,255,.14);border-radius:24px;box-shadow:0 12px 32px rgba(0,0,0,.85);touch-action:none;user-select:none;-webkit-user-select:none;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);transition:opacity .15s ease,transform .15s ease}
 .corner-fast-slider.active{display:flex}
-.corner-fast-slider.corner-tl{top:46px;left:10px}
-.corner-fast-slider.corner-tr{top:46px;right:10px}
-.corner-fast-slider.corner-bl{bottom:56px;left:10px}
-.corner-fast-slider.corner-br{bottom:56px;right:10px}
+.corner-fast-slider.outside-left{right:calc(100% + 8px);top:50%;transform:translateY(-50%)}
+.corner-fast-slider.outside-right{left:calc(100% + 8px);top:50%;transform:translateY(-50%)}
 .cfs-title{font-size:9px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;pointer-events:none}
 .cfs-track{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;width:34px;padding:4px 0}
 .cfs-node{position:relative;width:28px;height:28px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.06);color:rgba(246,239,228,.8);font-size:12px;cursor:pointer;transition:transform .12s cubic-bezier(.2,0,0,1),background .12s,color .12s}
@@ -382,17 +380,17 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
                         <div class="cfs-track" id="cfsTrack"></div>
                       </div>
                       <div class="cfs-bubble" id="cfsBubble"></div>
-                      <div class="pop-shift-handle" id="popShiftHandle" title="Drag to shift popup up or down"></div>
-                  <div class="dlgw" id="confirmDlg" style="position:absolute;inset:0;border-radius:inherit;z-index:92;background:rgba(0,0,0,.92);backdrop-filter:none;-webkit-backdrop-filter:none">
-                    <div class="dc" style="max-width:210px;padding:12px;border-radius:18px;text-align:center">
-                      <p id="confirmMsg" style="font-size:11px;color:var(--dim);line-height:1.3;margin:0 0 10px"></p>
-                      <div class="acts" style="margin:0;gap:6px">
-                        <button id="confirmCancel" style="flex:1;padding:5px 8px;font-size:11px;border-radius:8px">Cancel</button>
-                        <button class="del" id="confirmOk" style="flex:1;padding:5px 8px;font-size:11px;border-radius:8px;background:#e5534b;color:#fff">Delete</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                                        <div class="dlgw" id="confirmDlg" style="position:absolute;inset:0;border-radius:inherit;z-index:92;background:rgba(0,0,0,.92);backdrop-filter:none;-webkit-backdrop-filter:none">
+                                          <div class="dc" style="max-width:210px;padding:12px;border-radius:18px;text-align:center">
+                                            <p id="confirmMsg" style="font-size:11px;color:var(--dim);line-height:1.3;margin:0 0 10px"></p>
+                                            <div class="acts" style="margin:0;gap:6px">
+                                              <button id="confirmCancel" style="flex:1;padding:5px 8px;font-size:11px;border-radius:8px">Cancel</button>
+                                              <button class="del" id="confirmOk" style="flex:1;padding:5px 8px;font-size:11px;border-radius:8px;background:#e5534b;color:#fff">Delete</button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                            <div class="pop-shift-handle" id="popShiftHandle" title="Drag to shift popup up or down"></div>
+                                      </div>
         <div class="rz" id="rz" title="Drag to resize"></div>
 
   <div id="sim"></div>
@@ -735,8 +733,8 @@ function updateCornerSlider(){
     if(bubble)bubble.style.display='none';
     return;
   }
-  const pos=st.set.cornerSliderPos||(st.set.trigEdge==='left'?'tr':'tl');
-  cfs.className=`corner-fast-slider corner-${pos} active`;
+  const isLeft=st.set.trigEdge==='left';
+    cfs.className=`corner-fast-slider ${isLeft?'outside-right':'outside-left'} active`;
   track.innerHTML=folderItems.map(f=>`
     <div class="cfs-node" data-fid="${f.id}" title="${esc(f.n)}">
       <i class="fa-solid fa-folder"></i>
@@ -774,15 +772,15 @@ function initCornerSliderEvents(){
         bubble.style.display='flex';
         const br=matched.getBoundingClientRect();
         const pr=pop.getBoundingClientRect();
-        const isLeft=(st.set.cornerSliderPos||'').includes('l');
-        bubble.style.top=(br.top-pr.top+(br.height-bubble.offsetHeight)/2)+'px';
-        if(isLeft){
-          bubble.style.left=(cfs.offsetLeft+cfs.offsetWidth+8)+'px';
-          bubble.style.right='auto';
-        }else{
-          bubble.style.right=(pop.offsetWidth-cfs.offsetLeft+8)+'px';
-          bubble.style.left='auto';
-        }
+        const isLeft=st.set.trigEdge==='left';
+                bubble.style.top=(br.top-pr.top+(br.height-bubble.offsetHeight)/2)+'px';
+                if(isLeft){
+                  bubble.style.left=(cfs.offsetLeft+cfs.offsetWidth+8)+'px';
+                  bubble.style.right='auto';
+                }else{
+                  bubble.style.left=(cfs.offsetLeft-bubble.offsetWidth-8)+'px';
+                  bubble.style.right='auto';
+                }
       }
     }else{
       cfsActiveFolderId=null;

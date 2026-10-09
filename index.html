@@ -553,7 +553,7 @@ const SYS={
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
 const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default'};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%']];
+const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,10,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
 const DEF=[
@@ -1248,25 +1248,30 @@ function pvUpdate(){
           });
         }
     $('#stTag').textContent=isRingTab?'Selection Ring Preview':'Live Preview · '+Math.max(1,Math.round(scale*100))+'%'}
-function syncSl(){CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+(c[5]||'')});const t=$('#tgLbl');if(t)t.classList.toggle('on',!!st.set.showLbl)}
+function syncSl(){
+  CTRL.forEach(c=>{const el=document.querySelector(`#stBody input[data-k="${c[0]}"]`);if(!el)return;el.value=st.set[c[0]];const vEl=$('#v_'+c[0]);if(vEl)vEl.textContent=st.set[c[0]]+(c[5]||'')});
+  const tLbl=$('#tgLbl');if(tLbl)tLbl.classList.toggle('on',!!st.set.showLbl);
+  const tEdit=$('#ovHideEdit');if(tEdit)tEdit.classList.toggle('on',!!st.set.hideEditBtn);
+  const tTrig=$('#ovHideTrig');if(tTrig)tTrig.classList.toggle('on',!!st.set.hideTrigger);
+  const mskSeg=$('#ovShapeMaskSeg');if(mskSeg)mskSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.msk===(st.set.shapeMask||'default')));
+  const posSeg=$('#ovGridPosSeg');if(posSeg)posSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pos===(st.set.gridPos||'bottom')));
+  const tcSeg=$('#ovTrigCols');if(tcSeg)tcSeg.querySelectorAll('button').forEach(x=>x.style.borderColor=x.dataset.tc===(st.set.trigColor||'#ffffff')?'#fff':'transparent');
+  const edgeSeg=$('#trigEdgeSeg');if(edgeSeg)edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===(st.set.trigEdge||'right')));
+  const swUp=$('#ovSwipeUp');if(swUp)swUp.value=st.set.swipeUpAct||'notif';
+  const swDn=$('#ovSwipeDown');if(swDn)swDn.value=st.set.swipeDownAct||'recents';
+}
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
-  icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
+  icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div><div class="sw" style="margin-top:12px"><span>Icon Shape Masking</span><div class="seg" id="ovShapeMaskSeg" style="max-width:210px"><button data-msk="default">Default</button><button data-msk="circle">Circle</button><button data-msk="squircle">Squircle</button><button data-msk="square">Square</button></div></div>'},
   popup:{
-          keys:['w','h','glass','popRad'],
-          title:'Pop-up Size & Styling'
-        },
+    keys:['w','h','glass','popRad'],
+    title:'Pop-up Size & Styling',
+    extra:'<div class="sw" style="margin-top:12px"><span>Grid icons alignment</span><div class="seg" id="ovGridPosSeg" style="max-width:170px"><button data-pos="top">Top</button><button data-pos="center">Center</button><button data-pos="bottom">Bottom</button></div></div><div class="sw" style="margin-top:12px"><span>Hide edit icon</span><button class="tg" id="ovHideEdit"></button></div>'
+  },
   trigger:{
-    keys:['trigH','trigW','trigY'],
-    title:'Trigger Size & Placement',
-    extra:`<div class="sw" style="margin-top:12px">
-      <span>Screen Edge Placement</span>
-      <div class="seg" id="trigEdgeSeg" style="max-width:140px">
-        <button data-e="left">Left</button>
-        <button data-e="right">Right</button>
-      </div>
-    </div>
-    <div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>`
+    keys:['trigH','trigW','trigY','trigOpacity','dwellDelay'],
+    title:'Trigger Settings',
+    extra:`<div class="sw" style="margin-top:12px"><span>Hide trigger indicator</span><button class="tg" id="ovHideTrig"></button></div><div class="sw" style="margin-top:12px"><span>Screen Edge Placement</span><div class="seg" id="trigEdgeSeg" style="max-width:140px"><button data-e="left">Left</button><button data-e="right">Right</button></div></div><div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px"><div><b style="display:block;font-size:13px">Trigger Color</b></div><div class="pick cols" id="ovTrigCols" style="margin:0;gap:6px">${['#ffffff','#4ade80','#ffc46b','#60a5fa','#f43f5e','#a855f7'].map(c=>`<button type="button" data-tc="${c}" style="background:${c};width:24px;height:24px;border-radius:50%;border:2px solid transparent"></button>`).join('')}</div></div><div class="sw" style="margin-top:12px"><span>Swipe Up Action</span><select id="ovSwipeUp" style="height:30px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--ink);border:1px solid rgba(255,255,255,.1);padding:0 8px">${Object.keys(SYS).map(k=>`<option value="${k}">${SYS[k].n}</option>`).join('')}</select></div><div class="sw" style="margin-top:12px"><span>Swipe Down Action</span><select id="ovSwipeDown" style="height:30px;border-radius:8px;background:rgba(255,255,255,.08);color:var(--ink);border:1px solid rgba(255,255,255,.1);padding:0 8px">${Object.keys(SYS).map(k=>`<option value="${k}">${SYS[k].n}</option>`).join('')}</select></div><div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>`
   },
   ring:{keys:['ringSize','ringThick','ringOpacity'],title:'Selection Ring (Zone Pointer)'}
 };
@@ -1284,6 +1289,18 @@ function renderMainOverview(){
       <div class="sw" style="margin:8px 0">
               <div><b style="display:block;font-size:13px">Haptic Vibration</b><small style="color:var(--dim)">Tick on hover, firm pulse on launch</small></div>
               <button class="tg${st.set.haptic!==false?' on':''}" id="ovHaptic"></button>
+                          </div>
+                          <div class="sw" style="margin:8px 0">
+                            <div><b style="display:block;font-size:13px">Auto-close on launch</b><small style="color:var(--dim)">Dismiss launcher when opening an item</small></div>
+                            <button class="tg${st.set.autoClose!==false?' on':''}" id="ovAutoClose"></button>
+                          </div>
+                          <div class="sw" style="margin:8px 0">
+                            <div><b style="display:block;font-size:13px">Disable in landscape</b><small style="color:var(--dim)">Hide trigger during horizontal view</small></div>
+                            <button class="tg${st.set.disableInLandscape?' on':''}" id="ovNoLandscape"></button>
+                          </div>
+                          <div class="sw" style="margin:8px 0">
+                            <div><b style="display:block;font-size:13px">Test Landscape Mode</b><small style="color:var(--dim)">Rotate demo screen preview</small></div>
+                            <button class="sbtn" id="ovToggleRotate" style="margin:0;padding:6px 12px;font-size:11px"><i class="fa-solid fa-rotate"></i> Rotate</button>
             </div>
           </div>
 
@@ -1314,54 +1331,16 @@ function renderMainOverview(){
       <div class="sw" style="margin:8px 0">
               <div><b style="display:block;font-size:13px">All Files Access</b><small style="color:var(--dim)">Read storage, pick folders & files</small></div>
               <button class="tg${st.set.permStorage?' on':''}" id="ovPermStorage"></button>
+                          </div>
+                          <div class="sw" style="margin:8px 0">
+                            <div><b style="display:block;font-size:13px">Disable immersive mode</b><small style="color:var(--dim)">Keep bottom system navigation bar visible</small></div>
+                            <button class="tg${st.set.disableImmersive?' on':''}" id="ovNoImmersive"></button>
             </div>
           </div>
 
-    <div class="set-card">
-          <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px;color:#4ade80">
-            <i class="fa-solid fa-wand-magic-sparkles"></i> Trigger Appearance
-          </div>
-          <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Hide trigger indicator</b><small style="color:var(--dim)">Hides the visible line of touch triggers</small></div>
-            <button class="tg${st.set.hideTrigger?' on':''}" id="ovHideTrig"></button>
-          </div>
-          <div class="sg" style="margin:10px 0 6px">
-            <div class="row"><span>Line thickness</span><span id="v_ovTrigW">${st.set.trigW||5}px</span></div>
-            <input type="range" id="ovTrigThick" min="2" max="18" step="1" value="${st.set.trigW||5}">
-          </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;margin:12px 0 6px">
-            <div><b style="display:block;font-size:13px">Trigger indicator color</b><small style="color:var(--dim)">Line touch color</small></div>
-            <div class="pick cols" id="ovTrigCols" style="margin:0;gap:6px">
-              ${['#ffffff','#4ade80','#ffc46b','#60a5fa','#f43f5e','#a855f7'].map(c=>`<button type="button" data-tc="${c}" style="background:${c};width:24px;height:24px;border-radius:50\%;border:2px solid${st.set.trigColor===c?'#fff':'transparent'}"></button>`).join('')}
-            </div>
-          </div>
-        </div>
+    
 
-        <div class="set-card">
-          <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px;color:#4ade80">
-            <i class="fa-solid fa-palette"></i> General Appearance
-          </div>
-          <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Grid icons position</b><small style="color:var(--dim)">Vertical alignment inside popup</small></div>
-            <div class="seg" id="ovGridPosSeg" style="max-width:170px">
-              <button data-pos="top"${st.set.gridPos==='top'?' class="on"':''}>Top</button>
-              <button data-pos="center"${st.set.gridPos==='center'?' class="on"':''}>Center</button>
-              <button data-pos="bottom"${(st.set.gridPos==='bottom'||!st.set.gridPos)?' class="on"':''}>Bottom</button>
-            </div>
-          </div>
-          <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Hide edit icon</b><small style="color:var(--dim)">Hide the pen/gear floating icons</small></div>
-            <button class="tg${st.set.hideEditBtn?' on':''}" id="ovHideEdit"></button>
-          </div>
-          <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Left hand mode</b><small style="color:var(--dim)">Position launcher trigger on left edge</small></div>
-            <button class="tg${st.set.leftHand?' on':''}" id="ovLeftHand"></button>
-          </div>
-          <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Disable immersive mode</b><small style="color:var(--dim)">Keep bottom system navigation bar visible</small></div>
-            <button class="tg${st.set.disableImmersive?' on':''}" id="ovNoImmersive"></button>
-          </div>
-        </div>
+        
 
         <div class="set-card" style="padding-bottom:14px">
           <div class="set-hdr" style="margin-bottom:10px;padding-bottom:8px">
@@ -1581,44 +1560,24 @@ function renderMainOverview(){
             if(it){
               cellsHtml+=`<div class="grid-cell" data-slot="${slot}">${itemHTML(it)}</div>`;
             }else{
-              cellsHtml+=`<div class="grid-cell empty-slot" data-slot="${slot}"><div class="cell-add" title="Add shortcut here"><i class="fa-solid fa-plus"></i></div></div>`;
-            }
-          }
-          b.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:12px"><button class="bigbtn" id="stAdd" style="margin:0;flex:1;justify-content:center;font-size:12.5px"><i class="fa-solid fa-plus"></i> Add Shortcut</button><button class="sbtn" id="stBatchBtn" type="button" style="margin:0;padding:10px 14px;font-size:12.5px;color:var(--acc);border-color:rgba(255,196,107,.3);font-weight:700"><i class="fa-solid fa-layer-group"></i> Add Multiple</button></div>`+
-            `<div class="set-card edit${st.set.showLbl?'':' nolbl'}" style="padding:${s.pad||10}px;--icon:${s.icon||46}px;--rad:${s.radius!=null?s.radius:28};--cols:${cols};--cgap:${s.cgap||8}px;--rgap:${s.rgap||10}px;--lbl:${s.lbl||9.5}px">`+
-            `<div style="display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%;align-items:start">${cellsHtml}</div>`+
-            `</div>`;
-        }else{
-    const grp=SET_GROUPS[sTab]||SET_GROUPS.grid;
-    const subset=CTRL.filter(c=>grp.keys.includes(c[0]));
-    b.innerHTML=`<div class="set-card"><div class="set-hdr" style="margin-bottom:12px;padding-bottom:10px"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
-      subset.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
-            (grp.extra||'')+
-            `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
-          syncSl();
-
-          
-
-                    if(sTab==='trigger'){
-                      const edgeSeg=b.querySelector('#trigEdgeSeg');
-                      if(edgeSeg){
-                        const curEdge=st.set.trigEdge||'right';
-                        edgeSeg.querySelectorAll('button').forEach(btn=>{
-                          btn.classList.toggle('on',btn.dataset.e===curEdge);
-                          btn.onclick=()=>{
-                            st.set.trigEdge=btn.dataset.e;
-                            edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===st.set.trigEdge));
-                            placeFab();
-                            save();
-                            pvUpdate();
-                            toast(`Trigger pinned to ${st.set.trigEdge} edge`);
-                          };
-                        });
-                      }
-                    }
-                  }
-            b.scrollTop=y}
-function studioRefresh(){if(sTab==='items')buildStBody();pvUpdate()}
+                  cellsHtml+=`<div class="grid-cell empty-slot" data-slot="${slot}"><div class="cell-add" title="Add shortcut here"><i class="fa-solid fa-plus"></i></div></div>`;
+                              }
+                            }
+                            b.innerHTML=`<div style="display:flex;gap:10px;margin-bottom:12px"><button class="bigbtn" id="stAdd" style="margin:0;flex:1;justify-content:center;font-size:12.5px"><i class="fa-solid fa-plus"></i> Add Shortcut</button><button class="sbtn" id="stBatchBtn" type="button" style="margin:0;padding:10px 14px;font-size:12.5px;color:var(--acc);border-color:rgba(255,196,107,.3);font-weight:700"><i class="fa-solid fa-layer-group"></i> Add Multiple</button></div>`+
+                              `<div class="set-card edit${st.set.showLbl?'':' nolbl'}" style="padding:${s.pad||10}px;--icon:${s.icon||46}px;--rad:${s.radius!=null?s.radius:28};--cols:${cols};--cgap:${s.cgap||8}px;--rgap:${s.rgap||10}px;--lbl:${s.lbl||9.5}px">`+
+                              `<div style="display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));column-gap:var(--cgap);row-gap:var(--rgap);width:100%;align-items:start">${cellsHtml}</div>`+
+                              `</div>`;
+                          }else{
+                            const grp=SET_GROUPS[sTab]||SET_GROUPS.grid;
+                            const subset=CTRL.filter(c=>grp.keys.includes(c[0]));
+                            b.innerHTML=`<div class="set-card"><div class="set-hdr" style="margin-bottom:12px;padding-bottom:10px"><i class="fa-solid fa-sliders" style="color:var(--acc)"></i> ${grp.title}</div>`+
+                              subset.map(c=>`<div class="sg"><div class="row"><span>${c[1]}</span><span id="v_${c[0]}"></span></div><input type="range" data-k="${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"></div>`).join('')+
+                              (grp.extra||'')+
+                              `</div><button class="sbtn" id="sReset" style="width:100%;text-align:center;padding:11px;margin:0">Reset Tab to Defaults</button>`;
+                            syncSl();
+                          }
+                          b.scrollTop=y}
+                  function studioRefresh(){if(sTab==='items')buildStBody();pvUpdate()}
 function openMgr(){
   closePop();
   openSim({
@@ -1728,10 +1687,21 @@ function openStudio(fromPop=false){
   $('#stTabs').onclick=e=>{const t=e.target.closest('button');if(!t)return;sTab=t.dataset.t;buildStBody();pvUpdate();$('#stBody').scrollTop=0};
   $('#stBody').oninput=e=>{const el=e.target.closest('input[type=range]');if(!el)return;const k=el.dataset.k,c=CTRL_MAP.get(k);st.set[k]=parseFloat(el.value);if(k.startsWith('trig'))st.btn=null;const vEl=$('#v_'+k);if(vEl)vEl.textContent=st.set[k]+((c&&c[5])||'');applySet();placeFab();pvUpdate();save()};
   $('#stBody').onclick=e=>{
-      if(suppress)return;
-      if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
-      if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
-      if(e.target.closest('#stAdd')){openDlg(null,firstFreeSlot());return}
+        if(suppress)return;
+        if(e.target.closest('#tgLbl')){st.set.showLbl=!st.set.showLbl;applySet();syncSl();pvUpdate();save();return}
+        if(e.target.closest('#ovHideEdit')){st.set.hideEditBtn=!st.set.hideEditBtn;applySet();syncSl();save();return}
+        if(e.target.closest('#ovHideTrig')){st.set.hideTrigger=!st.set.hideTrigger;applySet();syncSl();save();return}
+        const mskBtn=e.target.closest('#ovShapeMaskSeg button');
+        if(mskBtn){st.set.shapeMask=mskBtn.dataset.msk;applySet();syncSl();save();return;}
+        const posBtn=e.target.closest('#ovGridPosSeg button');
+        if(posBtn){st.set.gridPos=posBtn.dataset.pos;applySet();syncSl();save();return;}
+        const tcBtn=e.target.closest('#ovTrigCols button');
+        if(tcBtn){st.set.trigColor=tcBtn.dataset.tc;applySet();syncSl();save();return;}
+        const edgeBtn=e.target.closest('#trigEdgeSeg button');
+        if(edgeBtn){st.set.trigEdge=edgeBtn.dataset.e;st.set.leftHand=(st.set.trigEdge==='left');placeFab();applySet();pvUpdate();syncSl();save();return;}
+
+        if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
+        if(e.target.closest('#stAdd')){openDlg(null,firstFreeSlot());return}
       if(e.target.closest('#stBatchBtn')){openBatchDlg();return}
       const addCell=e.target.closest('.grid-cell.empty-slot');
       if(addCell){
@@ -1781,8 +1751,12 @@ function openStudio(fromPop=false){
           }
           else{const j=d==='up'?i-1:i+1;if(j<0||j>=st.items.length)return;const t=st.items[i];st.items[i]=st.items[j];st.items[j]=t}
           save();render();pvUpdate()};
-  buildStBody();
-  s.classList.add('on');
+            $('#stBody').addEventListener('change', e=>{
+                if(e.target.id==='ovSwipeUp'){st.set.swipeUpAct=e.target.value;save();}
+                if(e.target.id==='ovSwipeDown'){st.set.swipeDownAct=e.target.value;save();}
+            });
+            buildStBody();
+            s.classList.add('on');
   const rCard=$('#ringCard');
     const rSim=$('#ringSimPointer');
     if(rCard&&rSim){

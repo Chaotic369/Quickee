@@ -84,6 +84,11 @@ input,select{font:inherit;color:var(--ink);outline:none}
   opacity:0;transform:scale(.92) translateX(12px);pointer-events:none;transition:opacity .18s cubic-bezier(.16,1,.3,1),transform .18s cubic-bezier(.16,1,.3,1)}
 #pop.solid-black{background:#000 !important;box-shadow:0 26px 70px rgba(0,0,0,1) !important}
 #pop.open{opacity:1;transform:none;pointer-events:auto}
+.pop-shift-handle{position:absolute;left:50%;transform:translateX(-50%);width:46px;height:16px;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:ns-resize;z-index:99;user-select:none;-webkit-user-select:none}
+.pop-shift-handle::after{content:"";width:28px;height:4.5px;border-radius:3px;background:rgba(255,255,255,.55);box-shadow:0 1px 4px rgba(0,0,0,.6);transition:background .15s,width .15s}
+.pop-shift-handle:hover::after,.pop-shift-handle:active::after{background:var(--acc);width:34px}
+.pop-shift-handle.top-handle{top:4px}
+.pop-shift-handle.bot-handle{bottom:4px}
 .top-bar{display:flex;align-items:center;gap:8px;padding:10px var(--pad) 0;flex-shrink:0}
 .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
 .chips::-webkit-scrollbar{display:none}
@@ -368,8 +373,9 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
         </div>
 
     <div id="pop" role="dialog" aria-label="Quick launcher">
-                  <div class="grab" id="topBar"></div>
-                  <div class="pop-scroll-arrow arr-top" id="popScrollUp"><i class="fa-solid fa-chevron-up"></i></div>
+                      <div class="pop-shift-handle top-handle" id="popTopShiftHandle" title="Drag to shift popup up or down"></div>
+                      <div class="grab" id="topBar"></div>
+                      <div class="pop-scroll-arrow arr-top" id="popScrollUp"><i class="fa-solid fa-chevron-up"></i></div>
                   <div class="pbody" id="pbody">
                     <div id="grid"></div>
                   </div>
@@ -379,6 +385,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
                                       <div class="cfs-track" id="cfsTrack"></div>
                                     </div>
                                     <div class="cfs-bubble" id="cfsBubble"></div>
+                                    <div class="pop-shift-handle bot-handle" id="popBotShiftHandle" title="Drag to shift popup up or down"></div>
                                     <div class="pop-bottom-bar" id="popBottomBar" title="Drag up or down to reposition popup"></div>
                   <div class="dlgw" id="confirmDlg" style="position:absolute;inset:0;border-radius:inherit;z-index:92;background:rgba(0,0,0,.92);backdrop-filter:none;-webkit-backdrop-filter:none">
                     <div class="dc" style="max-width:210px;padding:12px;border-radius:18px;text-align:center">
@@ -1193,39 +1200,44 @@ bindTrigResize($('#trigRzW'),'width');
 
 
 
-/* ───────── bottom mini-pill handle for moving popup up and down ───────── */
+/* ───────── shift handle for moving popup up and down ───────── */
 let popMoveDrag=null;
-const popBottomBar=$('#popBottomBar');
-popBottomBar.addEventListener('pointerdown',e=>{
-  e.stopPropagation();
-  userMoved=true;
-  popMoveDrag={startY:e.clientY,initTop:pop.offsetTop};
-  popBottomBar.setPointerCapture(e.pointerId);
-});
-popBottomBar.addEventListener('pointermove',e=>{
-  if(!popMoveDrag)return;
-  const ph=phone.getBoundingClientRect();
-  const isLeft=st.set&&st.set.trigEdge==='left';
-  const maxTop=Math.max(36,ph.height-pop.offsetHeight-54);
-  const newTop=clamp(popMoveDrag.initTop+(e.clientY-popMoveDrag.startY),36,maxTop);
-  pop.style.top=newTop+'px';
-  if(isLeft){
-    pop.style.left='0px';
-    pop.style.right='auto';
-  }else{
-    pop.style.right='0px';
-    pop.style.left='auto';
-  }
-  positionFabButtons();
-  placeRz();
-});
-popBottomBar.addEventListener('pointerup',()=>{
-  if(popMoveDrag){
-    popMoveDrag=null;
-    toast('Popup position set');
-  }
-});
-popBottomBar.addEventListener('pointercancel',()=>{popMoveDrag=null});
+function bindPopShiftDrag(el){
+  if(!el)return;
+  el.addEventListener('pointerdown',e=>{
+    e.stopPropagation();
+    userMoved=true;
+    popMoveDrag={startY:e.clientY,initTop:pop.offsetTop};
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(!popMoveDrag)return;
+    const ph=phone.getBoundingClientRect();
+    const isLeft=st.set&&st.set.trigEdge==='left';
+    const maxTop=Math.max(36,ph.height-pop.offsetHeight-54);
+    const newTop=clamp(popMoveDrag.initTop+(e.clientY-popMoveDrag.startY),36,maxTop);
+    pop.style.top=newTop+'px';
+    if(isLeft){
+      pop.style.left='0px';
+      pop.style.right='auto';
+    }else{
+      pop.style.right='0px';
+      pop.style.left='auto';
+    }
+    positionFabButtons();
+    placeRz();
+  });
+  el.addEventListener('pointerup',()=>{
+    if(popMoveDrag){
+      popMoveDrag=null;
+      toast('Popup position shifted');
+    }
+  });
+  el.addEventListener('pointercancel',()=>{popMoveDrag=null});
+}
+bindPopShiftDrag($('#popTopShiftHandle'));
+bindPopShiftDrag($('#popBotShiftHandle'));
+bindPopShiftDrag($('#popBottomBar'));
 
 /* ───────── views: grid / results / settings ───────── */
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}

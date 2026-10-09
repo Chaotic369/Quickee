@@ -878,47 +878,49 @@ fab.addEventListener('pointermove',e=>{
   const el=document.elementFromPoint(e.clientX,e.clientY);
   document.querySelectorAll('.fbtn').forEach(b=>{if(!b.classList.contains('drag-over'))return;b.classList.remove('drag-over');b.style.transform=''});
     if(tree){treeSlideMove(e);return}
-    const arrDown=$('#popScrollDown'),arrUp=$('#popScrollUp');
-      let hoverDir=0;
-      if(arrDown&&arrDown.classList.contains('visible')){
-        const ar=arrDown.getBoundingClientRect();
-        if(Math.hypot(e.clientX-(ar.left+ar.width/2), e.clientY-(ar.top+ar.height/2)) <= 26)hoverDir=1;
-      }
-      if(!hoverDir&&arrUp&&arrUp.classList.contains('visible')){
-        const ar=arrUp.getBoundingClientRect();
-        if(Math.hypot(e.clientX-(ar.left+ar.width/2), e.clientY-(ar.top+ar.height/2)) <= 26)hoverDir=-1;
-      }
-      if(hoverDir!==0){
-        startAutoScroll(hoverDir);
-      }else{
-        stopAutoScroll();
-      }
-
-      let targetItem=null;
-          const rThresh=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+22;
-          let closestDist=rThresh;
-          const allItems=grid.querySelectorAll('.it');
-          for(let i=0;i<allItems.length;i++){
-            const itemEl=allItems[i];
-            const ir=itemEl.getBoundingClientRect();
-            const dist=Math.hypot(e.clientX-(ir.left+ir.width/2), e.clientY-(ir.top+ir.height/2));
-            if(dist<closestDist){
-              closestDist=dist;
-              targetItem=itemEl;
-            }
+        const arrDown=$('#popScrollDown'),arrUp=$('#popScrollUp');
+          let hoverDir=0;
+          if(arrDown&&arrDown.classList.contains('visible')){
+            const ar=arrDown.getBoundingClientRect();
+            if(Math.hypot(e.clientX-(ar.left+ar.width/2), e.clientY-(ar.top+ar.height/2)) <= 26)hoverDir=1;
+          }
+          if(!hoverDir&&arrUp&&arrUp.classList.contains('visible')){
+            const ar=arrUp.getBoundingClientRect();
+            if(Math.hypot(e.clientX-(ar.left+ar.width/2), e.clientY-(ar.top+ar.height/2)) <= 26)hoverDir=-1;
+          }
+          if(hoverDir!==0){
+            startAutoScroll(hoverDir);
+          }else{
+            stopAutoScroll();
           }
 
-          if(targetItem){
-                if(targetItem!==lastHoveredDragItem){
-                  if(lastHoveredDragItem)lastHoveredDragItem.classList.remove('drag-over');
-                  lastHoveredDragItem=targetItem;
-                  targetItem.classList.add('drag-over');
-                  haptic('tick');
+          let targetItem=null;
+              const rThresh=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+16;
+              let closestDist=rThresh;
+              const allItems=grid.querySelectorAll('.it');
+              for(let i=0;i<allItems.length;i++){
+                const itemEl=allItems[i];
+                const ir=itemEl.getBoundingClientRect();
+                const dist=Math.hypot(e.clientX-(ir.left+ir.width/2), e.clientY-(ir.top+ir.height/2));
+                if(dist<closestDist){
+                  closestDist=dist;
+                  targetItem=itemEl;
                 }
-              }else if(!lastHoveredDragItem && allItems.length){
-                lastHoveredDragItem=allItems[0];
-                lastHoveredDragItem.classList.add('drag-over');
               }
+
+              if(targetItem){
+                    if(targetItem!==lastHoveredDragItem){
+                      if(lastHoveredDragItem)lastHoveredDragItem.classList.remove('drag-over');
+                      lastHoveredDragItem=targetItem;
+                      targetItem.classList.add('drag-over');
+                      haptic('tick');
+                    }
+                  }else{
+                    if(lastHoveredDragItem){
+                      lastHoveredDragItem.classList.remove('drag-over');
+                      lastHoveredDragItem=null;
+                    }
+                  }
 
       const currentFbtn=el?el.closest('.fbtn'):null;
             if(currentFbtn){
@@ -1283,10 +1285,15 @@ const SET_GROUPS={
       title:'Pop-up Size & Styling'
     },
   trigger:{
-    keys:['trigH','trigW','trigY','trigOpacity','dwellDelay'],
-    title:'Trigger Settings',
-    extra:`<div class="sw" style="margin-top:12px"><span>Hide trigger indicator</span><button class="tg" id="ovHideTrig"></button></div><div class="sw" style="margin-top:12px"><span>Screen Edge Placement</span><div class="seg" id="trigEdgeSeg" style="max-width:140px"><button data-e="left">Left</button><button data-e="right">Right</button></div></div><div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>`
-  },
+        keys:['trigH','trigW','trigY','trigOpacity','dwellDelay'],
+        title:'Trigger Settings',
+        extra:`<div class="sw" style="margin-top:12px"><span>Hide trigger indicator</span><button class="tg" id="ovHideTrig"></button></div><div class="sw" style="margin-top:12px"><span>Screen Edge Placement</span><div class="seg" id="trigEdgeSeg" style="max-width:140px"><button data-e="left">Left</button><button data-e="right">Right</button></div></div><div style="margin:12px 0;padding:12px;background:rgba(255,255,255,.05);border-radius:14px;font-size:12px;line-height:1.4;color:var(--dim)"><b style="color:var(--acc)">Puller & Resizers:</b> When in Edit mode, use the arrow puller tab to drag the trigger anywhere, the top/bottom bars to stretch length, and the side bar to adjust width.</div>`
+      },
+      folder:{
+        keys:['dwellDelay'],
+        title:'Folder Hover & Dwell',
+        extra:`<div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Backdrop Hover</b><small style="color:var(--dim)">Return to shortcuts when hovering outside popup</small></div></div>`
+      },
   ring:{keys:['ringSize','ringThick','ringOpacity'],title:'Selection Ring (Zone Pointer)'}
 };
 
@@ -1692,7 +1699,7 @@ function openStudio(fromPop=false){
   const s=$('#studio');
   if(!s)return;
   s.style.display='flex';
-  s.innerHTML=`${stOpenedFromPop?`<div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 14px 2px;flex-shrink:0"><button id="stDoneBtn" class="sbtn" style="margin:0;padding:6px 16px;background:var(--acc);color:#fff;border-color:transparent;font-weight:700"><i class="fa-solid fa-check"></i> Done</button></div>`:''}<div class="stp" id="stPrev" style="margin-top:${stOpenedFromPop?'4px':'14px'}"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
+  s.innerHTML=`${stOpenedFromPop?`<div style="display:flex;align-items:center;justify-content:flex-end;padding:12px 14px 2px;flex-shrink:0"><button id="stDoneBtn" class="sbtn" style="margin:0;padding:6px 16px;background:var(--acc);color:#fff;border-color:transparent;font-weight:700"><i class="fa-solid fa-check"></i> Done</button></div>`:''}<div class="stp" id="stPrev" style="margin-top:${stOpenedFromPop?'4px':'14px'}"><span class="tag" id="stTag">Live preview</span><div class="stp-bg"></div><div class="stp-phone" id="stPhone"><div class="stp-screen" id="stScreen"><div class="pv-fab" id="pvFab"></div><div class="pvpop" id="pvpop"><div class="pbody" style="padding:var(--pad);scrollbar-width:none"><div id="pvgrid"></div></div></div></div></div><div class="ring-preview-area" id="ringArea"><div class="ring-preview-card" id="ringCard"><div class="ring-sim-pointer" id="ringSimPointer"></div><div class="ring-preview-grid" id="ringGrid"></div></div></div></div><div class="stabs" id="stTabs"><button data-t="general">Overview</button><button data-t="items">Shortcuts</button><button data-t="grid">Grid</button><button data-t="icons">Icons</button><button data-t="popup">Popup</button><button data-t="trigger">Trigger</button><button data-t="folder">Folder</button><button data-t="ring">Selection Ring</button></div><div class="stbody" id="stBody"></div>`;
   const doneBtn=$('#stDoneBtn');
   if(doneBtn){
     doneBtn.onclick=()=>{
@@ -2130,6 +2137,12 @@ function treeAutoScroll(d){
 }
 function treeSlideMove(e){
   treeLast={x:e.clientX,y:e.clientY};
+  const popR=pop.getBoundingClientRect();
+  if(e.clientX<popR.left-15||e.clientX>popR.right+15||e.clientY<popR.top-15||e.clientY>popR.bottom+15){
+    haptic('tick');
+    resetTree();
+    return;
+  }
   const pr=pbody.getBoundingClientRect();
   const hdr=treeView.querySelector('.tv-hdr');
   const topEdge=hdr?hdr.getBoundingClientRect().bottom:pr.top;

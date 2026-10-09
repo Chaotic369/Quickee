@@ -251,10 +251,12 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .dc input[type=text],.dc select{width:100%;height:44px;border-radius:14px;background:rgba(255,255,255,.08);border:none;outline:none;padding:0 14px;font-size:14px}
 .dc input[type=text]:focus,.dc select:focus{border:none;outline:none}
 .dc select option{background:#1b1629}
-.seg{display:flex;flex-wrap:wrap;gap:6px}
-.seg button{padding:7px 12px;border-radius:999px;background:rgba(255,255,255,.07);border:none;outline:none;font-size:12px;font-weight:600;color:var(--dim);transition:all .15s}
-#dType button.on{background:#ffbf00;color:#1c1304;border:none;outline:none}
-.seg button.on{background:#ffbf00;color:#1c1304;border:none;outline:none}
+.seg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.seg button{display:flex;align-items:center;justify-content:center;gap:6px;padding:9px 6px;border-radius:12px;background:rgba(255,255,255,.06);border:none;outline:none;font-size:11.5px;font-weight:600;color:var(--dim);transition:all .15s;white-space:nowrap}
+.seg button i{font-size:12px}
+.seg button:hover{background:rgba(255,255,255,.1);color:var(--ink)}
+#dType button.on{background:#ffbf00;color:#1c1304;border:none;outline:none;font-weight:700}
+.seg button.on{background:#ffbf00;color:#1c1304;border:none;outline:none;font-weight:700}
 .stbody .seg button{background:transparent !important;border:none !important;outline:none !important;box-shadow:none !important}
 .stbody .seg button.on{color:#ffbf00 !important}
 .stbody select{background:transparent !important;border:none !important;outline:none !important;box-shadow:none !important}
@@ -491,12 +493,10 @@ const KEY='quick_launcher_demo_v1';
 /* ───────── data ───────── */
 const TYPES={
   app:{label:'App',color:'#5b8def',icon:'fa-solid fa-cube',ph:''},
-  call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number (Prompts dialer)'},
   directDial:{label:'Direct Dial',color:'#2fb872',icon:'fa-solid fa-phone-flip',ph:'Directly calls number'},
   sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
   email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
   web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'https://example.com'},
-  intent:{label:'Custom Intent',color:'#9c27b0',icon:'fa-solid fa-terminal',ph:'intent:#Intent;action=...;end or URI'},
   folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder-open',ph:'/storage/emulated/0/…'},
   file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'/storage/emulated/0/…'},
   system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-sliders',ph:''}
@@ -811,7 +811,7 @@ dtRing.className = 'dt-ring';
 phone.appendChild(dtRing);
 
 let fbDrag=false, fbEdgeDrag=false, fbStart={x:0,y:0}, fbWasOpen=false;
-let scrollTimer=null, lastHoveredDragItem=null;
+let scrollTimer=null, lastHoveredDragItem=null, lastHoveredFbtn=null;
 function startAutoScroll(dir){
   if(scrollTimer)return;
   const arrow=dir>0?$('#popScrollDown'):$('#popScrollUp');
@@ -919,15 +919,19 @@ fab.addEventListener('pointermove',e=>{
                 lastHoveredDragItem.classList.add('drag-over');
               }
 
-      if(el){
-        const fb=el.closest('.fbtn');
-        if(fb){
-          fb.classList.add('drag-over');
-          fb.style.transform='scale(1.35)';
-          fb.style.zIndex='55';
-        }
-      }
-    });
+      const currentFbtn=el?el.closest('.fbtn'):null;
+            if(currentFbtn){
+              currentFbtn.classList.add('drag-over');
+              currentFbtn.style.transform='scale(1.35)';
+              currentFbtn.style.zIndex='55';
+              if(currentFbtn!==lastHoveredFbtn){
+                lastHoveredFbtn=currentFbtn;
+                haptic('tick');
+              }
+            }else{
+              lastHoveredFbtn=null;
+            }
+          });
 fab.addEventListener('pointerup',e=>{
   if(fbEdgeDrag){
     fbEdgeDrag=false;
@@ -937,6 +941,7 @@ fab.addEventListener('pointerup',e=>{
   if(!fbDrag)return;
     stopAutoScroll();
     fbDrag=false;
+    lastHoveredFbtn=null;
     dtRing.style.display='none';
     document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
     document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('drag-over');b.style.transform=''});
@@ -986,8 +991,12 @@ fab.addEventListener('pointerup',e=>{
 fab.addEventListener('pointercancel',()=>{
   stopAutoScroll();
   fbEdgeDrag=false;
-  fbDrag=false; dtRing.style.display='none';
+  fbDrag=false;
+  lastHoveredFbtn=null;
+  dtRing.style.display='none';
   document.querySelectorAll('.it.drag-over').forEach(i=>i.classList.remove('drag-over'));
+  document.querySelectorAll('.fbtn').forEach(b=>{b.classList.remove('drag-over');b.style.transform=''});
+});
 });
 
 /* ───────── popup: drag ───────── */
@@ -2289,7 +2298,7 @@ function openDlg(item,targetSlot){
   $('#dChangeIconBtn').innerHTML='<i class="fa-solid fa-pen"></i> Presets';
   $('#dAppSel').innerHTML=INSTALLED.map(a=>`<option value="${esc(a.v)}">${esc(a.n)}</option>`).join('');
   $('#dSys').innerHTML=Object.keys(SYS).map(k=>`<option value="${k}">${SYS[k].n}</option>`).join('');
-  $('#dType').innerHTML=Object.keys(TYPES).map(t=>`<button data-t="${t}">${TYPES[t].label}</button>`).join('');
+  $('#dType').innerHTML=Object.keys(TYPES).map(t=>`<button type="button" data-t="${t}"><i class="${TYPES[t].icon}"></i>${TYPES[t].label}</button>`).join('');
   if(item){
     if(item.t==='system')$('#dSys').value=item.v;
     else if(item.t==='app')$('#dAppSel').value=item.v;

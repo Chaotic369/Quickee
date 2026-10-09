@@ -661,8 +661,8 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
   }else{
     fab.style.display=s.triggerEnabled===false?'none':'block';
   }
-  fab.style.opacity=s.hideTrigger?'0':((s.trigOpacity!=null?s.trigOpacity:80)/100);
-  fab.style.background='transparent';
+  fab.style.opacity=s.hideTrigger?'0':'1';
+    fab.style.background='#ffffff';
   fabEdit.style.display=s.hideEditBtn?'none':'';
   const nb=$('#navBar');
   if(nb)nb.style.display=s.disableImmersive?'flex':'none';

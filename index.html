@@ -328,6 +328,23 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .sg{margin-bottom:12px}
 .sg .row{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:500;margin-bottom:2px}
 .sg .row span:last-child{color:#ffbf00;font-variant-numeric:tabular-nums;font-weight:700;font-size:12px;padding:2px 8px;border-radius:6px}
+.gmini{display:grid;width:100%;height:100%;box-sizing:border-box;padding:13%;gap:9%;grid-template-columns:repeat(2,1fr);align-content:center;justify-content:center}
+.gmini.g3{padding:10%;gap:6%;grid-template-columns:repeat(3,1fr)}
+.gmini span{display:grid;place-items:center;aspect-ratio:1;border-radius:26%;color:#fff;overflow:hidden;font-size:calc(var(--icon,46px)*.15)}
+.gmini.g3 span{font-size:calc(var(--icon,46px)*.1)}
+.gmini span img{width:100%;height:100%;object-fit:cover}
+.gmini span.more{background:rgba(255,255,255,.12)}
+.gmini span.more b{font-size:calc(var(--icon,46px)*.12);color:var(--ink)}
+#gpanel{position:absolute;z-index:60;display:none;flex-direction:column;overflow:hidden;border-radius:22px;background:rgba(0,0,0,var(--gglass,1));border:1px solid rgba(255,255,255,.08);box-shadow:0 18px 44px rgba(0,0,0,.9)}
+.gp-hd{display:flex;align-items:center;gap:8px;height:34px;padding:0 10px 0 6px;flex-shrink:0;font-size:12px}
+.gp-hd button{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;color:var(--dim)}
+.gp-hd b{font-weight:700;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gp-hd small{color:var(--dim);font-size:10px}
+.gp-body{flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;padding:0 10px 10px;touch-action:pan-y}
+.gp-body::-webkit-scrollbar{display:none}
+.gp-grid{display:grid;row-gap:8px;justify-content:start}
+.gm.hover .ic{transform:scale(1.3);box-shadow:0 8px 24px rgba(0,0,0,.5);z-index:2}
+#phone.immersive #scrim.on{background:rgba(0,0,0,.92)}
 .res .pin.dl{color:#ff7b72}
 #treeView{display:none;flex-direction:column;gap:2px}
 .tv-hdr{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;margin:calc(var(--pad) * -1) calc(var(--pad) * -1) 6px;padding:8px var(--pad);background:rgba(8,8,8,.97);border-bottom:1px solid rgba(255,255,255,.07)}
@@ -448,6 +465,14 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
                                       <label style="margin:2px 0 2px;font-size:10.5px;color:var(--dim);text-transform:uppercase;letter-spacing:.5px">Shortcut Presets</label>
                                       <div id="dQuickShortcutsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
                                     </div>
+                                    <div id="dGroupBox" style="display:none;flex-direction:column;gap:8px">
+                                      <div style="display:flex;gap:8px;align-items:center">
+                                        <button type="button" id="dGrpApps" class="sbtn" style="flex:1;margin:0;height:44px;text-align:left;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.08)"><span id="dGrpAppsLbl">Add apps</span><i class="fa-solid fa-chevron-down" style="font-size:11px;color:var(--dim)"></i></button>
+                                        <button type="button" id="dGrpAdd" class="sbtn" style="margin:0;height:44px;padding:0 14px;white-space:nowrap"><i class="fa-solid fa-plus"></i> Shortcut</button>
+                                      </div>
+                                      <div id="dGrpList" style="display:none;flex-wrap:wrap;gap:7px;max-height:220px;overflow-y:auto;padding:6px;background:rgba(0,0,0,.25);border-radius:14px"></div>
+                                      <p id="dGrpHint" style="display:none;font-size:10px;color:var(--dim)">Tap a tile to edit or remove it. "Shortcut" adds anything else: several shortcuts of the same app (e.g. Gmail), calls, SMS, email, websites, files, system actions. No limit.</p>
+                                    </div>
                                     <select id="dSys"></select>
                                     <datalist id="dl"></datalist>
                               <div style="display:flex;align-items:center;justify-content:space-between;margin:14px 0 6px">
@@ -468,6 +493,25 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
               </div>
             </div>
 
+    <div class="dlgw" id="groupPickDlg" style="z-index:86">
+      <div class="dc">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <h3 style="margin:0"><i class="fa-solid fa-layer-group" style="color:#ffbf00"></i> Select apps</h3>
+          <span id="gpCount" style="font-size:11.5px;color:#ffbf00;font-weight:700">0 selected</span>
+        </div>
+        <input type="text" id="gpSearch" placeholder="Search apps" autocomplete="off">
+        <div style="display:flex;gap:8px;margin:10px 0">
+          <button class="sbtn" id="gpAll" type="button" style="margin:0;padding:6px 12px;font-size:11.5px">Select all</button>
+          <button class="sbtn" id="gpClear" type="button" style="margin:0;padding:6px 12px;font-size:11.5px">Clear</button>
+        </div>
+        <div id="gpList" style="max-height:300px;overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+        <div class="acts" style="margin-top:16px">
+          <button id="gpCancel" type="button">Cancel</button>
+          <span class="sp"></span>
+          <button class="pri" id="gpDone" type="button">Done (0)</button>
+        </div>
+      </div>
+    </div>
     <div class="dlgw" id="pickerDlg" style="z-index:85">
         <div class="dc">
           <h3 id="pickerTitle"><i class="fa-solid fa-folder-open" style="color:var(--acc)"></i> Browse Storage</h3>
@@ -515,13 +559,15 @@ const KEY='quick_launcher_demo_v1';
 /* ───────── data ───────── */
 const TYPES={
   app:{label:'App',color:'#5b8def',icon:'fa-solid fa-cube',ph:''},
-  call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number'},
-  directDial:{label:'Direct Dial',color:'#2fb872',icon:'fa-solid fa-phone-flip',ph:'Directly calls number'},
+    group:{label:'App Group',color:'#1b1b1f',icon:'fa-solid fa-layer-group',ph:''},
+  call:{label:'Call',color:'#3cc47c',icon:'fa-solid fa-phone',ph:'Phone number (opens dialer)'},
+  directDial:{label:'Direct Dial',color:'#2fb872',icon:'fa-solid fa-phone-flip',ph:'Phone number (calls immediately)'},
   sms:{label:'SMS',color:'#26a69a',icon:'fa-solid fa-comment-sms',ph:'Phone number'},
   email:{label:'Email',color:'#ea4335',icon:'fa-solid fa-envelope',ph:'name@domain.com'},
   web:{label:'Website',color:'#4aa3ff',icon:'fa-solid fa-globe',ph:'https://example.com'},
-  folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder-open',ph:'/storage/emulated/0/…'},
-  file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'/storage/emulated/0/…'},
+    intent:{label:'Custom Intent',color:'#9c27b0',icon:'fa-solid fa-terminal',ph:'intent:#Intent;action=...;end  or URI'},
+  folder:{label:'Folder',color:'#f0a93b',icon:'fa-solid fa-folder-open',ph:'Tap Browse to pick a folder'},
+  file:{label:'File',color:'#8f9bb3',icon:'fa-solid fa-file-lines',ph:'Tap Browse to pick a file'},
   system:{label:'System',color:'#6c63ff',icon:'fa-solid fa-sliders',ph:''}
 };
 const ROOT='/storage/emulated/0/';
@@ -574,13 +620,15 @@ const SYS={
  air:{n:'Airplane',i:'fa-solid fa-plane',c:'#5e7ea6',tog:1,hint:'Settings.ACTION_AIRPLANE_MODE_SETTINGS'},
  rot:{n:'Auto-rotate',i:'fa-solid fa-rotate',c:'#4d9a86',tog:1,hint:'Settings.System.ACCELEROMETER_ROTATION'},
  dnd:{n:'Do not disturb',i:'fa-solid fa-bell-slash',c:'#8a5bc2',tog:1,hint:'NotificationManager.setInterruptionFilter()'},
- hotspot:{n:'Hotspot',i:'fa-solid fa-tower-broadcast',c:'#e65100',tog:1,hint:'TetheringManager.startTethering()'},
+ appsearch:{n:'Search apps',i:'fa-solid fa-magnifying-glass',c:'#2f7fd6',hint:'Activity with a text field → PackageManager.queryIntentActivities(MAIN/LAUNCHER)',run(){appSearch()}},
+  callsearch:{n:'Call contact',i:'fa-solid fa-phone',c:'#2fb872',hint:'ContactsContract search (READ_CONTACTS) → ACTION_CALL / ACTION_DIAL',run(){callSearch()}},
+  hotspot:{n:'Hotspot',i:'fa-solid fa-tower-broadcast',c:'#e65100',tog:1,hint:'TetheringManager.startTethering()'},
  mute:{n:'Mute / Silent',i:'fa-solid fa-volume-xmark',c:'#c2185b',tog:1,hint:'AudioManager.RINGER_MODE_SILENT'}
 };
 const HINTS={app:'PackageManager.getLaunchIntentForPackage(pkg) → startActivity()',call:'Intent ACTION_CALL tel:<number> (CALL_PHONE) · or ACTION_DIAL',sms:'Intent ACTION_SENDTO smsto:<number>',email:'Intent ACTION_SENDTO mailto:<address>',folder:'Intent ACTION_VIEW + DocumentsContract URI · MANAGE_EXTERNAL_STORAGE for full access',file:'Intent ACTION_VIEW with FileProvider URI + MIME type',web:'Intent ACTION_VIEW Uri.parse(url)'};
 
-const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,permWriteSettings:true,permDnd:false,permPhone:true,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default',cornerSlider:true,cornerSliderPos:'tr'};
-const CTRL=[['icon','Icon size',30,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,7,1,''],['rows','Rows',2,50,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,420,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,260,2,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
+const S_DEF={icon:46,radius:28,cols:4,rows:5,cgap:8,rgap:10,pad:10,lbl:9.5,showLbl:true,showChips:true,w:280,h:420,glass:74,popRad:26,blur:0,trigH:72,trigW:5,trigY:50,trigEdge:'right',haptic:true,autoClose:true,ringSize:42,ringThick:2.5,ringOpacity:40,triggerEnabled:true,permOverlay:true,permAcc:true,permStorage:true,permWriteSettings:true,permDnd:false,permPhone:true,permBattery:false,permAutostart:false,hideTrigger:false,trigColor:'#ffffff',gridPos:'bottom',hideEditBtn:false,leftHand:false,disableImmersive:true,trigOpacity:80,shapeMask:'default',dwellDelay:300,swipeUpAct:'notif',swipeDownAct:'recents',disableInLandscape:false,activeTheme:'default',cornerSlider:true,cornerSliderPos:'tr'};
+const CTRL=[['icon','Icon size',16,78,1,'px'],['radius','Icon roundness',0,50,1,'%'],['cols','Columns',2,24,1,''],['rows','Rows',2,50,1,''],['cgap','Column spacing',0,34,1,'px'],['rgap','Row spacing',0,38,1,'px'],['pad','Popup padding',4,34,1,'px'],['lbl','Label size',7,15,.5,'px'],['w','Popup width',240,520,1,'px'],['h','Popup height',260,780,1,'px'],['glass','Glass opacity',30,100,1,'%'],['groupGlass','App group opacity',20,100,1,'%'],['popRad','Popup corner radius',0,40,1,'px'],['trigH','Trigger length',40,1000,4,'px'],['trigW','Trigger width',3,20,1,'px'],['trigY','Trigger location',10,90,1,'%'],['ringSize','Ring diameter',30,90,1,'px'],['ringThick','Ring thickness',1,8,0.5,'px'],['ringOpacity','Ring opacity',10,100,2,'%'],['trigOpacity','Trigger opacity',0,100,5,'%'],['dwellDelay','Hover dwell delay',150,600,25,'ms']];
 const CTRL_MAP=new Map(CTRL.map(c=>[c[0],c]));
 
 const DEF=[
@@ -671,13 +719,24 @@ function haptic(type){
 function closeLayers(){closeSim();closeStudio();['#recents','#notif','#lock'].forEach(s=>$(s).style.display='none');closeSheet();closePop()}
 
 /* ───────── popup: apply layout ───────── */
-function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
+function immEff(o,ph){if(!o||!o.immersive)return o;return{...o,icon:Math.min(o.icon*1.3,88),lbl:o.lbl*1.15,pad:o.pad+6,popRad:0,glass:Math.max(o.glass,88)}}
+function hasPopBg(s){return s.popBg==='wallpaper'||(s.popBg==='custom'&&!!s.popBgData)}
+function popBgCss(s){
+  const g=(s.glass>=100?100:s.glass)/100;
+  if(!hasPopBg(s))return s.glass>=100?'#000000':`rgba(0,0,0,${g})`;
+  const tint=`linear-gradient(rgba(0,0,0,${g}),rgba(0,0,0,${g}))`;
+  return s.popBg==='wallpaper'?tint+',linear-gradient(165deg,#3b2a6b,#14213d 55%,#0b0b12)':tint+',url("'+s.popBgData+'") center/cover no-repeat';
+}
+function applySet(){const ph=phone.getBoundingClientRect(),s=immEff(st.set,ph);
   const v=(k,x)=>pop.style.setProperty(k,x);
   const isFullBlack=s.glass>=100;
   v('--icon',s.icon+'px');v('--rad',s.radius);v('--cols',s.cols);v('--rows',s.rows||5);v('--cgap',s.cgap+'px');v('--rgap',s.rgap+'px');v('--pad',s.pad+'px');v('--lbl',s.lbl+'px');v('--glass',s.glass/100);
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
   v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
-  pop.classList.toggle('solid-black',isFullBlack);
+  pop.classList.toggle('solid-black',isFullBlack&&!hasPopBg(s));
+    v('--pop-bg',popBgCss(s));
+    v('--gglass',(s.groupGlass!=null?s.groupGlass:100)/100);
+    phone.classList.toggle('immersive',!!s.immersive);
   const isLandscape=phone.classList.contains('landscape');
   if(s.disableInLandscape&&isLandscape){
     fab.style.display='none';
@@ -705,8 +764,8 @@ function applySet(){const s=st.set,ph=phone.getBoundingClientRect();
     grid.style.alignContent=s.gridPos==='top'?'start':(s.gridPos==='center'?'center':'end');
   }
   const isLeft=s.trigEdge==='left';
-  const targetW=clamp(s.w,180,ph.width-12);
-  const targetH=clamp(s.h,180,ph.height-70);
+  const targetW=s.immersive?ph.width:clamp(s.w,180,ph.width-12);
+  const targetH=s.immersive?(ph.height-112):clamp(s.h,180,ph.height-70);
   pop.style.width=targetW+'px';
   pop.style.height=targetH+'px';
   pop.style.maxHeight=targetH+'px';
@@ -723,7 +782,7 @@ let cfsActiveFolderId=null;
 function updateCornerSlider(){
   const cfs=$('#cornerFastSlider'), track=$('#cfsTrack'), bubble=$('#cfsBubble');
   if(!cfs||!track)return;
-  if(!isOpen()||editMode||tree||st.set.cornerSlider===false){
+  if(!isOpen()||editMode||tree||st.set.immersive||st.set.cornerSlider===false){
     cfs.classList.remove('active');
     if(bubble)bubble.style.display='none';
     return;
@@ -851,7 +910,7 @@ function positionFabButtons(){
 function placeRz(){
   const rzEl=$('#rz');
   if(!rzEl)return;
-  if(isOpen()&&editMode){
+  if(isOpen()&&editMode&&!st.set.immersive){
     rzEl.style.display='flex';
     const isLeft=st.set&&st.set.trigEdge==='left';
     const rad=st.set.popRad!=null?st.set.popRad:26;
@@ -884,7 +943,8 @@ function placePop(){
     pop.style.right='0px';
     pop.style.left='auto';
   }
-  pop.style.top=t+'px';
+  if(s.immersive)t=64;
+    pop.style.top=t+'px';
   pop.style.transformOrigin=isLeft?'left center':'right center';
   positionFabButtons();
   placeRz()}
@@ -917,7 +977,7 @@ function updateScrollArrow(){
   arrUp.classList.toggle('visible', canUp);
 }
 function openPop(){userMoved=false;applySet();render();pop.classList.add('open');fab.classList.add('open');fabEdit.classList.add('open');fabSet.classList.add('open');if(editMode)fabAdd.classList.add('open','show');$('#scrim').classList.add('on');placePop();placeRz();updateScrollArrow();updateCornerSlider()}
-function closePop(){stopAutoScroll();resetTree();const cd=$('#confirmDlg');if(cd)cd.style.display='none';pendingDeleteFn=null;pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();updateCornerSlider();if(document.activeElement)document.activeElement.blur()}
+function closePop(){stopAutoScroll();resetTree();closeGroup();const cd=$('#confirmDlg');if(cd)cd.style.display='none';pendingDeleteFn=null;pop.classList.remove('open');fab.classList.remove('open');fabEdit.classList.remove('open','on');fabSet.classList.remove('open');fabAdd.classList.remove('open','show');$('#scrim').classList.remove('on');editMode=false;pop.classList.remove('edit');fabEdit.innerHTML='<i class="fa-solid fa-pen"></i>';$('#rz').style.display='none';updateScrollArrow();updateCornerSlider();if(document.activeElement)document.activeElement.blur()}
 $('#scrim').addEventListener('pointerdown',closePop);
 
 /* ───────── Zone Launcher side trigger: slide to launch ───────── */
@@ -1020,7 +1080,8 @@ fab.addEventListener('pointermove',e=>{
 
           let targetItem=null;
               const rThresh=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+16;
-              let closestDist=rThresh;
+              const inGp=el&&el.closest('#gpanel');
+                            let closestDist=inGp?-1:rThresh;
               const allItems=grid.querySelectorAll('.it');
               for(let i=0;i<allItems.length;i++){
                 const itemEl=allItems[i];
@@ -1092,7 +1153,17 @@ fab.addEventListener('pointerup',e=>{
         const targetAdd=el.closest('#fabAdd');
         const targetIt=lastHoveredDragItem||el.closest('.it');
 
-        if(targetSet){
+        if(el.closest('[data-gb]')){
+                          closeGroup();
+                          handled=true;
+                        }else if(el.closest('.gm')){
+                          const gm=el.closest('.gm'),ms=($('#gpanel')||{})._ms||[],m=ms[+gm.dataset.i];
+                          if(m){haptic('confirm');launch(m);closePop();}
+                          handled=true;
+                        }else if(el.closest('#gpanel')){
+                          gpTouch=true;
+                          handled=true;
+                        }else if(targetSet){
                   openStudio(true);
                   handled=true;
                 }else if(targetEdit){
@@ -1103,6 +1174,7 @@ fab.addEventListener('pointerup',e=>{
               handled=true;
             }else if(targetIt){
                   const item=st.items.find(x=>x.id===targetIt.dataset.id);
+                                    if(item&&item.t==='group'){haptic('tick');openGroup(item,false);handled=true;}else
                   if(item){
                     haptic('confirm');
                     launch(item);
@@ -1111,7 +1183,8 @@ fab.addEventListener('pointerup',e=>{
                   }
                 }
               }
-              if(!handled){
+              if(!handled&&st.set.tapKeepsOpen&&!fbWasOpen&&dx<18&&Math.abs(dy)<=44){haptic('tick');handled=true}
+                            if(!handled){
                 closePop();
               }
             });
@@ -1241,10 +1314,11 @@ bindPopShiftDrag($('#popShiftHandle'));
 /* ───────── views: grid / results / settings ───────── */
 function isOn(it){return it.t==='system'&&SYS[it.v]&&SYS[it.v].tog&&st.tog[it.v]}
 function iconInner(it){
+  if(it.t==='group')return gmini(memberList(it));
   if(it.customImg){
     return`<div class="fav-wrap"><img src="${esc(it.customImg)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit"></div>`;
   }
-  return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i)}"></i>`;
+  return it.i==='letter'?`<b>${esc((it.n||'?')[0]).toUpperCase()}</b>`:`<i class="${esc(it.i==='app'?((INSTALLED.find(x=>x.v===it.v)||{}).i||'fa-solid fa-cube'):it.i)}"></i>`;
 }
 function itemHTML(it){return`<div class="it${isOn(it)?' on':''}" data-id="${it.id}" title="${esc(it.n)}"><div class="ic" style="background:${it.c||'#5b8def'}">${iconInner(it)}</div><div class="lb">${esc(it.n)}</div><button class="ed" aria-label="Edit ${esc(it.n)}" title="Edit shortcut"><i class="fa-solid fa-pen"></i></button><button class="x" aria-label="Delete ${esc(it.n)}"><i class="fa-solid fa-xmark"></i></button></div>`}
 const normUrl=q=>/^[a-z]+:\/\//i.test(q)?q:'https://'+q;
@@ -1281,7 +1355,8 @@ function setVars(el,s){
   v('--glass',s.glass/100);
   v('--pop-rad',(s.popRad!=null?s.popRad:26)+'px');
   v('--pop-bg',isFullBlack?'#000000':`rgba(0,0,0,${s.glass/100})`);
-  el.classList.toggle('solid-black',isFullBlack);
+  el.classList.toggle('solid-black',isFullBlack&&!hasPopBg(s));
+    v('--pop-bg',popBgCss(s));
 }
 function pvUpdate(){
   const stage=$('#stPrev'),phoneBox=$('#stPhone'),screen=$('#stScreen'),p=$('#pvpop'),pvF=$('#pvFab');
@@ -1296,10 +1371,11 @@ function pvUpdate(){
 
   const scale=computedH/phoneH;
 
-  setVars(p,s);
+  setVars(p,immEff(s,ph));
   p.classList.toggle('nolbl',!s.showLbl);
-  p.style.width=Math.min(s.w,ph.width-12)+'px';
-  p.style.maxHeight=Math.min(s.h,ph.height-70)+'px';
+  p.style.width=(s.immersive?ph.width:Math.min(s.w,ph.width-12))+'px';
+    p.style.height=s.immersive?(ph.height-112)+'px':'';
+  p.style.maxHeight=(s.immersive?ph.height-112:Math.min(s.h,ph.height-70))+'px';
 
   const cols=Math.max(1,parseInt(s.cols)||4);
     const userRows=Math.max(1,parseInt(s.rows)||5);
@@ -1323,12 +1399,13 @@ function pvUpdate(){
 
   const popH=p.offsetHeight||Math.min(s.h,ph.height-70);
   let popTop=trigTop+(th/2)-(popH/2);
-  popTop=clamp(popTop,36,ph.height-popH-12);
+  popTop=s.immersive?64:clamp(popTop,36,ph.height-popH-12);
 
   const isLeft=s.trigEdge==='left';
   p.style.transform=`scale(${scale})`;
-  p.style.left=isLeft?(12*scale)+'px':'auto';
-  p.style.right=isLeft?'auto':(12*scale)+'px';
+  p.style.transformOrigin=s.immersive?'top left':'';
+    p.style.left=s.immersive?'0px':(isLeft?(12*scale)+'px':'auto');
+  p.style.right=s.immersive?'auto':(isLeft?'auto':(12*scale)+'px');
   p.style.top=(popTop*scale)+'px';
 
   if(pvF){
@@ -1405,15 +1482,21 @@ function syncSl(){
   const posSeg=$('#ovGridPosSeg');if(posSeg)posSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pos===(st.set.gridPos||'bottom')));
   const tcSeg=$('#ovTrigCols');if(tcSeg)tcSeg.querySelectorAll('button').forEach(x=>{x.style.border='none';x.style.outline='none';});
   const edgeSeg=$('#trigEdgeSeg');if(edgeSeg)edgeSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.e===(st.set.trigEdge||'right')));
-  const swUp=$('#ovSwipeUp');if(swUp)swUp.value=st.set.swipeUpAct||'notif';
+  const tIm=$('#ovImmersive');if(tIm)tIm.classList.toggle('on',!!st.set.immersive);
+    const pbSeg=$('#popBgSeg');if(pbSeg)pbSeg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.pb===(st.set.popBg||'none')));
+    const pbUp=$('#popBgUp');if(pbUp)pbUp.innerHTML='<i class="fa-solid fa-image"></i> '+(st.set.popBgData?'Change image':'Upload image');
+    const pbRm=$('#popBgRm');if(pbRm)pbRm.style.display=st.set.popBgData?'':'none';
+    const pbNote=$('#popBgNote');if(pbNote)pbNote.style.display=(st.set.popBg==='wallpaper'&&!st.set.permStorage)?'block':'none';
+    const swUp=$('#ovSwipeUp');if(swUp)swUp.value=st.set.swipeUpAct||'notif';
   const swDn=$('#ovSwipeDown');if(swDn)swDn.value=st.set.swipeDownAct||'recents';
 }
 const SET_GROUPS={
   grid:{keys:['cols','rows','cgap','rgap','pad'],title:'Grid Management'},
   icons:{keys:['icon','radius','lbl'],title:'Icon Size & Style',extra:'<div class="sw"><span>Show labels</span><button class="tg" id="tgLbl" aria-label="Show labels"></button></div>'},
   popup:{
-      keys:['w','h','glass','popRad'],
-      title:'Pop-up Size & Styling'
+      keys:['w','h','glass','groupGlass','popRad'],
+      title:'Pop-up Size & Styling',
+            extra:`<div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Immersive mode</b><small style="color:var(--dim)">Popup covers the whole screen with bigger icons (Width / Height are ignored)</small></div><button class="tg" id="ovImmersive"></button></div><div style="margin:12px 0 4px"><b style="display:block;font-size:13px">Popup background</b><small style="color:var(--dim);display:block;margin:2px 0 8px">A picture behind the popup. Lower "Glass opacity" to let it show through.</small><div class="seg" id="popBgSeg" style="grid-template-columns:repeat(3,1fr)"><button data-pb="none">None</button><button data-pb="wallpaper">My wallpaper</button><button data-pb="custom">My image</button></div><div style="display:flex;gap:8px;margin-top:8px"><button class="sbtn" id="popBgUp" type="button" style="margin:0;padding:8px 14px"><i class="fa-solid fa-image"></i> Upload image</button><button class="sbtn" id="popBgRm" type="button" style="margin:0;padding:8px 14px;color:#ff7b72;background:rgba(229,83,75,.14);display:none">Remove</button></div><input type="file" id="popBgFile" accept="image/*" style="display:none"><div id="popBgNote" style="display:none;font-size:11px;color:#ffbf00;margin-top:6px">Reading the wallpaper needs file access: turn it on in Overview.</div></div>`
     },
   trigger:{
         keys:['trigH','trigW','trigY','trigOpacity','dwellDelay'],
@@ -1423,7 +1506,7 @@ const SET_GROUPS={
       folder:{
               keys:['dwellDelay'],
               title:'Folder Hover & Dwell',
-              extra:`<div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Backdrop Hover</b><small style="color:var(--dim)">Return to shortcuts when hovering outside popup</small></div></div><div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Corner Fast Slider</b><small style="color:var(--dim)">Slide along the popup corner to quick-jump folders</small></div><button class="tg" id="ovCornerSlider"></button></div>`
+              extra:`<div class="sw" style="margin-top:12px"><div><b style="display:block;font-size:13px">Corner Fast Slider</b><small style="color:var(--dim)">Slide along the popup corner to quick-jump folders</small></div><button class="tg" id="ovCornerSlider"></button></div>`
             },
   ring:{keys:['ringSize','ringThick','ringOpacity'],title:'Selection Ring (Zone Pointer)'}
 };
@@ -1448,7 +1531,7 @@ function renderMainOverview(){
                                 </div>
                           <div class="sw" style="margin:8px 0">
                             <div><b style="display:block;font-size:13px">Auto-close on launch</b><small style="color:var(--dim)">Dismiss launcher when opening an item</small></div>
-                            <button class="tg${st.set.autoClose!==false?' on':''}" id="ovAutoClose"></button>
+                            <button class="tg${st.set.autoClose!==false?' on':''}" id="ovAutoClose"></button></div><div class="sw" style="margin:8px 0"><div><b style="display:block;font-size:13px">Tap keeps popup open</b><small style="color:var(--dim)">Off: a single tap on the trigger closes it again. On: it stays open for tapping</small></div><button class="tg${st.set.tapKeepsOpen?' on':''}" id="ovTapKeep"></button>
                           </div>
                           <div class="sw" style="margin:8px 0">
                             <div><b style="display:block;font-size:13px">Disable in landscape</b><small style="color:var(--dim)">Hide trigger during horizontal view</small></div>
@@ -1497,12 +1580,12 @@ function renderMainOverview(){
             <button class="tg${st.set.permStorage?' on':''}" id="ovPermStorage"></button>
           </div>
           <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Phone</b><small style="color:var(--dim)">Required for Direct Dial shortcuts</small></div>
-            <button class="tg${st.set.permPhone?' on':''}" id="ovPermPhone"></button>
+            <div><b style="display:block;font-size:13px">Run in background (no battery limits)</b><small style="color:var(--dim)">Stops the system from killing the launcher. Also lock the app in Recents and allow Autostart</small></div>
+            <button class="tg${st.set.permBattery?' on':''}" id="ovPermBattery"></button>
           </div>
           <div class="sw" style="margin:8px 0">
-            <div><b style="display:block;font-size:13px">Disable immersive mode</b><small style="color:var(--dim)">Keep bottom system navigation bar visible</small></div>
-            <button class="tg${st.set.disableImmersive?' on':''}" id="ovNoImmersive"></button>
+            <div><b style="display:block;font-size:13px">Autostart / Background activity</b><small style="color:var(--dim)">Opens your phone's own screen (Xiaomi, Oppo, Vivo, Realme, Samsung...) where you allow this app</small></div>
+            <button class="tg${st.set.permAutostart?' on':''}" id="ovPermAutostart"></button></div><div class="sw" style="margin:8px 0"><div><b style="display:block;font-size:13px">Phone</b><small style="color:var(--dim)">Required for Direct Dial shortcuts</small></div><button class="tg${st.set.permPhone?' on':''}" id="ovPermPhone"></button>
           </div>
         </div>
 
@@ -1542,7 +1625,9 @@ function renderMainOverview(){
         }
         bindTg('#ovHaptic','haptic','Haptic vibration');
                     bindTg('#ovHideTrig','hideTrigger','Hide trigger indicator');
-                    bindTg('#ovNoImmersive','disableImmersive','Disable immersive mode');
+                    bindTg('#ovTapKeep','tapKeepsOpen','Tap keeps popup open');
+                                bindTg('#ovPermBattery','permBattery','Run in background');
+                                bindTg('#ovPermAutostart','permAutostart','Autostart / background activity');
             bindTg('#ovAutoClose','autoClose','Auto-close on launch');
             bindTg('#ovNoLandscape','disableInLandscape','Disable in landscape');
             const lhBtn=b.querySelector('#ovLeftHand');
@@ -1683,7 +1768,7 @@ function renderMainOverview(){
               try{
                 const parsed=JSON.parse(ev.target.result);
                 if(parsed&&parsed.items&&parsed.set){
-                  st=parsed;
+                  st={...parsed,set:{...S_DEF,...parsed.set},tog:{...st.tog,...parsed.tog},lv:{...st.lv,...parsed.lv}};
                   save();
                   applySet();
                   placeFab();
@@ -1863,7 +1948,19 @@ function openStudio(fromPop=false){
         const edgeBtn=e.target.closest('#trigEdgeSeg button');
         if(edgeBtn){st.set.trigEdge=edgeBtn.dataset.e;st.set.leftHand=(st.set.trigEdge==='left');placeFab();applySet();pvUpdate();syncSl();save();return;}
 
-        if(e.target.closest('#sReset')){st.set={...S_DEF};st.btn=null;applySet();placeFab();syncSl();pvUpdate();save();toast('Settings reset');return}
+        if(e.target.closest('#ovImmersive')){st.set.immersive=!st.set.immersive;applySet();placePop();syncSl();pvUpdate();save();return}
+                const pbBtn=e.target.closest('[data-pb]');
+                if(pbBtn){const k=pbBtn.dataset.pb;if(k==='custom'&&!st.set.popBgData){$('#popBgFile').click();return}st.set.popBg=k;applySet();syncSl();pvUpdate();save();return}
+                if(e.target.closest('#popBgUp')){$('#popBgFile').click();return}
+                if(e.target.closest('#popBgRm')){st.set.popBgData=null;if(st.set.popBg==='custom')st.set.popBg='none';st.set.popBgRev=(st.set.popBgRev||0)+1;applySet();syncSl();pvUpdate();save();return}
+                if(e.target.closest('#sReset')){
+                  const g=SET_GROUPS[sTab]||SET_GROUPS.grid;
+                  g.keys.forEach(k=>{st.set[k]=S_DEF[k]});
+                  if(sTab==='icons')st.set.showLbl=S_DEF.showLbl;
+                  if(sTab==='popup'){st.set.immersive=false;st.set.popBg='none'}
+                  if(sTab==='trigger'){st.set.trigEdge='right';st.set.leftHand=false;st.set.hideTrigger=false;st.set.tapKeepsOpen=false;st.btn=null}
+                  if(sTab==='folder')st.set.cornerSlider=true;
+                  applySet();placeFab();syncSl();pvUpdate();updateCornerSlider();save();toast('Settings reset');return}
         if(e.target.closest('#stAdd')){openDlg(null,firstFreeSlot());return}
       if(e.target.closest('#stBatchBtn')){openBatchDlg();return}
       const addCell=e.target.closest('.grid-cell.empty-slot');
@@ -1917,6 +2014,32 @@ function openStudio(fromPop=false){
             $('#stBody').addEventListener('change', e=>{
                 if(e.target.id==='ovSwipeUp'){st.set.swipeUpAct=e.target.value;save();}
                 if(e.target.id==='ovSwipeDown'){st.set.swipeDownAct=e.target.value;save();}
+                                if(e.target.id==='popBgFile'){
+                                  const f=e.target.files&&e.target.files[0];
+                                  if(f){
+                                    const r=new FileReader();
+                                    r.onload=ev=>{
+                                      const im=new Image();
+                                      im.onload=()=>{
+                                        try{
+                                          const sc=Math.min(1,720/Math.max(im.width,im.height));
+                                          const c=document.createElement('canvas');
+                                          c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+                                          c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+                                          st.set.popBgData=c.toDataURL('image/jpeg',.82);
+                                          st.set.popBg='custom';
+                                          st.set.popBgRev=(st.set.popBgRev||0)+1;
+                                          applySet();syncSl();pvUpdate();save();
+                                        }catch(_){toast("Couldn't read that image")}
+                                      };
+                                      im.onerror=()=>toast("Couldn't read that image");
+                                      im.src=ev.target.result;
+                                    };
+                                    r.onerror=()=>toast("Couldn't read that image");
+                                    r.readAsDataURL(f);
+                                    e.target.value='';
+                                  }
+                                }
             });
             buildStBody();
             s.classList.add('on');
@@ -1964,6 +2087,7 @@ function openStudio(fromPop=false){
 /* ───────── edit mode + click handling ───────── */
 let editMode=false;
 fabEdit.onclick=()=>{
+  closeGroup();
   resetTree();
     editMode=!editMode;
   pop.classList.toggle('edit',editMode);
@@ -2013,7 +2137,7 @@ grid.addEventListener('click',e=>{
     openDlg(item,item.slot);
     return;
   }
-  if(editMode){openDlg(item,item.slot)}else if(item.t==='folder')enterTree(item);else launch(item);
+  if(editMode){openDlg(item,item.slot)}else if(item.t==='folder')enterTree(item);else if(item.t==='group')openGroup(item,false);else launch(item);
   });
   grid.addEventListener('contextmenu',e=>e.preventDefault());
 
@@ -2327,7 +2451,7 @@ fab.addEventListener('pointermove',e=>{
       const lim=((st.set.ringSize||52)/2)+((st.set.icon||46)/2)+22;
       if(Math.hypot(e.clientX-(ir.left+ir.width/2),e.clientY-(ir.top+ir.height/2))<=lim){
         const it=st.items.find(x=>x.id===h.dataset.id);
-        if(it&&it.t==='folder')fid=it.id;
+        if(it&&(it.t==='folder'||it.t==='group'))fid=it.id;
       }
     }
     if(fid===treeDwellId)return;
@@ -2338,14 +2462,32 @@ fab.addEventListener('pointermove',e=>{
       treeDwell=null;
       if(!fbDrag||tree||treeDwellId!==fid)return;
       const it=st.items.find(x=>x.id===fid);
-      if(it)enterTree(it);
+      if(it){if(it.t==='group')openGroup(it,true);else enterTree(it)}
     },dwellTime);
 });
-fab.addEventListener('pointerup',()=>{clearTimeout(treeDwell);treeDwell=null;treeDwellId=null});
+fab.addEventListener('pointermove',e=>{
+  if(!fbDrag||!gpOpenId||tree)return;
+  const p=$('#gpanel');if(!p)return;
+  const el=document.elementFromPoint(e.clientX,e.clientY),gm=el&&el.closest('.gm');
+  p.querySelectorAll('.gm').forEach(x=>x.classList.toggle('hover',x===gm));
+  if(gm&&gm!==gpLast)haptic('tick');
+  gpLast=gm||null;
+  const body=p.querySelector('.gp-body');
+  if(body){
+    const r=body.getBoundingClientRect();
+    if(e.clientX>=r.left&&e.clientX<=r.right){
+      if(e.clientY>=r.top-6&&e.clientY<r.top+22)body.scrollTop-=10;
+      else if(e.clientY>r.bottom-22&&e.clientY<=r.bottom+6)body.scrollTop+=10;
+    }
+  }
+});
+pop.addEventListener('pointerdown',e=>{if(gpOpenId&&!e.target.closest('#gpanel')&&!e.target.closest('.it'))closeGroup()});
+fab.addEventListener('pointerup',()=>{document.querySelectorAll('#gpanel .gm.hover').forEach(x=>x.classList.remove('hover'));clearTimeout(treeDwell);treeDwell=null;treeDwellId=null});
 fab.addEventListener('pointercancel',()=>{clearTimeout(treeDwell);treeDwell=null;treeDwellId=null;clearTimeout(treeHoverT);treeHoverT=null;treeAutoScroll(0)});
 
 /* ───────── launching shortcuts ───────── */
 function launch(it){
+  if(it&&it.t==='group'){openGroup(it,false);return}
   if(it.t!=='system')closePop();
   if(it.t==='system'){const s=SYS[it.v];if(!s)return;
     if(s.tog){st.tog[it.v]=st.tog[it.v]?0:1;save();statusIcons();render();toast(s.n+(st.tog[it.v]?' on':' off'),s.hint);return}
@@ -2445,17 +2587,166 @@ function powerMenu(){closePop();const sc=$('#sheetC');sc.innerHTML=`<h4><i class
   $('#pSh').onclick=()=>{closeSheet();shot()};$('#pLk').onclick=()=>{closeSheet();showLock()}}
 function slider(t,ic,val,fn){closePop();const sc=$('#sheetC');sc.innerHTML=`<h4><i class="${ic}"></i>${t}<span id="sv" style="margin-left:auto;color:var(--acc)">${val}%</span></h4><input type="range" min="0" max="100" value="${val}" id="sl">`;$('#sheet').style.display='flex';$('#sl').oninput=e=>{$('#sv').textContent=e.target.value+'%';fn(+e.target.value)}}
 function closeSheet(){$('#sheet').style.display='none';$('#off span').textContent='Screen off · tap to wake'}
+const CONTACTS=[{n:'Mom',v:'+15550198877'},{n:'Sam',v:'+15550192837'},{n:'Office',v:'+15550134400'},{n:'Doctor',v:'+15550182233'}];
+function appSearch(){
+  openSim({n:'Search apps',i:'fa-solid fa-magnifying-glass',c:'#2f7fd6',sub:'All installed apps',hint:'Activity with a text field → PackageManager.queryIntentActivities(MAIN/LAUNCHER)'},
+  `<div class="cinput" style="margin-bottom:10px"><input id="asQ" type="text" placeholder="Search all apps" autocomplete="off" style="flex:1"></div><div id="asList"></div>`,
+  b=>{
+    const q=b.querySelector('#asQ'),l=b.querySelector('#asList');
+    const draw=()=>{
+      const t=q.value.trim().toLowerCase();
+      l.innerHTML=INSTALLED.filter(a=>!t||a.n.toLowerCase().includes(t)||a.v.toLowerCase().includes(t)).map(a=>`<div class="res" data-p="${esc(a.v)}"><div class="ic" style="background:${esc(a.c)}"><i class="${esc(a.i)}"></i></div><div class="tx"><b>${esc(a.n)}</b><small>${esc(a.v)}</small></div></div>`).join('')||'<div class="empty">No apps found</div>';
+    };
+    q.oninput=draw;draw();
+    l.onclick=e=>{const r=e.target.closest('.res');if(!r)return;const a=INSTALLED.find(x=>x.v===r.dataset.p);if(a)openApp({t:'app',n:a.n,v:a.v,i:a.i,c:a.c})};
+    setTimeout(()=>q.focus(),250);
+  });
+}
+function callSearch(){
+  openSim({n:'Call contact',i:'fa-solid fa-phone',c:'#2fb872',sub:'Search contacts or type a number',hint:'ContactsContract search (READ_CONTACTS) → ACTION_CALL / ACTION_DIAL'},
+  `<div class="cinput" style="margin-bottom:10px"><input id="csQ" type="text" placeholder="Search contacts or type a number" autocomplete="off" style="flex:1"></div><div id="csList"></div>`,
+  b=>{
+    const q=b.querySelector('#csQ'),l=b.querySelector('#csList');
+    const draw=()=>{
+      const raw=q.value.trim(),t=raw.toLowerCase();
+      const isNum=/^[+\d][\d\s\-()]{2,}$/.test(raw);
+      let h=isNum?`<div class="res" data-n="${esc(raw)}" data-v="${esc(raw)}"><div class="ic" style="background:#3cc47c"><i class="fa-solid fa-user"></i></div><div class="tx"><b>${esc(raw)}</b><small>Typed number</small></div></div>`:'';
+      h+=CONTACTS.filter(c=>!t||c.n.toLowerCase().includes(t)||c.v.includes(t)).map(c=>`<div class="res" data-n="${esc(c.n)}" data-v="${esc(c.v)}"><div class="ic" style="background:#2fb872"><b>${esc(c.n[0].toUpperCase())}</b></div><div class="tx"><b>${esc(c.n)}</b><small>${esc(c.v)}</small></div></div>`).join('');
+      l.innerHTML=h||'<div class="empty">No contacts found</div>';
+    };
+    q.oninput=draw;draw();
+    l.onclick=e=>{const r=e.target.closest('.res');if(r)openCall({n:r.dataset.n,v:r.dataset.v})};
+    setTimeout(()=>q.focus(),250);
+  });
+}
 $('#sheet').addEventListener('pointerdown',e=>{if(e.target.id==='sheet')closeSheet()});
 
 /* ───────── add / edit dialog ───────── */
-let dS=null;
-function openDlg(item,targetSlot){
+let gpOpenId=null,gpTouch=false,gpLast=null;
+function memberList(it){
+  if(!it||it.t!=='group')return[];
+  if(Array.isArray(it.sub))return it.sub;
+  return String(it.v||'').split(',').map(x=>x.trim()).filter(Boolean).map(p=>INSTALLED.find(a=>a.v===p)).filter(Boolean).map(a=>({id:uid(),t:'app',n:a.n,v:a.v,i:a.i,c:a.c}));
+}
+function memberName(m){return m.n||(m.t==='app'?((INSTALLED.find(a=>a.v===m.v)||{}).n||''):((TYPES[m.t]||{}).label||''))}
+function gmini(sub){
+  sub=sub||[];
+  if(!sub.length)return'<i class="fa-solid fa-layer-group"></i>';
+  const big=sub.length>4,more=sub.length>9,cells=more?sub.slice(0,8):sub.slice(0,9);
+  return'<div class="gmini'+(big?' g3':'')+'">'+cells.map(m=>'<span style="background:'+esc(m.c||'#5b8def')+'">'+(m.customImg?'<img src="'+esc(m.customImg)+'" alt="">':(m.i==='letter'?'<b>'+esc((memberName(m)||'?')[0]).toUpperCase()+'</b>':'<i class="'+esc(m.i==='app'?((INSTALLED.find(a=>a.v===m.v)||{}).i||'fa-solid fa-cube'):(m.i||'fa-solid fa-cube'))+'"></i>'))+'</span>').join('')+(more?'<span class="more"><b>+'+(sub.length-8)+'</b></span>':'')+'</div>';
+}
+function closeGroup(){const p=$('#gpanel');if(p)p.style.display='none';gpOpenId=null;gpTouch=false;gpLast=null}
+function openGroup(it,hover){
+  if(!it||!isOpen()||editMode)return;
+  if(gpOpenId===it.id){if(!hover)gpTouch=true;return}
+  const ms=memberList(it);
+  if(!ms.length){toast('Empty group');return}
+  closeGroup();
+  const ic=parseFloat(getComputedStyle(pop).getPropertyValue('--icon'))||46,lbl=st.set.showLbl!==false;
+  const cols=Math.min(4,ms.length),cw=Math.round(ic+22),chh=Math.round(ic+(lbl?28:10)),vis=Math.min(Math.ceil(ms.length/cols),4);
+  const w=cols*cw+20,h=34+vis*chh+10;
+  let p=$('#gpanel');
+  if(!p){p=document.createElement('div');p.id='gpanel';pop.appendChild(p)}
+  p._ms=ms;
+  p.innerHTML='<div class="gp-hd"><button type="button" data-gb="1" aria-label="Back"><i class="fa-solid fa-chevron-left"></i></button><b>'+esc(it.n)+'</b><small>'+ms.length+' item'+(ms.length===1?'':'s')+'</small></div><div class="gp-body"><div class="gp-grid" style="grid-template-columns:repeat('+cols+','+cw+'px)">'+ms.map((m,i)=>'<div class="it gm" data-i="'+i+'" title="'+esc(memberName(m))+'" style="width:'+cw+'px"><div class="ic" style="background:'+esc(m.c||'#5b8def')+'">'+iconInner(m)+'</div><div class="lb">'+esc(memberName(m))+'</div></div>').join('')+'</div></div>';
+  const pr=pop.getBoundingClientRect(),tr=(grid.querySelector('.it[data-id="'+it.id+'"]')||pop).getBoundingClientRect();
+  const pw=Math.min(w,pr.width-12),ph2=Math.min(h,pr.height-12);
+  const l=clamp(tr.left-pr.left+tr.width/2-pw/2,6,Math.max(6,pr.width-pw-6));
+  let t=tr.bottom-pr.top+4;
+  if(t+ph2>pr.height-6)t=tr.top-pr.top-4-ph2;
+  t=clamp(t,6,Math.max(6,pr.height-ph2-6));
+  p.style.width=pw+'px';p.style.height=ph2+'px';p.style.left=l+'px';p.style.top=t+'px';p.style.display='flex';
+  p.onclick=e=>{
+    if(e.target.closest('[data-gb]')){haptic('tick');closeGroup();return}
+    const gm=e.target.closest('.gm');
+    if(!gm)return;
+    const m=p._ms[+gm.dataset.i];
+    if(m){haptic('confirm');launch(m)}
+  };
+  gpOpenId=it.id;gpTouch=!hover;
+  haptic('pop');
+}
+function renderGrpList(){
+  const sub=(dS&&dS.sub)||[];
+  const plain=sub.filter(m=>m.t==='app'&&!m.appAction).length;
+  const lb=$('#dGrpAppsLbl');if(lb)lb.textContent=plain?plain+' app'+(plain===1?'':'s'):'Add apps';
+  const l=$('#dGrpList'),h=$('#dGrpHint');
+  if(!l)return;
+  l.style.display=sub.length?'flex':'none';
+  h.style.display=sub.length?'block':'none';
+  l.innerHTML=sub.map((m,i)=>'<div class="it gmem" data-i="'+i+'" style="width:54px;cursor:pointer"><div class="ic" style="width:40px;height:40px;border-radius:12px;background:'+esc(m.c||'#5b8def')+'">'+iconInner(m)+'</div><div class="lb" style="font-size:9px;color:var(--dim)">'+esc(memberName(m))+'</div></div>').join('');
+  updateIconPreview();
+}
+function memberEdit(idx){
+  if(!dS)return;
+  gStash={dS:dS,name:$('#dName').value.trim(),idx:idx};
+  openDlg(idx>=0?dS.sub[idx]:null,dS.slot,{member:true,idx:idx});
+}
+function finishMember(rec,del){
+  const g=gStash;gStash=null;
+  if(!g)return;
+  const sub=g.dS.sub||(g.dS.sub=[]);
+  if(del){if(g.idx>=0)sub.splice(g.idx,1)}
+  else if(rec){if(g.idx>=0)sub[g.idx]=rec;else sub.push(rec)}
+  openDlg({id:g.dS.id,t:'group',n:g.name,v:'',i:'group',c:g.dS.c,slot:g.dS.slot,sub:sub},g.dS.slot,{draft:true,isNew:!g.dS.id});
+}
+let gpSel=new Set();
+function renderGrpPick(){
+  const q=$('#gpSearch').value.trim().toLowerCase();
+  $('#gpList').innerHTML=INSTALLED.filter(a=>!q||a.n.toLowerCase().includes(q)||a.v.toLowerCase().includes(q)).map(a=>{
+    const on=gpSel.has(a.v);
+    return'<div class="res gp-row" data-pkg="'+esc(a.v)+'" style="user-select:none;display:flex;align-items:center;gap:12px;padding:8px 10px;border-radius:14px;cursor:pointer;background:'+(on?'rgba(179,32,43,.25)':'rgba(255,255,255,.04)')+'"><div class="ic" style="background:'+esc(a.c)+';width:38px;height:38px;border-radius:12px;display:grid;place-items:center;color:#fff;font-size:16px"><i class="'+esc(a.i)+'"></i></div><div class="tx" style="flex:1"><b>'+esc(a.n)+'</b><small style="color:var(--dim)">'+esc(a.v)+'</small></div><input type="checkbox" '+(on?'checked ':'')+'style="width:18px;height:18px;accent-color:var(--acc);pointer-events:none"></div>';
+  }).join('')||'<div class="empty">No apps found</div>';
+  $('#gpCount').textContent=gpSel.size+' selected';
+  $('#gpDone').textContent='Done ('+gpSel.size+')';
+}
+function openGrpPick(){
+  gpSel=new Set((dS.sub||[]).filter(m=>m.t==='app'&&!m.appAction).map(m=>m.v));
+  $('#gpSearch').value='';
+  renderGrpPick();
+  $('#groupPickDlg').style.display='flex';
+}
+$('#gpSearch').oninput=renderGrpPick;
+$('#gpList').onclick=e=>{
+  const r=e.target.closest('.gp-row');
+  if(!r)return;
+  const p=r.dataset.pkg;
+  if(gpSel.has(p))gpSel.delete(p);else gpSel.add(p);
+  renderGrpPick();
+};
+$('#gpAll').onclick=()=>{
+  const q=$('#gpSearch').value.trim().toLowerCase();
+  INSTALLED.filter(a=>!q||a.n.toLowerCase().includes(q)||a.v.toLowerCase().includes(q)).forEach(a=>gpSel.add(a.v));
+  renderGrpPick();
+};
+$('#gpClear').onclick=()=>{gpSel.clear();renderGrpPick()};
+$('#gpCancel').onclick=()=>{$('#groupPickDlg').style.display='none'};
+$('#gpDone').onclick=()=>{
+  const keep=(dS.sub||[]).filter(m=>!(m.t==='app'&&!m.appAction)||gpSel.has(m.v));
+  const have=new Set(keep.filter(m=>m.t==='app'&&!m.appAction).map(m=>m.v));
+  gpSel.forEach(p=>{
+    if(have.has(p))return;
+    const a=INSTALLED.find(x=>x.v===p);
+    if(a)keep.push({id:uid(),t:'app',n:a.n,v:a.v,i:a.i,c:a.c});
+  });
+  dS.sub=keep;
+  $('#groupPickDlg').style.display='none';
+  renderGrpList();
+};
+$('#dGrpApps').onclick=openGrpPick;
+$('#dGrpAdd').onclick=()=>memberEdit(-1);
+$('#dGrpList').onclick=e=>{const t=e.target.closest('.gmem');if(t)memberEdit(+t.dataset.i)};
+let dS=null;let gStash=null;
+function openDlg(item,targetSlot,o){
+  if(!(o&&(o.member||o.draft)))gStash=null;
+  const isNew=o&&o.draft?!!o.isNew:!item;
   const destSlot=(item&&typeof item.slot==='number')?item.slot:(typeof targetSlot==='number'?targetSlot:firstFreeSlot());
   dS=item?{id:item.id,slot:destSlot,t:item.t,i:item.i,c:item.c,appAction:item.appAction||null,actionName:item.actionName||null,customImg:item.customImg||null,touched:true}:{id:null,slot:destSlot,t:'app',i:TYPES.app.icon,c:TYPES.app.color,appAction:null,actionName:null,customImg:null,touched:false};
-  $('#dT').textContent=item?'Edit shortcut':'New shortcut';
-  $('#dBatchBtn').style.display=item?'none':'inline-flex';
+  dS.sub=item&&item.t==='group'?memberList(item).map(m=>({...m})):null;
+    $('#dT').textContent=o&&o.member?(item?'Edit group shortcut':'Add to group'):(isNew?'New shortcut':'Edit shortcut');
+  $('#dBatchBtn').style.display=(isNew&&!(o&&o.member))?'inline-flex':'none';
   $('#dName').value=item?item.n:'';
-  $('#dDel').style.display=item?'block':'none';
+  $('#dDel').style.display=(o&&o.member?o.idx>=0:!isNew)?'block':'none';
   $('#dIcons').style.display='none';
   $('#dChangeIconBtn').innerHTML='<i class="fa-solid fa-pen"></i> Presets';
   $('#dAppSel').innerHTML=INSTALLED.map(a=>`<option value="${esc(a.v)}">${esc(a.n)}</option>`).join('');
@@ -2466,7 +2757,8 @@ function openDlg(item,targetSlot){
     else if(item.t==='app')$('#dAppSel').value=item.v;
     else $('#dTarget').value=item.v;
   }
-  setDType(dS.t,true);
+  if(o&&o.member){const gb=$('#dType [data-t="group"]');if(gb)gb.style.display='none'}
+    setDType(dS.t,true);
   buildPickers();$('#dlg').style.display='flex'}
 
 let batchSelected=new Set();
@@ -2585,10 +2877,15 @@ const QUICK_SC={
 function setDType(t,keep){dS.t=t;
   document.querySelectorAll('#dType button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   const isApp=t==='app';
+    const isGrp=t==='group';
   const isSys=t==='system';
   const showPickerBtn=t==='file'||t==='folder';
   $('#dAppBox').style.display=isApp?'flex':'none';
-  $('#dTargetBox').style.display=(!isApp&&!isSys)?'flex':'none';
+    $('#dGroupBox').style.display=isGrp?'flex':'none';
+    $('#dUploadIconBtn').parentNode.parentNode.style.display=isGrp?'none':'flex';
+    $('#dColors').style.display=isGrp?'none':'flex';
+    if(isGrp)$('#dIcons').style.display='none';
+  $('#dTargetBox').style.display=(!isApp&&!isSys&&!isGrp)?'flex':'none';
   $('#dSys').style.display=isSys?'block':'none';
   $('#dPickBtn').style.display=showPickerBtn?'block':'none';
   $('#dTL').textContent=isSys?'Action':(isApp?'Application':'Target');
@@ -2632,6 +2929,8 @@ function setDType(t,keep){dS.t=t;
   }
   if(!keep&&!isApp){$('#dTarget').value='';if(!dS.touched){dS.i=(TYPES[t]||TYPES.app).icon;dS.c=(TYPES[t]||TYPES.app).color}}
   if(isSys&&!dS.touched){const s=SYS[$('#dSys').value];if(s){dS.i=s.i;dS.c=s.c}}
+    if(isGrp){dS.i='group';dS.customImg=null;dS.c=keep?(dS.c||'#1b1b1f'):'#1b1b1f';if(!dS.sub)dS.sub=[];renderGrpList()}
+    else if(dS.i==='group'){dS.i=(TYPES[t]||TYPES.app).icon;dS.c=(TYPES[t]||TYPES.app).color;dS.touched=false}
   buildPickers()}
 
 $('#dAppSel').onchange=()=>{
@@ -2740,7 +3039,7 @@ function updateIconPreview(){
     if(dS.customImg){
       curIcon.innerHTML=`<img src="${esc(dS.customImg)}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
     }else{
-      curIcon.innerHTML=dS.i==='letter'?'<b>Aa</b>':`<i class="${esc(dS.i)}"></i>`;
+      curIcon.innerHTML=dS.t==='group'?gmini(dS.sub):(dS.i==='letter'?'<b>Aa</b>':`<i class="${esc(dS.i)}"></i>`);
     }
   }
   const lbl=$('#dIconLabel');
@@ -2748,7 +3047,7 @@ function updateIconPreview(){
     if(dS.customImg){
       lbl.textContent='Custom Cropped Image';
     }else{
-      lbl.textContent=dS.i==='letter'?'Monogram (Aa)':dS.i.replace('fa-solid fa-','').replace('fa-brands fa-','');
+      lbl.textContent=dS.t==='group'?"Icon is always the grid of the group's small icons":(dS.i==='letter'?'Monogram (Aa)':dS.i.replace('fa-solid fa-','').replace('fa-brands fa-',''));
     }
   }
 }
@@ -2907,10 +3206,14 @@ $('#dTarget').addEventListener('input',()=>{
   }
 });
 
-$('#dCancel').onclick=()=>{$('#dlg').style.display='none'};
+$('#dCancel').onclick=()=>{
+  if(gStash){finishMember(undefined);return}
+  $('#dlg').style.display='none';
+};
 $('#dDel').onclick=()=>{
+  if(gStash){finishMember(null,true);return}
   const targetItem=st.items.find(x=>x.id===dS.id);
-  const name=targetItem?targetItem.n:$('#dName').value;
+  const name=targetItem?(targetItem.t==='group'?targetItem.n+' (App Group, '+memberList(targetItem).length+' shortcuts inside)':targetItem.n):$('#dName').value;
   confirmRemoval(name,()=>{
     st.items=st.items.filter(x=>x.id!==dS.id);
     save();
@@ -2922,23 +3225,27 @@ $('#dDel').onclick=()=>{
 };
 $('#dSave').onclick=()=>{
   let name=$('#dName').value.trim();
-  let v=dS.t==='system'?$('#dSys').value:(dS.t==='app'?$('#dAppSel').value:$('#dTarget').value.trim());
+  let v=dS.t==='group'?'':(dS.t==='system'?$('#dSys').value:(dS.t==='app'?$('#dAppSel').value:$('#dTarget').value.trim()));
   if(dS.t==='system'&&!name)name=SYS[v].n;
   if(dS.t==='app'&&!name){
     const a=INSTALLED.find(x=>x.v===v);
     name=dS.actionName||(a?a.n:'App');
   }
-  if(!v){toast('Select a target first');return}
+  if(dS.t==='group'){if(!(dS.sub&&dS.sub.length)){toast('Add at least one app or shortcut');return}}
+    else if(!v){toast('Select a target first');return}
   if(!name){toast('Add a name first');return}
   const rec={t:dS.t,n:name,v,i:dS.i,c:dS.c,slot:dS.slot};
   if(dS.appAction)rec.appAction=dS.appAction;
   if(dS.actionName)rec.actionName=dS.actionName;
   if(dS.customImg)rec.customImg=dS.customImg;
+    if(dS.t==='group')rec.sub=(dS.sub||[]).map(m=>({...m}));
+    if(gStash){delete rec.slot;rec.id=dS.id||uid();finishMember(rec);return}
   if(dS.id){
     const x=st.items.find(i=>i.id===dS.id);
     if(!dS.customImg)delete x.customImg;
     if(!dS.appAction)delete x.appAction;
     if(!dS.actionName)delete x.actionName;
+        if(dS.t!=='group')delete x.sub;
     Object.assign(x,rec);
   }else{
     st.items=st.items.filter(x=>x.slot!==dS.slot);
@@ -2951,7 +3258,9 @@ $('#dSave').onclick=()=>{
 /* ───────── keyboard + resize + init ───────── */
 $('#nbBack').onclick=()=>{
   haptic('tick');
-  if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none';return}
+  if($('#groupPickDlg').style.display==='flex'){$('#groupPickDlg').style.display='none';return}
+    if($('#batchDlg').style.display==='flex'){$('#batchDlg').style.display='none';return}
+    if(gpOpenId&&!$('#dlg').style.display.includes('flex')){closeGroup();return}
   if($('#cropDlg').style.display==='flex'){$('#cropDlg').style.display='none';return}
   if($('#pickerDlg').style.display==='flex'){$('#pickerDlg').style.display='none';return}
   if($('#dlg').style.display==='flex'){$('#dlg').style.display='none';return}

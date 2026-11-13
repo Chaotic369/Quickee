@@ -360,6 +360,7 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .tv-row.dir .tv-ic{color:#f0a93b}
 .tv-row .tv-nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
 .fwin{position:absolute;width:230px;max-height:310px;display:flex;flex-direction:column;border-radius:16px;background:rgba(18,18,22,.98);border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.6);overflow:hidden}
+#phone.immersive .fwin{width:200px;max-height:250px}
 .fw-hd{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 10px;flex-shrink:0;background:rgba(255,255,255,.07);font-size:11.5px;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}
 .fw-hd>i{color:var(--acc);font-size:12px}
 .fw-hd b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
@@ -2668,7 +2669,8 @@ fab.addEventListener('pointercancel',()=>{clearTimeout(treeDwell);treeDwell=null
 /* ───────── launching shortcuts ───────── */
 function launch(it){
   if(it&&it.t==='group'){openGroup(it,false);return}
-  if(it.t!=='system')closePop();
+    if(it.t==='file'){const fa=grid.querySelector('.it[data-id="'+it.id+'"]');return openFile(it.v,fa||undefined)}
+    if(it.t!=='system')closePop();
   if(it.t==='system'){const s=SYS[it.v];if(!s)return;
     if(s.tog){st.tog[it.v]=st.tog[it.v]?0:1;save();statusIcons();render();toast(s.n+(st.tog[it.v]?' on':' off'),s.hint);return}
     closePop();

@@ -371,16 +371,6 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 .fprev table{width:100%;border-collapse:collapse;font-size:10.5px}
 .fprev td,.fprev th{padding:4px 6px;border:1px solid rgba(255,255,255,.1);text-align:left}
 .fprev th{background:rgba(255,255,255,.08)}
-.tv-row .tv-nm{flex:1}
-.tv-dots{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;color:var(--dim);font-size:13px;flex-shrink:0;margin-right:-4px}
-.tv-dots:hover,.tv-dots:active{background:rgba(255,255,255,.1);color:var(--ink)}
-#tMenu{position:absolute;z-index:60;width:172px;display:none;flex-direction:column;gap:2px;padding:6px;border-radius:16px;background:rgba(14,14,14,.98);border:1px solid rgba(255,255,255,.1);box-shadow:0 16px 36px rgba(0,0,0,.85)}
-#tMenu.open{display:flex}
-.tm-hd{padding:6px 10px 4px;font-size:10.5px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tm-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:11px;font-size:12.5px;font-weight:600;color:var(--ink);text-align:left;width:100%}
-.tm-item i{width:16px;text-align:center;font-size:13px;color:var(--acc)}
-.tm-item.hl,.tm-item:active{background:rgba(179,32,43,.3);color:var(--acc)}
-.tm-item.del,.tm-item.del i{color:#ff7b72}
 </style>
 </head>
 <body>
@@ -2312,145 +2302,6 @@ const treeView=document.createElement('div');
 treeView.id='treeView';
 pbody.appendChild(treeView);
 
-/* ── file menu (three dots): send / copy / move / rename / delete ── */
-let tMenuPath=null,tmLast=null;
-const tMenu=document.createElement('div');
-tMenu.id='tMenu';
-pop.appendChild(tMenu);
-function hideTMenu(){tMenuPath=null;tmLast=null;tMenu.classList.remove('open')}
-function showTreeMenu(p){
-  tMenuPath=p;tmLast=null;
-  const items=[['send','fa-solid fa-share-nodes','Send'],['copy','fa-regular fa-copy','Copy'],['move','fa-solid fa-folder-tree','Move'],['rename','fa-solid fa-pen','Rename'],['del','fa-solid fa-trash-can','Delete']];
-  tMenu.innerHTML='<div class="tm-hd">'+esc(p.split('/').pop())+'</div>'+items.map(x=>'<button type="button" class="tm-item'+(x[0]==='del'?' del':'')+'" data-ta="'+x[0]+'"><i class="'+x[1]+'"></i>'+x[2]+'</button>').join('');
-  tMenu.classList.add('open');
-  const row=[...treeView.querySelectorAll('.tv-row')].find(r=>r.dataset.tp===p);
-  const pr=pop.getBoundingClientRect(),mh=tMenu.offsetHeight,mw=tMenu.offsetWidth;
-  let top=0;
-  if(row){const rr=row.getBoundingClientRect();top=rr.bottom-pr.top+2;if(top+mh>pop.clientHeight-6)top=rr.top-pr.top-mh-2}
-  tMenu.style.left=clamp(pop.clientWidth-mw-8,6,Math.max(6,pop.clientWidth-mw-6))+'px';
-  tMenu.style.top=clamp(top,6,Math.max(6,pop.clientHeight-mh-6))+'px';
-  haptic('pop');
-}
-tMenu.addEventListener('click',e=>{const b=e.target.closest('.tm-item');if(b)tmAct(b.dataset.ta)});
-pop.addEventListener('pointerdown',e=>{if(tMenuPath&&!e.target.closest('#tMenu,[data-dots]'))hideTMenu()});
-function tmAct(a){
-  const p=tMenuPath;
-  hideTMenu();
-  if(!p)return;
-  haptic('confirm');
-  if(a==='send')fmSend(p);
-  else if(a==='copy')fmPick(p,'copy');
-  else if(a==='move')fmPick(p,'move');
-  else if(a==='rename')fmRename(p);
-  else if(a==='del'){
-    confirmRemoval(p.split('/').pop(),()=>{
-      const i=FILES.indexOf(p);
-      if(i>=0)FILES.splice(i,1);
-      fmRefresh();
-      toast('File deleted');
-    });
-  }
-}
-const fmRefresh=()=>{if(tree)renderTree()};
-function fmDlg(html,wire){
-  let d=document.getElementById('fmDlg');
-  if(!d){d=document.createElement('div');d.className='dlgw';d.id='fmDlg';d.style.zIndex='88';phone.appendChild(d)}
-  d.innerHTML='<div class="dc">'+html+'</div>';
-  d.style.display='flex';
-  d.onclick=e=>{if(e.target===d)fmClose()};
-  wire(d.firstChild);
-}
-function fmClose(){const d=document.getElementById('fmDlg');if(d)d.style.display='none'}
-function fmUniq(dir,name){
-  let t=dir+'/'+name;
-  if(!FILES.includes(t))return t;
-  const i=name.lastIndexOf('.'),b=i>0?name.slice(0,i):name,x=i>0?name.slice(i):'';
-  let n=1,c;
-  do{c=dir+'/'+b+' (copy'+(n>1?' '+n:'')+')'+x;n++}while(FILES.includes(c));
-  return c;
-}
-function fmRepoint(p,np){
-  const i=FILES.indexOf(p);
-  if(i>=0)FILES[i]=np;
-  st.items.forEach(it=>{if(it.t==='file'&&it.v===p)it.v=np});
-  save();
-}
-function fmSend(p){
-  const n=p.split('/').pop(),info=p.replace(ROOT,'Internal storage/');
-  fmDlg('<h3><i class="fa-solid fa-share-nodes" style="color:var(--acc)"></i> Send to</h3><div class="res" style="cursor:default"><div class="ic" style="background:#8f9bb3"><i class="'+fileIcon(p)+'"></i></div><div class="tx"><b>'+esc(n)+'</b><small>'+fsize(p)+'</small></div></div><div class="acts" style="flex-direction:column;align-items:stretch;gap:8px"><button class="pri" id="fmShare"><i class="fa-solid fa-share-nodes"></i> Choose app…</button><button id="fmCopyPath"><i class="fa-regular fa-copy"></i> Copy path</button><button id="fmCancel">Cancel</button></div>',d=>{
-    d.querySelector('#fmCancel').onclick=fmClose;
-    d.querySelector('#fmShare').onclick=()=>{
-      if(navigator.share){
-        navigator.share({title:n,text:n+' · '+info}).then(fmClose).catch(()=>{});
-      }else{
-        try{navigator.clipboard.writeText(p)}catch(_){}
-        toast('Share sheet not supported here','Path copied instead');
-        fmClose();
-      }
-    };
-    d.querySelector('#fmCopyPath').onclick=()=>{
-      try{navigator.clipboard.writeText(p);toast('Path copied')}catch(_){toast('Copy not available')}
-      fmClose();
-    };
-  });
-}
-function fmRename(p){
-  const old=p.split('/').pop(),dir=p.split('/').slice(0,-1).join('/');
-  fmDlg('<h3><i class="fa-solid fa-pen" style="color:var(--acc)"></i> Rename</h3><label>Name</label><input type="text" id="fmName" autocomplete="off" autocapitalize="off" spellcheck="false"><div class="acts"><button id="fmCancel">Cancel</button><span class="sp"></span><button class="pri" id="fmOk">Rename</button></div>',d=>{
-    const inp=d.querySelector('#fmName');
-    inp.value=old;
-    d.querySelector('#fmCancel').onclick=fmClose;
-    const go=()=>{
-      const nn=inp.value.trim();
-      if(!nn||nn.includes('/')){toast('Enter a valid name');return}
-      if(nn===old){fmClose();return}
-      const np=dir+'/'+nn;
-      if(FILES.includes(np)){toast('A file with that name exists');return}
-      fmRepoint(p,np);
-      fmClose();
-      fmRefresh();
-      toast('Renamed');
-    };
-    d.querySelector('#fmOk').onclick=go;
-    inp.onkeydown=e=>{if(e.key==='Enter')go()};
-    setTimeout(()=>{inp.focus();const i=old.lastIndexOf('.');try{inp.setSelectionRange(0,i>0?i:old.length)}catch(_){}},60);
-  });
-}
-function fmPick(p,mode){
-  const root=ROOT.slice(0,-1),name=p.split('/').pop(),home=p.split('/').slice(0,-1).join('/');
-  let cur=home;
-  fmDlg('<h3><i class="fa-solid fa-folder-tree" style="color:var(--acc)"></i> '+(mode==='move'?'Move to':'Copy to')+'</h3><div class="crumb" id="fmCrumb"></div><div id="fmList" style="max-height:260px;overflow-y:auto;display:flex;flex-direction:column;gap:4px"></div><div class="acts"><button id="fmCancel">Cancel</button><span class="sp"></span><button class="pri" id="fmOk"></button></div>',d=>{
-    const list=d.querySelector('#fmList'),ok=d.querySelector('#fmOk');
-    const draw=()=>{
-      const sub=new Set(kids(cur).dirs);
-      DIRS.forEach(x=>{if(x!==cur&&x.startsWith(cur+'/')&&!x.slice(cur.length+1).includes('/'))sub.add(x)});
-      const parent=cur!==root?cur.split('/').slice(0,-1).join('/'):null;
-      d.querySelector('#fmCrumb').textContent=cur.replace(root,'Internal storage');
-      let h=parent!==null?'<div class="res" data-n="'+esc(parent)+'"><div class="ic" style="background:#3a3552"><i class="fa-solid fa-turn-up"></i></div><div class="tx"><b>..</b><small>Up one level</small></div></div>':'';
-      h+=[...sub].sort().map(x=>'<div class="res" data-n="'+esc(x)+'"><div class="ic" style="background:#f0a93b"><i class="fa-solid fa-folder"></i></div><div class="tx"><b>'+esc(x.split('/').pop())+'</b><small>Folder</small></div></div>').join('');
-      list.innerHTML=h||'<div class="empty">No subfolders</div>';
-      ok.textContent=mode==='move'?'Move here':'Copy here';
-    };
-    draw();
-    list.onclick=e=>{const r=e.target.closest('.res');if(!r)return;cur=r.dataset.n;draw()};
-    d.querySelector('#fmCancel').onclick=fmClose;
-    ok.onclick=()=>{
-      if(mode==='move'){
-        if(cur===home){toast('Already in this folder');return}
-        const np=cur+'/'+name;
-        if(FILES.includes(np)){toast('A file with that name exists there');return}
-        fmRepoint(p,np);
-        fmClose();fmRefresh();
-        toast('Moved to '+(cur.split('/').pop()||'Storage'));
-      }else{
-        FILES.push(fmUniq(cur,name));
-        fmClose();fmRefresh();
-        toast('Copied to '+(cur.split('/').pop()||'Storage'));
-      }
-    };
-  });
-}
-
 function treeRows(dir,depth,out){
   const k=kids(dir);
   k.dirs.forEach(d=>{
@@ -2472,7 +2323,7 @@ function renderTree(){
   let html='<div class="tv-hdr"><button type="button" class="tv-btn" data-tv="back" title="Back to grid" aria-label="Back to grid"><i class="fa-solid fa-chevron-left"></i></button><div class="tv-title"><b>'+esc(tree.name||'Folder')+'</b><small>'+esc(tree.root.replace(ROOT.slice(0,-1),'Internal storage'))+'</small></div><button type="button" class="tv-btn" data-tv="ext" title="Open in file manager" aria-label="Open in file manager"><i class="fa-solid fa-arrow-up-right-from-square"></i></button></div>';
   html+=rows.map(r=>{
     const isD=r.t==='d';
-    return '<div class="tv-row'+(isD?' dir':'')+'" data-tp="'+esc(r.p)+'" data-tt="'+r.t+'" style="padding-left:'+(8+r.depth*16)+'px"><i class="tv-car'+(isD?' fa-solid '+(r.open?'fa-chevron-down':'fa-chevron-right'):'')+'"></i><span class="tv-ic"><i class="'+(isD?(r.open?'fa-solid fa-folder-open':'fa-solid fa-folder'):fileIcon(r.p))+'"></i></span><span class="tv-nm">'+esc(r.p.split('/').pop())+'</span>'+(isD?'':'<button type="button" class="tv-dots" data-dots="'+esc(r.p)+'" aria-label="File menu" title="File menu"><i class="fa-solid fa-ellipsis-vertical"></i></button>')+'</div>';
+    return '<div class="tv-row'+(isD?' dir':'')+'" data-tp="'+esc(r.p)+'" data-tt="'+r.t+'" style="padding-left:'+(8+r.depth*16)+'px"><i class="tv-car'+(isD?' fa-solid '+(r.open?'fa-chevron-down':'fa-chevron-right'):'')+'"></i><span class="tv-ic"><i class="'+(isD?(r.open?'fa-solid fa-folder-open':'fa-solid fa-folder'):fileIcon(r.p))+'"></i></span><span class="tv-nm">'+esc(r.p.split('/').pop())+'</span></div>';
   }).join('');
   if(!rows.length)html+='<div class="empty">Empty folder</div>';
   treeView.innerHTML=html;
@@ -2492,7 +2343,6 @@ function enterTree(item){
   haptic('pop');
 }
 function resetTree(){
-  hideTMenu();
   clearTimeout(treeDwell);treeDwell=null;treeDwellId=null;
   clearTimeout(treeHoverT);treeHoverT=null;
   clearInterval(treeScrollT);treeScrollT=null;treeScrollDir=0;
@@ -2529,8 +2379,6 @@ function treeRowAct(row,how){
 }
 treeView.addEventListener('click',e=>{
   if(!tree)return;
-  const dt=e.target.closest('[data-dots]');
-  if(dt){e.stopPropagation();showTreeMenu(dt.dataset.dots);return}
   const b=e.target.closest('[data-tv]');
   if(b){treeAction(b.dataset.tv);return}
   const r=e.target.closest('.tv-row');
@@ -2578,14 +2426,7 @@ function treeAutoScroll(d){
 }
 function treeSlideMove(e){
   treeLast={x:e.clientX,y:e.clientY};
-    if(tMenuPath){
-      const hm=document.elementFromPoint(e.clientX,e.clientY),mi=hm&&hm.closest('.tm-item');
-      tMenu.querySelectorAll('.tm-item').forEach(x=>x.classList.toggle('hl',x===mi));
-      if(mi&&mi!==tmLast)haptic('tick');
-      tmLast=mi||null;
-      return;
-    }
-    const popR=pop.getBoundingClientRect();
+  const popR=pop.getBoundingClientRect();
   if(e.clientX<popR.left-15||e.clientX>popR.right+15||e.clientY<popR.top-15||e.clientY>popR.bottom+15){
     haptic('tick');
     resetTree();
@@ -2609,16 +2450,7 @@ function treeSlideRelease(e){
   tree.hl=null;
   treeApplyHl();
   lastHoveredDragItem=null;
-    if(tMenuPath){
-      const tmi=el&&el.closest('.tm-item');
-      tMenu.querySelectorAll('.tm-item').forEach(x=>x.classList.remove('hl'));
-      if(tmi)tmAct(tmi.dataset.ta);
-      else if(!(el&&el.closest('#tMenu')))hideTMenu();
-      return;
-    }
-    const dotB=el&&el.closest('[data-dots]');
-    if(dotB){showTreeMenu(dotB.dataset.dots);return}
-    if(btn){treeAction(btn.dataset.tv);return}
+  if(btn){treeAction(btn.dataset.tv);return}
   if(row){treeRowAct(row,'release');return}
   if(!(el&&el.closest('#pop')))closePop();
 }

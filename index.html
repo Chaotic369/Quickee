@@ -363,6 +363,11 @@ iframe.pv{width:100%;height:360px;border:0;border-radius:14px;background:#fff;ma
 #phone.immersive .fwin{width:200px;max-height:250px}
 .fw-hd{display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 10px;flex-shrink:0;background:rgba(255,255,255,.07);font-size:11.5px;cursor:move;touch-action:none;user-select:none;-webkit-user-select:none}
 .fw-hd>i{color:var(--acc);font-size:12px}
+#phone .fwin,#phone.immersive .fwin{width:170px!important;max-height:190px!important;border-radius:14px}
+#phone .fwin .fw-hd{height:28px!important;font-size:10.5px}
+#phone .fwin .fw-body{padding:6px!important}
+#phone .fwin .fprev>*{max-height:90px!important;overflow:hidden}
+#phone .fwin .fw-meta{margin-top:5px;font-size:9.5px}
 .fw-hd b{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 .fw-x{width:24px;height:24px;border-radius:8px;display:grid;place-items:center;color:var(--dim);font-size:12px;background:rgba(255,255,255,.08)}
 .fw-body{flex:1;min-height:0;overflow-y:auto;padding:10px}
@@ -2779,6 +2784,8 @@ function openFileWin(p,anchor){
   w.className='fwin';
   ph.querySelectorAll('.fwin').forEach(x=>x.remove());
     w.style.zIndex=++fwZ;
+      w.style.setProperty('width','170px','important');
+      w.style.setProperty('max-height','190px','important');
   w.innerHTML=`<div class="fw-hd"><i class="${fileIcon(p)}"></i><b>${esc(n)}</b><button type="button" class="fw-x" aria-label="Close"><i class="fa-solid fa-xmark"></i></button></div><div class="fw-body">${fpreview(p)}<div class="fw-meta">${fsize(p)} · ${esc(p.split('.').pop().toUpperCase())}</div></div>`;
   ph.appendChild(w);
     {
@@ -2799,6 +2806,17 @@ function openFileWin(p,anchor){
   let dx=0,dy=0,dr=false;
   w.addEventListener('pointerdown',()=>{w.style.zIndex=++fwZ});
   w.querySelector('.fw-x').onclick=()=>w.remove();
+    {
+      const away=e=>{
+        if(!w.isConnected){document.removeEventListener('pointermove',away,true);return}
+        const r=w.getBoundingClientRect();
+        if(e.clientX<r.left-30||e.clientX>r.right+30||e.clientY<r.top-30||e.clientY>r.bottom+30){
+          document.removeEventListener('pointermove',away,true);
+          w.remove();
+        }
+      };
+      setTimeout(()=>document.addEventListener('pointermove',away,true),400);
+    }
   hd.onpointerdown=e=>{if(e.target.closest('.fw-x'))return;dr=true;const r=w.getBoundingClientRect();dx=e.clientX-r.left;dy=e.clientY-r.top;try{hd.setPointerCapture(e.pointerId)}catch(_){}};
   hd.onpointermove=e=>{if(!dr)return;const pr=ph.getBoundingClientRect();w.style.left=Math.max(0,Math.min(pr.width-w.offsetWidth,e.clientX-pr.left-dx))+'px';w.style.top=Math.max(0,Math.min(pr.height-w.offsetHeight,e.clientY-pr.top-dy))+'px'};
   hd.onpointerup=hd.onpointercancel=()=>{dr=false};
